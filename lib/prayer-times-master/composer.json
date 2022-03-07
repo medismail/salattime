@@ -1,0 +1,17 @@
+{
+  "name": "islamic-network/prayer-times",
+  "type": "library",
+  "description": "Precise and Powerful PHP Prayer Times Library",
+  "license": "GPL-3.0-or-later",
+  "autoload": {
+    "psr-4": {
+      "IslamicNetwork\\PrayerTimes\\": "src/PrayerTimes/"
+    }
+  },
+  "require-dev": {
+      "phpunit/phpunit": "^6.2"
+  },
+  "require": {
+    "islamic-network/prayer-times-moonsighting": "^1.0"
+  }
+}

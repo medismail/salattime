@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>salattime</id>
+    <name>Salat Time</name>
+    <summary>Salat Time</summary>
+    <description><![CDATA[Give 5 times prayer.]]></description>
+    <version>0.0.1</version>
+    <licence>agpl</licence>
+    <author mail="mmismailm@hotmail.com" >Mohamed</author>
+    <namespace>SalatTime</namespace>
+    <category>tools</category>
+    <bugs>http://mmismailm.com/</bugs>
+    <dependencies>
+        <nextcloud min-version="15" max-version="23"/>
+    </dependencies>
+    <navigations>
+        <navigation>
+            <name>Salat Time</name>
+            <route>salattime.page.index</route>
+        </navigation>
+    </navigations>
+</info>
