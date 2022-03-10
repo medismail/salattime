@@ -1,10 +1,10 @@
 <?php
 
-require_once __DIR__ . '/../../lib/prayer-times-master/src/PrayerTimes/PrayerTimes.php';
-require_once __DIR__ . '/../../lib/prayer-times-master/src/PrayerTimes/Method.php';
-require_once __DIR__ . '/../../lib/prayer-times-master/src/PrayerTimes/DMath.php';
-require_once __DIR__ . '/../../lib/prayer-times-moonsighting-master/src/MoonSighting/PrayerTimes.php';
-require_once __DIR__ . '/../../lib/prayer-times-moonsighting-master/src/MoonSighting/Isha.php';
+require_once __DIR__ . '/../../lib/prayer-times/PrayerTimes/PrayerTimes.php';
+require_once __DIR__ . '/../../lib/prayer-times/PrayerTimes/Method.php';
+require_once __DIR__ . '/../../lib/prayer-times/PrayerTimes/DMath.php';
+require_once __DIR__ . '/../../lib/prayer-times/MoonSighting/PrayerTimes.php';
+require_once __DIR__ . '/../../lib/prayer-times/MoonSighting/Isha.php';
 
 require_once __DIR__ . '/../../lib/hijri/hijri_date.php';
 
