@@ -1,22 +1,7 @@
 <?php
-script('salattime', 'script');
+script('salattime', 'settings');
 style('salattime', 'style');
 ?>
-<script type="text/javascript">
-function switchHidden() {
-        document.getElementById("div10").hidden = !document.getElementById("div10").hidden;
-        //document.getElementById("longitude").hidden = !document.getElementById("longitude").hidden;
-        //document.getElementById("elevation").hidden = !document.getElementById("elevation").hidden;
-}
-function switchHidden1() {
-  var x = document.getElementById("div10");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
-</script>
 
 <!--div id="app"-->
         <div id="app-navigation">

@@ -219,15 +219,17 @@ class PageController extends Controller {
                     $this->config->setUserValue($this->userId, Application::APP_ID, 'longitude', $longitude);
                 if ($timezone != "")
                     $this->config->setUserValue($this->userId, Application::APP_ID, 'timezone', $timezone);*/
-                $addressInfo = $this->getGeoCode($address);
-                if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
-                    $latitude = $addressInfo['latitude'];
-                    $longitude = $addressInfo['longitude'];
-                    if (isset($addressInfo['elevation']))
-                        $elevation = $addressInfo['elevation'];
-                    $cTimezone = $this->config->getUserValue($this->userId, 'core', 'timezone');
-                    if ($cTimezone != "")
-                          $timezone = $cTimezone;
+                if ($address != "") {
+                    $addressInfo = $this->getGeoCode($address);
+                    if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
+                        $latitude = $addressInfo['latitude'];
+                        $longitude = $addressInfo['longitude'];
+                        if (isset($addressInfo['elevation']))
+                            $elevation = $addressInfo['elevation'];
+                        $cTimezone = $this->config->getUserValue($this->userId, 'core', 'timezone');
+                        if ($cTimezone != "")
+                            $timezone = $cTimezone;
+                    }
                 }
                 $p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation;
                 $this->config->setUserValue($this->userId, Application::APP_ID, 'settings', $p_settings);
