@@ -5,14 +5,14 @@
     <name>Salat Time</name>
     <summary>Salat Time</summary>
     <description><![CDATA[Give 5 times prayer.]]></description>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <licence>agpl</licence>
     <author mail="mmismailm@hotmail.com" >Mohamed</author>
     <namespace>SalatTime</namespace>
     <category>tools</category>
     <bugs>http://mmismailm.com/</bugs>
     <dependencies>
-        <nextcloud min-version="15" max-version="23"/>
+        <nextcloud min-version="21" max-version="23"/>
     </dependencies>
     <navigations>
         <navigation>

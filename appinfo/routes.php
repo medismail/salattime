@@ -10,7 +10,6 @@
 return [
     'routes' => [
 	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-	   ['name' => 'page#do_echo', 'url' => '/echo', 'verb' => 'POST'],
            ['name' => 'page#settings', 'url' => '/settings', 'verb' => 'GET'],
            ['name' => 'page#adjustments', 'url' => '/adjustments', 'verb' => 'GET'],
            ['name' => 'page#prayertime', 'url' => '/prayertime', 'verb' => 'GET'],

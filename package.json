@@ -1,6 +1,6 @@
 {
 	"name": "salattime",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "salattime widget",
 	"main": "index.js",
 	"directories": {
@@ -17,17 +17,17 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/eneiluj/salattime"
+		"url": "https://github.com/medismail/salattime"
 	},
 	"keywords": [
 		"salattime"
 	],
-	"author": "Julien Veyssier",
+	"author": "Moahmed-Ismail MEJRI",
 	"license": "AGPL-3.0",
 	"bugs": {
-		"url": "https://github.com/eneiluj/salattime/issues"
+		"url": "https://github.com/medismail/salattime/issues"
 	},
-	"homepage": "https://github.com/eneiluj/salattime",
+	"homepage": "https://github.com/medismail/salattime",
 	"browserslist": [
 		"extends @nextcloud/browserslist-config"
 	],
