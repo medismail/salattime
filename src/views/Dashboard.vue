@@ -164,6 +164,7 @@ export default {
 		}
 	}
 }
+
 #salattime-widget {
 	overflow: scroll;
 	height: 100%;

@@ -16,5 +16,6 @@ return [
            ['name' => 'page#prayertime', 'url' => '/prayertime', 'verb' => 'GET'],
            ['name' => 'page#savesetting', 'url' => 'savesetting', 'verb' => 'GET'],
            ['name' => 'page#saveadjustment', 'url' => 'saveadjustment', 'verb' => 'GET'],
+           ['name' => 'config#getWidgetContent', 'url' => '/widget-content', 'verb' => 'GET'],
     ]
 ];

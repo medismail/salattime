@@ -1,7 +1,7 @@
 .icon-salattime {
-    background-image: url(./../img/app.svg);
+    background-image: url(./../img/app-dark.svg);
 }
 
-body.theme--dark .icon-welcome {
+body.theme--dark .icon-salattime {
     background-image: url(./../img/app.svg);
 }
