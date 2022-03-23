@@ -12,15 +12,6 @@
 				{{ emptyContentMessage }}
 			</template>
 		</EmptyContent>
-		<a v-if="supportUserId"
-			v-tooltip.top="{ content: callSupportUserTooltip }"
-			class="call-link"
-			:href="callUrl">
-			<Avatar
-				:user="supportUserId"
-				:tooltip-message="supportUserName" />
-			<span>{{ callSupportUserText }}</span>
-		</a>
 	</div>
 </template>
 
@@ -28,18 +19,13 @@
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import EmptyContent from '@nextcloud/vue/dist/Components/EmptyContent'
-import Avatar from '@nextcloud/vue/dist/Components/Avatar'
-import Tooltip from '@nextcloud/vue/dist/Directives/Tooltip'
 import VueMarkdown from 'vue-markdown'
-import Vue from 'vue'
-Vue.directive('tooltip', Tooltip)
 export default {
 	name: 'Dashboard',
 	components: {
 		// DashboardWidget,
 		EmptyContent,
 		VueMarkdown,
-		Avatar,
 	},
 	props: {
 		title: {
@@ -62,17 +48,6 @@ export default {
 		emptyContentIcon() {
 			return 'icon-close'
 		},
-		callUrl() {
-			return generateUrl('/apps/spreed/?callUser=' + this.supportUserId)
-		},
-		callSupportUserText() {
-			return this.supportText
-				? this.supportText.replace('{name}', this.supportUserName)
-				: t('welcome', 'Talk to your support contact ({name})', { name: this.supportUserName })
-		},
-		callSupportUserTooltip() {
-			return t('welcome', 'Talk to {name}', { name: this.supportUserName })
-		},
 	},
 	beforeMount() {
 		this.getContent()
@@ -88,11 +63,6 @@ export default {
 				this.content = this.content.replaceAll(/\!\[(.*)\]\(.*\?fileId=(\d+).*/g, (match, p1, p2) => {
 					return '![' + p1 + '](' + generateUrl('/core/preview?fileId=' + p2 + '&x=200&y=200&a=true') + ')'
 				})
-				this.userId = response.data.userId
-				this.userName = response.data.userName
-				this.supportUserId = response.data.supportUserId
-				this.supportUserName = response.data.supportUserName
-				this.supportText = response.data.supportText
 				console.debug('"' + this.content + '"')
 			}).catch((error) => {
 				console.debug(error)
@@ -172,17 +142,6 @@ export default {
 	.icon-loading {
 		display: block;
 		margin-top: 50%;
-	}
-	.call-link {
-		display: flex;
-		margin-top: 25px;
-		border-radius: var(--border-radius-large);
-		span {
-			margin: auto 0 auto 10px;
-		}
-		&:hover {
-			background-color: var(--color-background-hover);
-		}
 	}
 }
 </style>
