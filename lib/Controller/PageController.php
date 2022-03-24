@@ -3,10 +3,10 @@ namespace OCA\SalatTime\Controller;
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Controller;
 use OCA\SalatTime\AppInfo\Application;
-use OCA\salattime\Service\ConfigService;
 use OCP\IConfig;
 use OCP\IURLGenerator;
 use OCA\SalatTime\CurrentUser;
@@ -23,9 +23,6 @@ class PageController extends Controller {
 
         /** @var \OCP\IConfig */
         protected $config;
-
-        /** @var \OCA\salattime\Service\ConfigService */
-        private $configService;
 
         /** @var string */
         protected $user;
@@ -51,7 +48,6 @@ class PageController extends Controller {
 	public function __construct($AppName, IRequest $request,
                                                IClientService $clientService,
                                                IConfig $config,
-                                               ConfigService $configService,
                                                IURLGenerator $urlGenerator,
                                                CurrentUser $currentUser,
                                                IAccountManager $accountManager,
@@ -61,7 +57,6 @@ class PageController extends Controller {
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
                 $this->config = $config;
-                $this->configService = $configService;
                 $this->user = (string) $currentUser->getUID();
                 $this->urlGenerator = $urlGenerator;
                 $this->accountManager = $accountManager;
@@ -402,7 +397,7 @@ class PageController extends Controller {
 		try {
 			$options = [
 				'headers' => [
-					'User-Agent' => 'NextcloudSalatTime/' . $this->version . ' nextcloud.com'
+					'User-Agent' => 'NextcloudWeatherStatus/' . $this->version . ' nextcloud.com'
 				],
 			];
 
