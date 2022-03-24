@@ -37,8 +37,6 @@ export default {
 		return {
 			loading: true,
 			content: '',
-			userId: null,
-			userName: null,
 		}
 	},
 	computed: {
@@ -58,11 +56,7 @@ export default {
 		getContent() {
 			const url = generateUrl('/apps/salattime/widget-content')
 			axios.get(url).then((response) => {
-				this.content = response.data.content
-				// eslint-disable-next-line
-				this.content = this.content.replaceAll(/\!\[(.*)\]\(.*\?fileId=(\d+).*/g, (match, p1, p2) => {
-					return '![' + p1 + '](' + generateUrl('/core/preview?fileId=' + p2 + '&x=200&y=200&a=true') + ')'
-				})
+				this.content = response.data.ocs.data.content
 				console.debug('"' + this.content + '"')
 			}).catch((error) => {
 				console.debug(error)
@@ -124,6 +118,20 @@ export default {
 	a {
 		color: var(--color-text-light);
 		text-decoration: underline;
+	}
+	td, th {
+		border: 1px solid #ddd;
+		padding: 6px;
+	}
+	tr:nth-child(even) {
+		background-color: #f2f2f2;
+	}
+	th {
+		padding-top: 6px;
+		padding-bottom: 6px;
+		text-align: left;
+		background-color: #04AA6D;
+		color: white;
 	}
 	> p {
 		img {
