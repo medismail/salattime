@@ -9,12 +9,12 @@
  * License: GNU LGPL v3.0
  */
 
-namespace IslamicNetwork\PrayerTimes;
+namespace OCA\SalatTime\IslamicNetwork\PrayerTimes;
 
 use DateTime;
 use DateTimezone;
-use IslamicNetwork\MoonSighting\Fajr;
-use IslamicNetwork\MoonSighting\Isha;
+use OCA\SalatTime\IslamicNetwork\MoonSighting\Fajr;
+use OCA\SalatTime\IslamicNetwork\MoonSighting\Isha;
 
 /**
  * Class PrayerTimes
@@ -68,6 +68,12 @@ class PrayerTimes
      * If we're unable to calculate a time, we'll return this
      */
     const INVALID_TIME = '-----';
+
+    /**
+     * Next
+     */
+    const SALAT = 'Salat';
+    const REMAIN = 'Remain';
 
     /**
      * @Array
@@ -800,23 +806,64 @@ class PrayerTimes
         return $result;
     }
 
-     * @param $latitude
-     * @param $longitude
-     * @param $timezone
-     * @param null $elevation
-     * @param string $latitudeAdjustmentMethod
-     * @param null $midnightMode
-     * @param string $format
-     * @return mixed
-     * @throws \Exception
-     */
-    public function getNextPrayer($latitude, $longitude, $timezone, $elevation = null, $latitudeAdjustmentMethod = self::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midni$
+    public function getNextPrayer($prayer = null)
     {
-        $date = new DateTime(null, new DateTimezone($timezone));
-
-        return $this->getTimes($date, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod, $midnightMode, $format);
+        return $this->getNextPrayerFromDate($this->date, $prayer);
     }
 
+    /**
+     * @param DateTime $date
+     */
+    public function getNextPrayerFromDate(DateTime $date, $prayer = null)
+    {
+        $curtime = strtotime($date->format('H:i'));
 
+        $times = $this->computeTimes();
+        $offset = 0;
 
+        if ($prayer)
+        {
+            $salat = $prayer;
+            if (strtotime($times[$salat]) < $curtime)
+                $offset = 86400;
+        } elseif (strtotime($times[self::FAJR]) > $curtime)
+        {
+            $salat = self::FAJR;
+        } elseif (strtotime($times[self::ZHUHR]) > $curtime)
+        {
+            $salat = self::ZHUHR;
+        } elseif (strtotime($times[self::ASR]) > $curtime)
+        {
+            $salat = self::ASR;
+        } elseif (strtotime($times[self::MAGHRIB]) > $curtime)
+        {
+            $salat = self::MAGHRIB;
+        } elseif (strtotime($times[self::ISHA]) > $curtime)
+        {
+            $salat = self::ISHA;
+        } else {
+            $salat = self::FAJR;
+            $offset = 86400;
+        }
+
+        $minutes = $this->twoDigitsFormat((int)((strtotime($times[$salat]) + $offset - $curtime) / 60) % 60);
+        $hours = $this->twoDigitsFormat((int)((strtotime($times[$salat]) + $offset - $curtime) / 3600));
+        $remain = $hours . ":" . $minutes;
+        return [
+            self::SALAT => $salat,
+            self::REMAIN => $remain,
+        ];
+    }
+
+    /**
+     * @param string sunrise
+     * @param string sunset
+     */
+    public function getDayLength($sunrise, $sunset)
+    {
+        $daylength = strtotime($sunset) - strtotime($sunrise);
+        $minutes = $this->twoDigitsFormat((int)(($daylength) / 60) % 60);
+        $hours = $this->twoDigitsFormat((int)(($daylength) / 3600));
+        return $hours . ":" . $minutes;
+    }
 }

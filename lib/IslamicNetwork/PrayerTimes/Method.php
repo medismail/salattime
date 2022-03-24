@@ -1,8 +1,8 @@
 <?php
 
-namespace IslamicNetwork\PrayerTimes;
+namespace OCA\SalatTime\IslamicNetwork\PrayerTimes;
 
-use IslamicNetwork\MoonSighting\Isha;
+use OCA\SalatTime\IslamicNetwork\MoonSighting\Isha;
 
 class Method
 {

@@ -9,6 +9,9 @@
 * Copyright 2013 | Faiz Shukri
 * Released under the MIT license
 */
+
+namespace OCA\SalatTime\IslamicNetwork\hijri;
+
 class HijriDate{
 
     private $hijri;

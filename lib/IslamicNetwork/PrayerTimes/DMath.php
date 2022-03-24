@@ -1,5 +1,5 @@
 <?php
-namespace IslamicNetwork\PrayerTimes;
+namespace OCA\SalatTime\IslamicNetwork\PrayerTimes;
 /**
  * Class DMath
  */

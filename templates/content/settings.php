@@ -9,7 +9,7 @@ Address: <input type="text" name="address"><br>
 <input type="submit">
 </form>
 <br>
-<button id="btnmtoggle">Click from manuel settings</button>
+<button id="btnmtoggle">Click for manuel settings</button>
 <div id="divmanuel" style="display: none;">
 Manuel settings: <br>
 <form action="savesetting" method="get">

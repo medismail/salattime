@@ -1,5 +1,5 @@
 <?php
-namespace AlQibla;
+namespace OCA\SalatTime\IslamicNetwork\qibla-direction;
 
 class Calculation
 {

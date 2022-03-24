@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\SalatTime\AppInfo;
 
 use OCP\AppFramework\App;
-use OCA\SalatTime\Service\AuthorService;
 use OCA\SalatTime\Dashboard\SalatTimeWidget;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -22,12 +21,6 @@ class Application extends App implements IBootstrap {
             /**
              * Controllers
              */
-            $container->registerService('AuthorService', function($c) {
-                return new AuthorService(
-                    $c->query('Config'),
-                    $c->query('AppName')
-                );
-            });
 
             $container->registerService('Config', function($c) {
                 return $c->query('ServerContainer')->getConfig();

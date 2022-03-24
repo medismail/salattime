@@ -1,14 +1,14 @@
 <?php
 
-require_once __DIR__ . '/../../lib/prayer-times/PrayerTimes/PrayerTimes.php';
-require_once __DIR__ . '/../../lib/prayer-times/PrayerTimes/Method.php';
-require_once __DIR__ . '/../../lib/prayer-times/PrayerTimes/DMath.php';
-require_once __DIR__ . '/../../lib/prayer-times/MoonSighting/PrayerTimes.php';
-require_once __DIR__ . '/../../lib/prayer-times/MoonSighting/Isha.php';
+require_once __DIR__ . '/../../lib/IslamicNetwork/PrayerTimes/PrayerTimes.php';
+require_once __DIR__ . '/../../lib/IslamicNetwork/PrayerTimes/Method.php';
+require_once __DIR__ . '/../../lib/IslamicNetwork/PrayerTimes/DMath.php';
+require_once __DIR__ . '/../../lib/IslamicNetwork/MoonSighting/PrayerTimes.php';
+require_once __DIR__ . '/../../lib/IslamicNetwork/MoonSighting/Isha.php';
+require_once __DIR__ . '/../../lib/IslamicNetwork/hijri/hijri_date.php';
 
-require_once __DIR__ . '/../../lib/hijri/hijri_date.php';
-
-use IslamicNetwork\PrayerTimes\PrayerTimes;
+use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
+use OCA\SalatTime\IslamicNetwork\hijri\HijriDate;
 
 // Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
 

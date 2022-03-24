@@ -1,5 +1,5 @@
 <?php
-namespace IslamicNetwork\MoonSighting;
+namespace OCA\SalatTime\IslamicNetwork\MoonSighting;
 
 use DateTime;
 

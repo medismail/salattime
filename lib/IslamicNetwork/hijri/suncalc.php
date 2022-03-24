@@ -1,6 +1,6 @@
 <?php
 
-namespace AurorasLive;
+namespace OCA\SalatTime\IslamicNetwork\hijri;
 
 use DateInterval;
 
