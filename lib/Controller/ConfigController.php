@@ -31,8 +31,8 @@ class ConfigController extends OCSController {
 	 * @NoAdminRequired
 	 */
         public function getWidgetContent(): DataResponse {
-                $times = $this->calculationService->getPrayerTimes();
-                $name = $this->calculationService->gretNames();
+                $times = $this->calculationService->getPrayerTimes($this->userId);
+                $name = $this->calculationService->gretNames($this->userId);
                 return new DataResponse([
                         'content' => "\n ## " . $times[$name['HIJRI']] . " \n" .
                                      "| Salat | &nbsp;&nbsp;Time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | \n| ----------- | :-----------: | " .

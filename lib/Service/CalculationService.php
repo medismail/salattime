@@ -29,10 +29,10 @@ class CalculationService {
             $this->configService = $configService;
     }
 
-    public function getPrayerTimes() {
+    public function getPrayerTimes($userId) {
 
-        $p_settings = $this->configService->getSettingsValue($this->userId);
-        $adjustments = $this->configService->getAdjustmentsValue($this->userId);
+        $p_settings = $this->configService->getSettingsValue($userId);
+        $adjustments = $this->configService->getAdjustmentsValue($userId);
         // Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
 
         if ($p_settings['latitude'] != "")
@@ -83,8 +83,8 @@ class CalculationService {
             $hijri->tune($adjustments['day']);
 
         $times['Hijri'] = $hijri->get_date();
-        //$next[PrayerTimes::SALAT]
-        //$next[PrayerTimes::REMAIN]
+        $times['PrayerTimes::SALAT'] = $next[PrayerTimes::SALAT];
+        $times['PrayerTimes::REMAIN]'] = $next[PrayerTimes::REMAIN];
         //$pt->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET])
         //if ( $hijri->get_month() == 9) //Ramadhane
         //$times[PrayerTimes::IMSAK]
@@ -92,8 +92,8 @@ class CalculationService {
         return $times;
     }
 
-    public function getSunCalc() {
-        $p_settings = $this->configService->getSettingsValue($this->userId);
+    public function getSunCalc($userId) {
+        $p_settings = $this->configService->getSettingsValue($userId);
         $date = new DateTime(null, new DateTimezone($p_settings['timezone']));
         $sc = new SunCalc($date, $p_settings['latitude'], $p_settings['longitude']);
         //$sunTimes = $sc->getSunTimes();
