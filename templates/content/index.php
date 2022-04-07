@@ -69,6 +69,9 @@ if ( $hijri->get_month() == 9) //Ramadhane
 echo "Sunrise: &emsp;", $times[PrayerTimes::SUNRISE], '<br>';
 echo "Sunset: &emsp; ", $times[PrayerTimes::SUNSET], '<br>';
 
+$Format_12_24 = 'g:i a';
+//$Format_12_24 = 'G:i';
+
 $sc = new SunCalc($date, $latitude, $longitude);
 /*$sunTimes = $sc->getSunTimes();
 echo "Sunrise: &emsp;", $sunTimes['sunrise']->format('G:i'), '<br>';
@@ -76,10 +79,13 @@ echo "Sunset: &emsp; ", $sunTimes['sunset']->format('G:i'), '<br>'*/;
 
 $moonTimes = $sc->getMoonTimes();
 if ($moonTimes['moonrise'])
-    echo "Moonrise: &emsp; ", $moonTimes['moonrise']->format('g:i a'), '<br>';
+    echo "Moonrise: &emsp; ", $moonTimes['moonrise']->format($Format_12_24), '<br>';
 if ($moonTimes['moonset'])
-    echo "Moonset: &emsp; ", $moonTimes['moonset']->format('g:i a'), '<br>';
+    echo "Moonset: &emsp; ", $moonTimes['moonset']->format($Format_12_24), '<br>';
 
+$moonIl = $sc->getMoonIllumination();
+echo "Moon Illumination: ", number_format($moonIl['fraction']*100, 1), '%<br>';
+echo "Moon Phase: ", number_format($moonIl['phase']*100, 1), '%<br>';
 
 $gback = [
             PrayerTimes::FAJR => "",
