@@ -87,6 +87,11 @@ $moonIl = $sc->getMoonIllumination();
 echo "Moon Illumination: ", number_format($moonIl['fraction']*100, 1), '%<br>';
 echo "Moon Phase: ", number_format($moonIl['phase']*100, 1), '%<br>';
 
+$output=null;
+$retval=null;
+exec( __DIR__ . '/../../lib/bin/salattime.py ' . $latitude . ' ' . $longitude, $output, $retval);
+print_r($output);
+
 $gback = [
             PrayerTimes::FAJR => "",
             PrayerTimes::ZHUHR => "",

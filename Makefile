@@ -55,9 +55,9 @@ all: build
 # is present, the npm step is skipped
 .PHONY: build
 build:
-ifneq (,$(wildcard $(CURDIR)/composer.json))
-	make composer
-endif
+#ifneq (,$(wildcard $(CURDIR)/composer.json))
+#	make composer
+#endif
 ifneq (,$(wildcard $(CURDIR)/package.json))
 	make npm
 endif
@@ -153,3 +153,7 @@ appstore:
 test: composer
 	$(CURDIR)/vendor/phpunit/phpunit/phpunit -c phpunit.xml
 	$(CURDIR)/vendor/phpunit/phpunit/phpunit -c phpunit.integration.xml
+
+.PHONY: build-dep
+	npm install
+
