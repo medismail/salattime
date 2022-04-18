@@ -64,10 +64,11 @@ def main(args):
     # Calculate the fraction of the Moon's disc
     # that appears illuminated, as seen from the Earth.
     illum = astronomy.Illumination(astronomy.Body.Moon, time)
-    print("{} : Moon's illuminated fraction = {:0.2f}%.".format(time, 100.0 * illum.phase_fraction))
+    print("Moon's illuminated fraction: {:0.2f}%.".format(100.0 * illum.phase_fraction))
 
     mq = astronomy.SearchMoonQuarter(time)
-    print('{} : {}'.format(mq.time, QuarterName(mq.quarter)))
+    #print('{} : {}'.format(mq.time, QuarterName(mq.quarter)))
+    print('Moon Phase: {}'.format(QuarterName(mq.quarter)))
 
     PrintEvent('search',   time)
     PrintEvent('sunrise',  sunrise)
@@ -75,14 +76,14 @@ def main(args):
     PrintEvent('moonrise', moonrise)
     PrintEvent('moonset',  moonset)
 
-    print('BODY           AZ      ALT')
+    #print('BODY           AZ      ALT')
     body_list = [
         Body.Sun, Body.Moon
     ]
     for body in body_list:
         equ_ofdate = Equator(body, time, observer, ofdate=True, aberration=True)
         hor = Horizon(time, observer, equ_ofdate.ra, equ_ofdate.dec, Refraction.Normal)
-        print('{:<8} {:8.2f} {:8.2f}'.format(body.name, hor.azimuth, hor.altitude))
+        print('{:<8} position: AZ: {:8.2f} ALT: {:8.2f}'.format(body.name, hor.azimuth, hor.altitude))
 
     return 0
 

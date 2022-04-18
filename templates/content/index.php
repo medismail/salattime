@@ -83,14 +83,18 @@ if ($moonTimes['moonrise'])
 if ($moonTimes['moonset'])
     echo "Moonset: &emsp; ", $moonTimes['moonset']->format($Format_12_24), '<br>';
 
-$moonIl = $sc->getMoonIllumination();
+/*$moonIl = $sc->getMoonIllumination();
 echo "Moon Illumination: ", number_format($moonIl['fraction']*100, 1), '%<br>';
-echo "Moon Phase: ", number_format($moonIl['phase']*100, 1), '%<br>';
+echo "Moon Phase: ", number_format($moonIl['phase']*100, 1), '%<br>';*/
 
 $output=null;
 $retval=null;
 exec( __DIR__ . '/../../lib/bin/salattime.py ' . $latitude . ' ' . $longitude, $output, $retval);
-print_r($output);
+//print_r($output);
+echo $output[1], '<br>';
+echo $output[2], '<br>';
+echo $output[8], '<br>';
+echo $output[9], '<br>';
 
 $gback = [
             PrayerTimes::FAJR => "",
