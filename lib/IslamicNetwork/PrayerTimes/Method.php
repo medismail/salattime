@@ -9,12 +9,12 @@ class Method
     /**
      * All methods available for computation
      */
-    const METHOD_JAFARI = 'JAFARI'; // 0;
+    const METHOD_MWL = 'MWL'; // 0;
     const METHOD_KARACHI = 'KARACHI'; // 1;
     const METHOD_ISNA = 'ISNA'; // 2;
-    const METHOD_MWL = 'MWL'; // 3
-    const METHOD_MAKKAH = 'MAKKAH'; // 4;
-    const METHOD_EGYPT = 'EGYPT'; // 5;
+    const METHOD_MAKKAH = 'MAKKAH'; // 3;
+    const METHOD_EGYPT = 'EGYPT'; // 4;
+    const METHOD_JAFARI = 'JAFARI'; // 5;
     const METHOD_TEHRAN = 'TEHRAN'; // 7;
     const METHOD_GULF = 'GULF'; // 8
     const METHOD_KUWAIT = 'KUWAIT'; // 9

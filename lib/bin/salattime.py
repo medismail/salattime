@@ -68,7 +68,7 @@ def main(args):
 
     mq = astronomy.SearchMoonQuarter(time)
     #print('{} : {}'.format(mq.time, QuarterName(mq.quarter)))
-    print('Moon Phase: {}'.format(QuarterName(mq.quarter)))
+    print('Moon Phase: {}'.format(QuarterName(mq.quarter-1 if mq.quarter>0 else 3)))
 
     PrintEvent('search',   time)
     PrintEvent('sunrise',  sunrise)

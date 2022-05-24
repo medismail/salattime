@@ -212,7 +212,7 @@ class PageController extends Controller {
          * @NoAdminRequired
          * @NoCSRFRequired
          */
-        public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation): RedirectResponse {
+        public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method): RedirectResponse {
                 /*if ($latitude != "")
                     $this->config->setUserValue($this->userId, Application::APP_ID, 'latitude', $latitude);
                 if ($longitude != "")
@@ -231,7 +231,7 @@ class PageController extends Controller {
                             $timezone = $cTimezone;
                     }
                 }
-                $p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation;
+                $p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation . ':' . $method;
                 $this->config->setUserValue($this->userId, Application::APP_ID, 'settings', $p_settings);
                 $url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
                 return new RedirectResponse($url);
