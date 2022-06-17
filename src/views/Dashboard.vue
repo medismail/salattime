@@ -41,7 +41,7 @@ export default {
 	},
 	computed: {
 		emptyContentMessage() {
-			return t('welcome', 'No welcome content')
+			return t('salattime', 'Salat time content is unavailable')
 		},
 		emptyContentIcon() {
 			return 'icon-close'

@@ -63,7 +63,7 @@ class CalculationService {
         if ($p_settings['format_12_24'] != "")
             $format_12_24  = $p_settings['format_12_24'];
         else
-            $format_12_24 = $PrayerTimes::TIME_FORMAT_12H;
+            $format_12_24 = PrayerTimes::TIME_FORMAT_12H;
 
         $pt = new PrayerTimes($method); // new PrayerTimes($method, $asrJuristicMethod, $asrShadowFactor);
 

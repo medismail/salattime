@@ -37,9 +37,9 @@ else
 if ($_['format_12_24'] != "")
     $format_12_24  = $_['format_12_24'];
 else
-    $format_12_24 = $PrayerTimes::TIME_FORMAT_12H;
+    $format_12_24 = PrayerTimes::TIME_FORMAT_12H;
 
-if ($format_12_24 == $PrayerTimes::TIME_FORMAT_12H)
+if ($format_12_24 == PrayerTimes::TIME_FORMAT_12H)
    $textFormat_12_24 = 'g:i a';
 else
    $textFormat_12_24 = 'G:i';
@@ -68,15 +68,15 @@ if ($_['day'] != "")
 
 echo "<div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">", $hijri->get_date(), '</h2>';
 
-echo "Next: <b>" . $next[PrayerTimes::SALAT] . "</b> after: <b>" . $next[PrayerTimes::REMAIN] . '</b><br>';
+echo $l->t('Next') . ": <b>" . $next[PrayerTimes::SALAT] . "</b> " . $l->t('after') . ": <b>" . $next[PrayerTimes::REMAIN] . '</b><br>';
 
-echo "Day length: &emsp;", $pt->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]), '<br>';
+echo $l->t('Day length') . ": &emsp;", $pt->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]), '<br>';
 
 if ( $hijri->get_month() == 9) //Ramadhane
-    echo "Imsak:&emsp;&emsp;", $times[PrayerTimes::IMSAK], '<br>';
+    echo $l->t('Imsak') . ":&emsp;&emsp;", $times[PrayerTimes::IMSAK], '<br>';
 
-echo "Sunrise: &emsp;", $times[PrayerTimes::SUNRISE], '<br>';
-echo "Sunset: &emsp; ", $times[PrayerTimes::SUNSET], '<br>';
+echo $l->t('Sunrise') . ": &emsp;", $times[PrayerTimes::SUNRISE], '<br>';
+echo $l->t('Sunset') . ": &emsp; ", $times[PrayerTimes::SUNSET], '<br>';
 
 $sc = new SunCalc($date, $latitude, $longitude);
 /*$sunTimes = $sc->getSunTimes();
@@ -85,9 +85,9 @@ echo "Sunset: &emsp; ", $sunTimes['sunset']->format('G:i'), '<br>'*/;
 
 $moonTimes = $sc->getMoonTimes();
 if ($moonTimes['moonrise'])
-    echo "Moonrise: &emsp; ", $moonTimes['moonrise']->format($textFormat_12_24), '<br>';
+    echo $l->t('Moonrise') . ": &emsp; ", $moonTimes['moonrise']->format($textFormat_12_24), '<br>';
 if ($moonTimes['moonset'])
-    echo "Moonset: &emsp; ", $moonTimes['moonset']->format($textFormat_12_24), '<br>';
+    echo $l->t('Moonset') . ": &emsp; ", $moonTimes['moonset']->format($textFormat_12_24), '<br>';
 
 /*$moonIl = $sc->getMoonIllumination();
 echo "Moon Illumination: ", number_format($moonIl['fraction']*100, 1), '%<br>';

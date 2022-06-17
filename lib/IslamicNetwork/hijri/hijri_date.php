@@ -97,8 +97,8 @@ class HijriDate{
     {
         $week = [
             'Monday' => ['en' => 'Al Athnayn', 'ar' => 'الاثنين'],
-            'Tuesday' => ['en' => 'Al Thalaata', 'ar' => 'الثلاثاء'],
-            'Wednesday' => ['en' => 'Al Arba\'a', 'ar' => 'الاربعاء'],
+            'Tuesday' => ['en' => 'Al Thulaatha', 'ar' => 'الثلاثاء'],
+            'Wednesday' => ['en' => 'Al Arbya\'a', 'ar' => 'الاربعاء'],
             'Thursday' => ['en' => 'Al Khamees', 'ar' => 'الخميس'],
             'Friday' => ['en' => 'Al Juma\'a', 'ar' => 'الجمعة'],
             'Saturday' => ['en' => 'Al Sabt', 'ar' => 'السبت'],
