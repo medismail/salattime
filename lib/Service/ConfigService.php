@@ -36,12 +36,18 @@ class ConfigService {
                     } else {
                         $ret['method'] = "";
                     }
+                    if (isset($p_settings['5'])) {
+                        $format_12_24 = $p_settings['5'];
+                    } else {
+                        $ret['format_12_24']  = "";
+                    }
             } else {
                     $ret['latitude'] = "";
                     $ret['longitude'] = "";
                     $ret['timezone'] = "";
                     $ret['elevation'] = "";
                     $ret['method'] = "";
+                    $ret['format_12_24']  = "";
             }
             return $ret;
     }

@@ -92,12 +92,18 @@ class PageController extends Controller {
                     } else {
                         $method = "";
                     }
+                    if (isset($p_settings['5'])) {
+                        $format_12_24 = $p_settings['5'];
+                    } else {
+                        $format_12_24 = "";
+                    }
                 } else {
                     $latitude = "";
                     $longitude = "";
                     $timezone = "";
                     $elevation = "";
                     $method = "";
+                    $format_12_24 = "";
                 }
                 $adjustments = explode(",", $this->config->getUserValue($this->userId, Application::APP_ID, 'adjustments'));
                 if (count($adjustments) == 6) {
@@ -116,7 +122,7 @@ class PageController extends Controller {
                     $Isha = 0;
                 }
                 $parameters = array('latitude' => $latitude, 'longitude' => $longitude, 'timezone' => $timezone, 'elevation' => $elevation, 'method' => $method,
-                                      'day' => $day, 'Fajr' => $Fajr, 'Dhuhr' => $Dhuhr, 'Asr' => $Asr, 'Maghrib' => $Maghrib, 'Isha' => $Isha);
+                                      'format_12_24' => $format_12_24, 'day' => $day, 'Fajr' => $Fajr, 'Dhuhr' => $Dhuhr, 'Asr' => $Asr, 'Maghrib' => $Maghrib, 'Isha' => $Isha);
 		return new TemplateResponse(Application::APP_ID, 'index', $parameters);  // templates/index.php
 	}
 
@@ -141,14 +147,20 @@ class PageController extends Controller {
                     } else {
                         $method = "";
                     }
+                    if (isset($p_settings['5'])) {
+                        $format_12_24 = $p_settings['5'];
+                    } else {
+                        $format_12_24 = "";
+                    }
                 } else {
                     $latitude = "";
                     $longitude = "";
                     $timezone = "";
                     $elevation = "";
                     $method = "";
+                    $format_12_24 = "";
                 }
-                $parameters = array('latitude' => $latitude, 'longitude' => $longitude, 'timezone' => $timezone, 'elevation' => $elevation, 'method' => $method);
+                $parameters = array('latitude' => $latitude, 'longitude' => $longitude, 'timezone' => $timezone, 'elevation' => $elevation, 'method' => $method, 'format_12_24' => $format_12_24);
                 return new TemplateResponse($this->appName, $templateName, $parameters);
         }
 
@@ -172,12 +184,18 @@ class PageController extends Controller {
                     } else {
                         $method = "";
                     }
-	                } else {
+                    if (isset($p_settings['5'])) {
+                        $format_12_24 = $p_settings['5'];
+                    } else {
+                        $format_12_24 = "";
+                    }
+                } else {
                     $latitude = "";
                     $longitude = "";
                     $timezone = "";
                     $elevation = "";
                     $method = "";
+                    $format_12_24 = "";
                 }
                 $adjustments = explode(",", $this->config->getUserValue($this->userId, Application::APP_ID, 'adjustments'));
                 if (count($adjustments) == 6) {
@@ -196,7 +214,7 @@ class PageController extends Controller {
                     $Isha = 0;
                 }
                 $parameters = array('latitude' => $latitude, 'longitude' => $longitude, 'timezone' => $timezone, 'elevation' => $elevation, 'method' => $method,
-                                      'day' => $day, 'Fajr' => $Fajr, 'Dhuhr' => $Dhuhr, 'Asr' => $Asr, 'Maghrib' => $Maghrib, 'Isha' => $Isha);
+                                      'format_12_24' => $format_12_24, 'day' => $day, 'Fajr' => $Fajr, 'Dhuhr' => $Dhuhr, 'Asr' => $Asr, 'Maghrib' => $Maghrib, 'Isha' => $Isha);
                 return new TemplateResponse(Application::APP_ID, 'prayers', $parameters);  // templates/prayers.php
         }
 /*RedirectResponse {
@@ -212,7 +230,7 @@ class PageController extends Controller {
          * @NoAdminRequired
          * @NoCSRFRequired
          */
-        public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method): RedirectResponse {
+        public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method, string $format_12_24): RedirectResponse {
                 /*if ($latitude != "")
                     $this->config->setUserValue($this->userId, Application::APP_ID, 'latitude', $latitude);
                 if ($longitude != "")
@@ -231,7 +249,7 @@ class PageController extends Controller {
                             $timezone = $cTimezone;
                     }
                 }
-                $p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation . ':' . $method;
+                $p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation . ':' . $method . ':' . $format_12_24;
                 $this->config->setUserValue($this->userId, Application::APP_ID, 'settings', $p_settings);
                 $url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
                 return new RedirectResponse($url);

@@ -32,6 +32,10 @@ if ($_['method'] != "")
     $method = $_['method'];
 else
     $method = 'MWL';
+if ($_['format_12_24'] != "")
+    $format_12_24  = $_['format_12_24'];
+else
+    $format_12_24 = $PrayerTimes::TIME_FORMAT_12H;
 
 $pt = new PrayerTimes($method); // new PrayerTimes($method, $asrJuristicMethod, $asrShadowFactor);
 
@@ -71,7 +75,7 @@ $daterange = new DatePeriod($start_date, $interval ,$end_date);
 
 foreach($daterange as $date1){
    //$date1->setTimezone(new DateTimezone($timezone));
-   $times = $pt->getTimes($date1, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format = PrayerTimes::TIME_FORMAT_12H);
+   $times = $pt->getTimes($date1, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format_12_24);
    $curtime = strtotime($date1->format('d-m-Y H:i:s'));
    $hijri = new HijriDate($curtime);
    if ($_['day'] != "")

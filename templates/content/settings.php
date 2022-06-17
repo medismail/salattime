@@ -1,5 +1,5 @@
 <div>
-<form action="savesetting" method="get">
+<form name="auto" action="savesetting" method="get">
 Location:<br>
 Address: <input type="text" name="address"><br>
 <input type="text" name="latitude" style="display: none;" value<?php echo "\"" . $_['latitude'] . "\""; ?>>
@@ -7,13 +7,16 @@ Address: <input type="text" name="address"><br>
 <input type="text" name="timezone" style="display: none;" value<?php echo "\"" . $_['timezone'] . "\""; ?>>
 <input type="text" name="elevation" style="display: none;" value<?php echo "\"" . $_['elevation'] . "\""; ?>>
 <input type="text" name="method" style="display: none;" value<?php echo "\"" . $_['method'] . "\""; ?>>
+<input type="text" name="format_12_24" style="display: none;" value<?php echo "\"" . $_['format_12_24'] . "\""; ?>>
 <input type="submit">
 </form>
 <br>
+<input id="checkbox1224" type="checkbox" <?php if ($_['format_12_24'] == "24h") echo "checked"; ?> />
+<label>Use 24 hours format</label><br>
 <button id="btnmtoggle">Click for manuel settings</button>
 <div id="divmanuel" style="display: none;">
 Manuel settings: <br>
-<form action="savesetting" method="get">
+<form name="man" action="savesetting" method="get">
 <input type="text" name="address" style="display: none;" value"">
 Latitude: <input type="text" name="latitude" value=<?php echo "\"" . $_['latitude'] . "\""; ?>><br>
 Longitude: <input type="text" name="longitude" value=<?php echo "\"" . $_['longitude'] . "\""; ?>><br>
@@ -24,30 +27,54 @@ Timezone: <input list="timezones" name="timezone" id="timezone" value=<?php echo
   <option value="+0200">
   <option value="+0300">
   <option value="+0400">
+  <option value="+0430">
   <option value="+0500">
+  <option value="+0530">
+  <option value="+0545">
   <option value="+0600">
+  <option value="+0630">
   <option value="+0700">
+  <option value="+0800">
+  <option value="+0845">
+  <option value="+0900">
+  <option value="+0930">
+  <option value="+1000">
+  <option value="+1030">
+  <option value="+1100">
+  <option value="+1200">
   <option value="-0100">
+  <option value="-0200">
+  <option value="-0230">
+  <option value="-0300">
+  <option value="-0400">
+  <option value="-0500">
+  <option value="-0600">
+  <option value="-0700">
+  <option value="-0800">
+  <option value="-0930">
+  <option value="-1000">
+  <option value="-1100">
+  <option value="-1200">
 </datalist>
 Altitude: <input type="text" name="elevation" value=<?php echo "\"" . $_['elevation'] . "\""; ?>><br>
-Caclulation method: <input list="method" name="method" id="method" value=<?php echo "\"" . $_['method'] . "\""; ?>><br>
-<select id="method">
-  <option value="MWL">Muslim World League</option>
-  <option value="MAKKAH">Umm Al-Qura University, Makkah</option>
-  <option value="KARACHI">University of Islamic Sciences, Karachi</option>
-  <option value="ISNA">Islamic Society of North America (ISNA)</option>
-  <option value="JAFARI">Shia Ithna-Ashari, Leva Institute, Qum</option>
-  <option value="GULF">Gulf Region</option>
-  <option value="MOONSIGHTING">Moonsighting Committee Worldwide (Moonsighting.com)</option>
-  <option value="TURKEY">TURKEY</option>
-  <option value="TEHRAN">TEHRAN</option>
-  <option value="EGYPT">EGYPT</option>
-  <option value="QATAR">QATAR</option>
-  <option value="KUWAIT">KUWAIT</option>
-  <option value="RUSSIA">RUSSIA</option>
-  <option value="FRANCE">FRANCE</option>
-  <option value="SINGAPORE">SINGAPORE</option>
-</select>
+Caclulation method: <select name="method" id="method">
+  <option value="MWL" <?php if($_['method'] == 'MWL'){echo("selected");}?>>Muslim World League</option>
+  <option value="MAKKAH" <?php if($_['method'] == 'MAKKAH'){echo("selected");}?>>Umm Al-Qura University, Makkah</option>
+  <option value="KARACHI" <?php if($_['method'] == 'KARACHI'){echo("selected");}?>>University of Islamic Sciences, Karachi</option>
+  <option value="ISNA" <?php if($_['method'] == 'ISNA'){echo("selected");}?>>Islamic Society of North America (ISNA)</option>
+  <option value="JAFARI" <?php if($_['method'] == 'JAFARI'){echo("selected");}?>>Shia Ithna-Ashari, Leva Institute, Qum</option>
+  <option value="GULF" <?php if($_['method'] == 'GULF'){echo("selected");}?>>Gulf Region</option>
+  <option value="MOONSIGHTING" <?php if($_['method'] == 'MOONSIGHTING'){echo("selected");}?>>Moonsighting Committee Worldwide (Moonsighting.com)</option>
+  <option value="TURKEY" <?php if($_['method'] == 'TURKEY'){echo("selected");}?>>TURKEY</option>
+  <option value="TEHRAN" <?php if($_['method'] == 'TEHRAN'){echo("selected");}?>>TEHRAN</option>
+  <option value="EGYPT" <?php if($_['method'] == 'EGYPT'){echo("selected");}?>>EGYPT</option>
+  <option value="QATAR" <?php if($_['method'] == 'QATAR'){echo("selected");}?>>QATAR</option>
+  <option value="KUWAIT" <?php if($_['method'] == 'KUWAIT'){echo("selected");}?>>KUWAIT</option>
+  <option value="RUSSIA" <?php if($_['method'] == 'RUSSIA'){echo("selected");}?>>RUSSIA</option>
+  <option value="FRANCE" <?php if($_['method'] == 'FRANCE'){echo("selected");}?>>FRANCE</option>
+  <option value="SINGAPORE" <?php if($_['method'] == 'SINGAPORE'){echo("selected");}?>>SINGAPORE</option>
+</select><br>
+<input type="text" name="format_12_24" style="display: none;" value<?php echo "\"" . $_['format_12_24'] . "\""; ?>>
 <input type="submit">
 </form>
 </div>

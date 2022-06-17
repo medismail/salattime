@@ -842,8 +842,14 @@ class PrayerTimes
         {
             $salat = self::ISHA;
         } else {
-            $salat = self::FAJR;
             $offset = 86400;
+            $ishaTime = strtotime($times[self::ISHA]);
+            if (($ishaTime < strtotime($times[self::FAJR])) && ($ishaTime + 86400 > $curtime))
+            {
+                $salat = self::ISHA;
+            } else {
+                $salat = self::FAJR;
+            }
         }
 
         $minutes = $this->twoDigitsFormat((int)((strtotime($times[$salat]) + $offset - $curtime) / 60) % 60);

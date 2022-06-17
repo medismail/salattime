@@ -34,12 +34,21 @@ if ($_['method'] != "")
     $method = $_['method'];
 else
     $method = 'MWL';
+if ($_['format_12_24'] != "")
+    $format_12_24  = $_['format_12_24'];
+else
+    $format_12_24 = $PrayerTimes::TIME_FORMAT_12H;
+
+if ($format_12_24 == $PrayerTimes::TIME_FORMAT_12H)
+   $textFormat_12_24 = 'g:i a';
+else
+   $textFormat_12_24 = 'G:i';
 
 $pt = new PrayerTimes($method); // new PrayerTimes($method, $asrJuristicMethod, $asrShadowFactor);
 
 $pt->tune($imsak = 0, $fajr = $_['Fajr'], $sunrise = 0, $dhuhr = $_['Dhuhr'], $asr = $_['Asr'], $maghrib = $_['Maghrib'], $sunset = 0, $isha = $_['Isha'], $midnight = 0);
 // Then, to get times for today.
-$times = $pt->getTimesForToday($latitude, $longitude, $timezone, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format = PrayerTimes::TIME_FORMAT_12H);
+$times = $pt->getTimesForToday($latitude, $longitude, $timezone, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format_12_24);
 
 $next = $pt->getNextPrayer();
 
@@ -47,7 +56,7 @@ $date = new DateTime(null, new DateTimezone($timezone));
 $curtime = strtotime($date->format('d-m-Y H:i:s'));
 if (($next[PrayerTimes::SALAT] == PrayerTimes::FAJR)&&($date->format('H') > 12)) {
     $nextday = new DateTime('today +1 day', new DateTimezone($timezone));
-    $times = $pt->getTimes($nextday, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format = PrayerTimes::TIME_FORMAT_12H);
+    $times = $pt->getTimes($nextday, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format_12_24);
     $next = $pt->getNextPrayerFromDate($date, PrayerTimes::FAJR);
     $curtime = strtotime($nextday->format('d-m-Y H:i:s'));
     $date = $nextday;
@@ -69,9 +78,6 @@ if ( $hijri->get_month() == 9) //Ramadhane
 echo "Sunrise: &emsp;", $times[PrayerTimes::SUNRISE], '<br>';
 echo "Sunset: &emsp; ", $times[PrayerTimes::SUNSET], '<br>';
 
-$Format_12_24 = 'g:i a';
-//$Format_12_24 = 'G:i';
-
 $sc = new SunCalc($date, $latitude, $longitude);
 /*$sunTimes = $sc->getSunTimes();
 echo "Sunrise: &emsp;", $sunTimes['sunrise']->format('G:i'), '<br>';
@@ -79,9 +85,9 @@ echo "Sunset: &emsp; ", $sunTimes['sunset']->format('G:i'), '<br>'*/;
 
 $moonTimes = $sc->getMoonTimes();
 if ($moonTimes['moonrise'])
-    echo "Moonrise: &emsp; ", $moonTimes['moonrise']->format($Format_12_24), '<br>';
+    echo "Moonrise: &emsp; ", $moonTimes['moonrise']->format($textFormat_12_24), '<br>';
 if ($moonTimes['moonset'])
-    echo "Moonset: &emsp; ", $moonTimes['moonset']->format($Format_12_24), '<br>';
+    echo "Moonset: &emsp; ", $moonTimes['moonset']->format($textFormat_12_24), '<br>';
 
 /*$moonIl = $sc->getMoonIllumination();
 echo "Moon Illumination: ", number_format($moonIl['fraction']*100, 1), '%<br>';
