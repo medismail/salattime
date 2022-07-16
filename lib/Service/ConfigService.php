@@ -24,30 +24,36 @@ class ConfigService {
             $p_settings = explode(":", $this->config->getUserValue($userId, Application::APP_ID, 'settings'));
             if (count($p_settings) > 2) {
                     $ret['latitude'] = $p_settings['0'];
+                    if ($ret['latitude'] == "")
+                        $ret['latitude'] = 21.3890824;
                     $ret['longitude'] = $p_settings['1'];
+                    if ($ret['longitude'] == "")
+                        $ret['longitude'] = 39.8579118;
                     $ret['timezone'] = $p_settings['2'];
-                    if (isset($p_settings['3'])) {
+                    if ($ret['timezone'] == "")
+                        $ret['timezone'] = '+0300';
+                    if (isset($p_settings['3']) && ($p_settings['3'] != "")) {
                         $ret['elevation'] = $p_settings['3'];
                     } else {
-                        $ret['elevation'] = "";
+                        $ret['elevation'] = null;
                     }
-                    if (isset($p_settings['4'])) {
+                    if (isset($p_settings['4']) && ($p_settings['4'] != "")) {
                         $ret['method'] = $p_settings['4'];
                     } else {
-                        $ret['method'] = "";
+                        $ret['method'] = 'MWL';
                     }
-                    if (isset($p_settings['5'])) {
-                        $format_12_24 = $p_settings['5'];
+                    if (isset($p_settings['5']) && ($p_settings['5'] != "")) {
+                        $ret['format_12_24'] = $p_settings['5'];
                     } else {
-                        $ret['format_12_24']  = "";
+                        $ret['format_12_24']  = '12h';
                     }
             } else {
-                    $ret['latitude'] = "";
-                    $ret['longitude'] = "";
-                    $ret['timezone'] = "";
-                    $ret['elevation'] = "";
-                    $ret['method'] = "";
-                    $ret['format_12_24']  = "";
+                    $ret['latitude'] = 21.3890824;
+                    $ret['longitude'] = 39.8579118;
+                    $ret['timezone'] = '+0300';
+                    $ret['elevation'] = null;
+                    $ret['method'] = 'MWL';
+                    $ret['format_12_24']  = '12h';
             }
             return $ret;
     }

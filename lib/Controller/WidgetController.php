@@ -10,7 +10,7 @@ use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
-class ConfigController extends OCSController {
+class WidgetController extends OCSController {
 	private $calculationService;
 	private $userId;
 
@@ -32,7 +32,7 @@ class ConfigController extends OCSController {
 	 */
         public function getWidgetContent(): DataResponse {
                 $times = $this->calculationService->getPrayerTimes($this->userId);
-                $name = $this->calculationService->gretNames($this->userId);
+                $name = $this->calculationService->gretNames();
                 return new DataResponse([
                         'content' => "\n ## " . $times[$name['HIJRI']] . " \n" .
                                      "| Salat | &nbsp;&nbsp;Time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | \n| ----------- | :-----------: | " .

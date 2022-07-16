@@ -20,3 +20,23 @@
   background-color: #04AA6D;
   color: white;
 }
+
+#infos {
+  margin-top: 20px;
+}
+
+#compass {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  background: url(../img/pusula.png) no-repeat;
+}
+
+@media screen and (min-width: 480px) {
+  #main-content-div {
+    display: flex;
+  }
+  #infos {
+    margin-left: 20px;
+  }
+}

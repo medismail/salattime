@@ -7,6 +7,6 @@
 	<div id="app-settings-content">
 		<!-- Your settings in here -->
                 <input type="checkbox" id="salatnotification" class="checkbox" name="salatnotification" value="Notification">
-                <label for="salatnotification"> Enable notification </label>
+                <label for="salatnotification"> <?php echo $l->t('Enable notification'); ?> </label>
 	</div>
 </div>

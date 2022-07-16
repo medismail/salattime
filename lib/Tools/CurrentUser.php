@@ -19,7 +19,7 @@
  *
  */
 
-namespace OCA\SalatTime;
+namespace OCA\SalatTime\Tools;
 
 use OCP\IRequest;
 use OCP\IUser;

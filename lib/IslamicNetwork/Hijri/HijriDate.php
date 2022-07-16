@@ -7,10 +7,13 @@
 * @url      https://gist.github.com/faizshukri/7802735
 *
 * Copyright 2013 | Faiz Shukri
+*
+* @date     2022
+* Copyright 2022 | Mohamed Ismail MEJRI
 * Released under the MIT license
 */
 
-namespace OCA\SalatTime\IslamicNetwork\hijri;
+namespace OCA\SalatTime\IslamicNetwork\Hijri;
 
 class HijriDate{
 
@@ -25,7 +28,7 @@ class HijriDate{
     }
 
     public function get_date(){
-        return $this->get_day_name() . ' ' . $this->hijri[1] . ' ' . $this->get_month_name($this->hijri[0]) . ' ' . $this->hijri[2] . 'H';
+        return $this->get_day_name() . ' ' . $this->hijri[1] . ' ' . $this->get_month_name() . ' ' . $this->hijri[2] . 'H';
     }
 
     public function get_day(){
@@ -42,10 +45,18 @@ class HijriDate{
 
     public function get_day_name(){
         //return ($this->hijriWeekdays())[date('l',strtotime())]['en'];
-         return ($this->hijriWeekdays())[date('l', $this->time)]['en'];
+         return (self::hijriWeekdays())[date('l', $this->time)]['en'];
     }
 
-    public function get_month_name($i){
+    public function get_month_name(){
+           return (self::getIslamicMonths())[$this->hijri[0]]['en'];
+    }
+
+    public function get_day_special_name(){
+         return (self::getHijriHolidays($this->hijri[1], $this->hijri[0]));
+    }
+
+    public function get_name_of_month($i){
         static $month  = array(
             "muharram", "safar", "rabiulawal", "rabiulakhir",
             "jamadilawal", "jamadilakhir", "rejab", "syaaban",
@@ -153,6 +164,7 @@ class HijriDate{
               $this->hijri = $this->GregorianToHijri($time);
           }
     }
+
     private function GregorianToHijri($time = null){
         if ($time === null) $time = time();
         $m = date('m', $time);
@@ -166,9 +178,9 @@ class HijriDate{
         return jd_to_cal(CAL_GREGORIAN, $this->HijriToJD($m, $d, $y));
     }
 
-    # Julian Day Count To Hijri
+    // Julian Day Count To Hijri
     private function JDToHijri($jd){
-        $jd = $jd - 1948440 + 10632;
+        $jd = $jd + 0.5 - 1948440 + 10632;
         $n  = (int)(($jd - 1) / 10631);
         $jd = $jd - 10631 * $n + 354;
         $j  = ((int)((10985 - $jd) / 5316)) *
@@ -186,7 +198,7 @@ class HijriDate{
         return array($m, $d, $y);
     }
 
-    # Hijri To Julian Day Count
+    // Hijri To Julian Day Count
     private function HijriToJD($m, $d, $y){
         return (int)((11 * $y + 3) / 30) +
             354 * $y + 30 * $m -
@@ -199,6 +211,14 @@ class HijriDate{
             $Month = $Month + 12;
             $Year = $Year - 1;
         }
-        return (int)($Day + (153 * $Month - 457) / 5 + 365 * $Year + ($Year / 4) - ($Year / 100) + ($Year / 400) + 1721119);
+        //return (int)($Day + (153 * $Month - 457) / 5 + 365 * $Year + ($Year / 4) - ($Year / 100) + ($Year / 400) + 1721119);
+        /*Y: Year, M: Month, D: Day
+          A = Y/100
+          B = A/4
+          C = 2-A+B
+          E = 365.25x(Y+4716)
+          F = 30.6001x(M+1)
+          JD= C+D+E+F-1524.5*/
+        return (2-(int)($Year / 100)+(int)($Year / 400)+$Day+(int)(365.25*($Year+4716))+(int)(30.6001*($Month+1))-1524.5);
     }
 }

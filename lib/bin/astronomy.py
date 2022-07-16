@@ -35,6 +35,7 @@ import math
 import datetime
 import enum
 import re
+import abc
 
 def _cbrt(x):
     if x < 0.0:
@@ -206,10 +207,7 @@ class Vector:
         self.t = t
 
     def __repr__(self):
-        return 'Vector({}, {}, {}, {})'.format(self.x, self.y, self.z, str(self.t))
-
-    def __str__(self):
-        return '({}, {}, {}, {})'.format(self.x, self.y, self.z, str(self.t))
+        return 'Vector({}, {}, {}, {})'.format(self.x, self.y, self.z, repr(self.t))
 
     def Length(self):
         """Returns the length of the vector in AU."""
@@ -263,14 +261,32 @@ class StateVector:
         self.t = t
 
     def __repr__(self):
-        return 'StateVector[pos=({}, {}, {}), vel=({}, {}, {}), t={}]'.format(
+        return 'StateVector(x={}, y={}, z={}, vx={}, vy={}, vz={}, t={})'.format(
             self.x, self.y, self.z,
             self.vx, self.vy, self.vz,
-            str(self.t))
+            repr(self.t))
 
-    def __str__(self):
-        return '({}, {}, {}, {}, {}, {}, {})'.format(self.x, self.y, self.z, self.vx, self.vy, self.vz, str(self.t))
+    def __add__(self, other):
+        return StateVector(
+            self.x  + other.x,
+            self.y  + other.y,
+            self.z  + other.z,
+            self.vx + other.vx,
+            self.vy + other.vy,
+            self.vz + other.vz,
+            self.t
+        )
 
+    def __sub__(self, other):
+        return StateVector(
+            self.x  - other.x,
+            self.y  - other.y,
+            self.z  - other.z,
+            self.vx - other.vx,
+            self.vy - other.vy,
+            self.vz - other.vz,
+            self.t
+        )
 
 @enum.unique
 class Body(enum.Enum):
@@ -385,7 +401,7 @@ class InternalError(Error):
     Astronomy Engine for everyone! (Thank you in advance from the author.)
     """
     def __init__(self):
-        Error.__init__(self, 'Internal error - please report issue at https://github.com/cosinekitty/astronomy/issues')
+        Error.__init__(self, 'Internal error - please report issue, including stack trace, at https://github.com/cosinekitty/astronomy/issues')
 
 class NoConvergeError(Error):
     """A numeric solver did not converge.
@@ -608,11 +624,17 @@ class Time:
         Historically, Terrestrial Time has also been known by the term *Ephemeris Time* (ET).
     """
     def __init__(self, ut, tt = None):
-        self.ut = ut
-        if tt is None:
-            self.tt = _TerrestrialTime(ut)
+        if isinstance(ut, str):
+            # Undocumented hack, to make repr(time) reversible.
+            other = Time.Parse(ut)
+            self.ut = other.ut
+            self.tt = other.tt
         else:
-            self.tt = tt
+            self.ut = ut
+            if tt is None:
+                self.tt = _TerrestrialTime(ut)
+            else:
+                self.tt = tt
         self._et = None     # lazy-cache for earth tilt
         self._st = None     # lazy-cache for sidereal time
 
@@ -622,7 +644,8 @@ class Time:
 
         Parameters
         ----------
-        tt : The number of days after the J2000 epoch.
+        tt : float
+            The number of days after the J2000 epoch.
 
         Returns
         -------
@@ -748,7 +771,7 @@ class Time:
         return Time(self.ut + days)
 
     def __repr__(self):
-        return 'Time(' + str(self) + ')'
+        return 'Time(\'' + str(self) + '\')'
 
     def __str__(self):
         millis = round(self.ut * 86400000.0)
@@ -812,7 +835,7 @@ class Observer:
         self.height = height
 
     def __repr__(self):
-        return 'Observer({}, {}, {})'.format(self.latitude, self.longitude, self.height)
+        return 'Observer(latitude={}, longitude={}, height={})'.format(self.latitude, self.longitude, self.height)
 
     def __str__(self):
         text = '('
@@ -836,6 +859,9 @@ class RotationMatrix:
     def __init__(self, rot):
         self.rot = rot
 
+    def __repr__(self):
+        return 'RotationMatrix({})'.format(self.rot)
+
 class Spherical:
     """Holds spherical coordinates: latitude, longitude, distance.
 
@@ -852,6 +878,9 @@ class Spherical:
         self.lat = lat
         self.lon = lon
         self.dist = dist
+
+    def __repr__(self):
+        return 'Spherical(lat={}, lon={}, dist={})'.format(self.lat, self.lon, self.dist)
 
 class _iau2000b:
     def __init__(self, time):
@@ -1539,6 +1568,9 @@ class Equatorial:
         self.dec = dec
         self.dist = dist
         self.vec = vec
+
+    def __repr__(self):
+        return 'Equatorial(ra={}, dec={}, dist={}, vec={})'.format(self.ra, self.dec, self.dist, repr(self.vec))
 
 
 def _vector2radec(pos, time):
@@ -3431,6 +3463,13 @@ class _body_state_t:
         self.r = r
         self.v = v
 
+    def clone(self):
+        '''Make a copy of this body state.'''
+        return _body_state_t(self.tt, self.r.clone(), self.v.clone())
+
+    def __sub__(self, other):
+        return _body_state_t(self.tt, self.r - other.r, self.v - other.v)
+
 def _CalcVsopPosVel(model, tt):
     t = tt / _DAYS_PER_MILLENNIUM
 
@@ -3572,6 +3611,15 @@ class _TerseVector:
         self.y = y
         self.z = z
 
+    def clone(self):
+        '''Create a copy of this vector.'''
+        return _TerseVector(self.x, self.y, self.z)
+
+    @staticmethod
+    def zero():
+        '''Return a zero vector.'''
+        return _TerseVector(0.0, 0.0, 0.0)
+
     def ToAstroVector(self, time):
         '''Convert _TerseVector object to Vector object.'''
         return Vector(self.x, self.y, self.z, time)
@@ -3656,6 +3704,10 @@ class _body_grav_calc_t:
         self.r = r      # position [au]
         self.v = v      # velocity [au/day]
         self.a = a      # acceleration [au/day^2]
+
+    def clone(self):
+        '''Creates a copy of this gravity simulation state.'''
+        return _body_grav_calc_t(self.tt, self.r.clone(), self.v.clone(), self.a.clone())
 
 
 class _grav_sim_t:
@@ -3970,12 +4022,28 @@ class JupiterMoonsInfo:
 
     Attributes
     ----------
-    moon : StateVector[4]
-        An array of state vectors, one for each of the four major moons
-        of Jupiter, in the following order: 0=Io, 1=Europa, 2=Ganymede, 3=Callisto.
+    io : StateVector
+        The position and velocity of Jupiter's moon Io.
+    europa : StateVector
+        The position and velocity of Jupiter's moon Europa.
+    ganymede : StateVector
+        The position and velocity of Jupiter's moon Ganymede.
+    callisto : StateVector
+        The position and velocity of Jupiter's moon Callisto.
     """
     def __init__(self, moon):
-        self.moon = moon
+        self.io = moon[0]
+        self.europa = moon[1]
+        self.ganymede = moon[2]
+        self.callisto = moon[3]
+
+    def __repr__(self):
+        return 'JupiterMoonsInfo(io={}, europa={}, ganymede={}, callisto={})'.format(
+            repr(self.io),
+            repr(self.europa),
+            repr(self.ganymede),
+            repr(self.callisto)
+        )
 
 
 def _JupiterMoon_elem2pv(time, mu, A, AL, K, H, Q, P):
@@ -4358,6 +4426,171 @@ def HelioDistance(body, time):
     return HelioVector(body, time).Length()
 
 
+class PositionFunction(abc.ABC):
+    """A function for which to solve a light-travel time problem.
+
+    This abstract class defines the contract for wrapping a
+    position vector as a function of time. A class derived from
+    `PositionFunction` must define a `Position` method that
+    returns a position vector for a given time.
+
+    The function #CorrectLightTravel solves a generalized
+    problem of deducing how far in the past light must have
+    left a target object to be seen by an observer at a
+    specified time. It is passed an instance of `PositionFunction`
+    that expresses a relative position vector function.
+    """
+    def __init__(self):
+        pass
+
+    @abc.abstractmethod
+    def Position(self, time):
+        """Returns a relative position vector for a given time.
+
+        Parameters
+        ----------
+        time : Time
+            The time at which to evaluate a relative position vector.
+
+        Returns
+        -------
+        Vector
+        """
+
+def CorrectLightTravel(func, time):
+    """Solve for light travel time of a vector function.
+
+    When observing a distant object, for example Jupiter as seen from Earth,
+    the amount of time it takes for light to travel from the object to the
+    observer can significantly affect the object's apparent position.
+    This function is a generic solver that figures out how long in the
+    past light must have left the observed object to reach the observer
+    at the specified observation time. It uses #PositionFunction
+    to express an arbitrary position vector as a function of time.
+
+    This function repeatedly calls `func.Position`, passing a series of time
+    estimates in the past. Then `func.Position` must return a relative state vector between
+    the observer and the target. `CorrectLightTravel` keeps calling
+    `func.Position` with more and more refined estimates of the time light must have
+    left the target to arrive at the observer.
+
+    For common use cases, it is simpler to use #BackdatePosition
+    for calculating the light travel time correction of one body observing another body.
+
+    For geocentric calculations, #GeoVector also backdates the returned
+    position vector for light travel time, only it returns the observation time in
+    the returned vector's `t` field rather than the backdated time.
+
+    Parameters
+    ----------
+    func : PositionFunction
+         An arbitrary position vector as a function of time.
+
+    time : Time
+        The observation time for which to solve for light travel delay.
+
+    Returns
+    -------
+    Vector
+        The position vector at the solved backdated time.
+        The `t` field holds the time that light left the observed
+        body to arrive at the observer at the observation time.
+    """
+    ltime = time
+    for _ in range(10):
+        pos = func.Position(ltime)
+        ltime2 = time.AddDays(-pos.Length() / C_AUDAY)
+        dt = abs(ltime2.tt - ltime.tt)
+        if dt < 1.0e-9:     # 86.4 microseconds
+            return pos
+        ltime = ltime2
+    raise NoConvergeError()
+
+
+class _BodyPosition(PositionFunction):
+    def __init__(self, observerBody, targetBody, aberration, observerPos):
+        super().__init__()
+        self.observerBody = observerBody
+        self.targetBody = targetBody
+        self.aberration = aberration
+        self.observerPos = observerPos
+
+    def Position(self, time):
+        if self.aberration:
+            # The following discussion is worded with the observer body being the Earth,
+            # which is often the case. However, the same reasoning applies to any observer body
+            # without loss of generality.
+            #
+            # To include aberration, make a good first-order approximation
+            # by backdating the Earth's position also.
+            # This is confusing, but it works for objects within the Solar System
+            # because the distance the Earth moves in that small amount of light
+            # travel time (a few minutes to a few hours) is well approximated
+            # by a line segment that substends the angle seen from the remote
+            # body viewing Earth. That angle is pretty close to the aberration
+            # angle of the moving Earth viewing the remote body.
+            # In other words, both of the following approximate the aberration angle:
+            #     (transverse distance Earth moves) / (distance to body)
+            #     (transverse speed of Earth) / (speed of light).
+            observerPos = HelioVector(self.observerBody, time)
+        else:
+            # No aberration, so use the pre-calculated initial position of
+            # the observer body that is already stored in this object.
+            observerPos = self.observerPos
+        # Subtract the bodies' heliocentric positions to obtain a relative position vector.
+        return HelioVector(self.targetBody, time) - observerPos
+
+
+def BackdatePosition(time, observerBody, targetBody, aberration):
+    """Solve for light travel time correction of apparent position.
+
+    When observing a distant object, for example Jupiter as seen from Earth,
+    the amount of time it takes for light to travel from the object to the
+    observer can significantly affect the object's apparent position.
+
+    This function solves the light travel time correction for the apparent
+    relative position vector of a target body as seen by an observer body
+    at a given observation time.
+
+    For geocentric calculations, #GeoVector also includes light
+    travel time correction, but the time `t` embedded in its returned vector
+    refers to the observation time, not the backdated time that light left
+    the observed body. Thus `BackdatePosition` provides direct
+    access to the light departure time for callers that need it.
+
+    For a more generalized light travel correction solver, see #CorrectLightTravel.
+
+    Parameters
+    ----------
+    time : Time
+        The time of observation.
+    observerBody : Body
+        The body to be used as the observation location.
+    targetBody : Body
+        The body to be observed.
+    aberration : bool
+        `True` to correct for aberration, or `False` to leave uncorrected.
+
+    Returns
+    -------
+    Vector
+        The position vector at the solved backdated time.
+        Its `t` field holds the time that light left the observed
+        body to arrive at the observer at the observation time.
+    """
+    if aberration:
+        # With aberration, `BackdatePosition` will calculate `observerPos` at different times.
+        # Therefore, do not waste time calculating it now.
+        # Provide a placeholder value.
+        observerPos = None
+    else:
+        # Without aberration, we need the observer body position at the observation time only.
+        # For efficiency, calculate it once and hold onto it, so `BodyPosition` can keep using it.
+        observerPos = HelioVector(observerBody, time)
+    func = _BodyPosition(observerBody, targetBody, aberration, observerPos)
+    return CorrectLightTravel(func, time)
+
+
 def GeoVector(body, time, aberration):
     """Calculates geocentric Cartesian coordinates of a body in the J2000 equatorial system.
 
@@ -4368,7 +4601,7 @@ def GeoVector(body, time, aberration):
 
     If given an invalid value for `body`, this function will raise an exception.
 
-    Unlike #HelioVector, this function always corrects for light travel time.
+    Unlike #HelioVector, this function corrects for light travel time.
     This means the position of the body is "back-dated" by the amount of time it takes
     light to travel from that body to an observer on the Earth.
 
@@ -4397,37 +4630,12 @@ def GeoVector(body, time, aberration):
     if body == Body.Earth:
         return Vector(0.0, 0.0, 0.0, time)
 
-    if not aberration:
-        # No aberration, so calculate Earth's position once, at the time of observation.
-        earth = _CalcEarth(time)
-
     # Correct for light-travel time, to get position of body as seen from Earth's center.
-    ltime = time
-    for _ in range(10):
-        h = HelioVector(body, ltime)
-        if aberration:
-            # Include aberration, so make a good first-order approximation
-            # by backdating the Earth's position also.
-            # This is confusing, but it works for objects within the Solar System
-            # because the distance the Earth moves in that small amount of light
-            # travel time (a few minutes to a few hours) is well approximated
-            # by a line segment that substends the angle seen from the remote
-            # body viewing Earth. That angle is pretty close to the aberration
-            # angle of the moving Earth viewing the remote body.
-            # In other words, both of the following approximate the aberration angle:
-            #    (transverse distance Earth moves) / (distance to body)
-            #    (transverse speed of Earth) / (speed of light).
-            earth = _CalcEarth(ltime)
+    vec = BackdatePosition(time, Body.Earth, body, aberration)
 
-        geo = Vector(h.x-earth.x, h.y-earth.y, h.z-earth.z, time)
-        ltime2 = time.AddDays(-geo.Length() / C_AUDAY)
-        dt = abs(ltime2.tt - ltime.tt)
-        if dt < 1.0e-9:
-            return geo
-
-        ltime = ltime2
-
-    raise Error('Light-travel time solver did not converge: dt={}'.format(dt))
+    # Tricky: return the observation time, not the backdated time.
+    vec.t = time
+    return vec
 
 
 def _ExportState(terse, time):
@@ -4838,6 +5046,14 @@ class HorizontalCoordinates:
         self.ra = ra
         self.dec = dec
 
+    def __repr__(self):
+        return 'HorizontalCoordinates(azimuth={}, altitude={}, ra={}, dec={})'.format(
+            self.azimuth,
+            self.altitude,
+            self.ra,
+            self.dec
+        )
+
 def Horizon(time, observer, ra, dec, refraction):
     """Calculates the apparent location of a body relative to the local horizon of an observer on the Earth.
 
@@ -5061,7 +5277,7 @@ def InverseRefractionAngle(refraction, bent_altitude):
     """Calculates the inverse of an atmospheric refraction angle.
 
     Given an observed altitude angle that includes atmospheric refraction,
-    calculate the negative angular correction to obtain the unrefracted
+    calculates the negative angular correction to obtain the unrefracted
     altitude. This is useful for cases where observed horizontal
     coordinates are to be converted to another orientation system,
     but refraction first must be removed from the observed position.
@@ -5115,6 +5331,9 @@ class EclipticCoordinates:
         self.vec = vec
         self.elat = elat
         self.elon = elon
+
+    def __repr__(self):
+        return 'EclipticCoordinates({}, elat={}, elon={})'.format(repr(self.vec), self.elat, self.elon)
 
 def _RotateEquatorialToEcliptic(pos, obliq_radians, time):
     cos_ob = math.cos(obliq_radians)
@@ -5313,6 +5532,14 @@ class ElongationEvent:
         self.visibility = visibility
         self.elongation = elongation
         self.ecliptic_separation = ecliptic_separation
+
+    def __repr__(self):
+        return 'ElongationEvent({}, {}, elongation={}, ecliptic_separation={})'.format(
+            repr(self.time),
+            self.visibility,
+            self.elongation,
+            self.ecliptic_separation
+        )
 
 @enum.unique
 class Visibility(enum.Enum):
@@ -5612,7 +5839,7 @@ def SearchSunLongitude(targetLon, startTime, limitDays):
     Time or `None`
     """
     t2 = startTime.AddDays(limitDays)
-    return Search(_sun_offset, targetLon, startTime, t2, 1.0)
+    return Search(_sun_offset, targetLon, startTime, t2, 0.01)
 
 def MoonPhase(time):
     """Returns the Moon's phase as an angle from 0 to 360 degrees.
@@ -5716,6 +5943,9 @@ class MoonQuarter:
         self.quarter = quarter
         self.time = time
 
+    def __repr__(self):
+        return 'MoonQuarter({}, {})'.format(self.quarter, repr(self.time))
+
 def SearchMoonQuarter(startTime):
     """Finds the first lunar quarter after the specified date and time.
 
@@ -5793,22 +6023,40 @@ class IlluminationInfo:
         body's apparent disc is illuminated, as seen from the Earth.
     helio_dist : float
         The distance between the Sun and the body at the observation time, in AU.
+    geo_dist : dist
+        The distance between the Earth and the both at the observation time, in AU.
+    hc : Vector
+        The body's heliocentric vector.
+    gc : Vector
+        The body's geocentric vector.
     ring_tilt : float
         For Saturn, the tilt angle in degrees of its rings as seen from Earth.
         When the `ring_tilt` is very close to 0, it means the rings are edge-on
         as seen from observers on the Earth, and are thus very difficult to see.
         For bodies other than Saturn, `ring_tilt` is `None`.
     """
-    def __init__(self, time, mag, phase, helio_dist, geo_dist, gc, hc, ring_tilt):
+    def __init__(self, time, mag, phase, helio_dist, geo_dist, hc, gc, ring_tilt):
         self.time = time
         self.mag = mag
         self.phase_angle = phase
         self.phase_fraction = (1.0 + math.cos(math.radians(phase))) / 2.0
         self.helio_dist = helio_dist
         self.geo_dist = geo_dist
-        self.gc = gc
         self.hc = hc
+        self.gc = gc
         self.ring_tilt = ring_tilt
+
+    def __repr__(self):
+        return 'IlluminationInfo({}, mag={}, phase_angle={}, helio_dist={}, geo_dist={}, hc={}, gc={}, ring_tilt={})'.format(
+            repr(self.time),
+            self.mag,
+            self.phase_angle,
+            self.helio_dist,
+            self.geo_dist,
+            repr(self.hc),
+            repr(self.gc),
+            repr(self.ring_tilt)
+        )
 
 def _MoonMagnitude(phase, helio_dist, geo_dist):
     # https://astronomy.stackexchange.com/questions/10246/is-there-a-simple-analytical-formula-for-the-lunar-phase-brightness-curve
@@ -5931,7 +6179,7 @@ def Illumination(body, time):
         mag, ring_tilt = _SaturnMagnitude(phase, helio_dist, geo_dist, gc, time)
     else:
         mag = _VisualMagnitude(body, phase, helio_dist, geo_dist)
-    return IlluminationInfo(time, mag, phase, helio_dist, geo_dist, gc, hc, ring_tilt)
+    return IlluminationInfo(time, mag, phase, helio_dist, geo_dist, hc, gc, ring_tilt)
 
 def _mag_slope(body, time):
     # The Search() function finds a transition from negative to positive values.
@@ -6067,6 +6315,9 @@ class HourAngleEvent:
     def __init__(self, time, hor):
         self.time = time
         self.hor = hor
+
+    def __repr__(self):
+        return 'HourAngleEvent({}, {})'.format(repr(self.time), repr(self.hor))
 
 def SearchHourAngle(body, observer, hourAngle, startTime):
     """Searches for the time when a celestial body reaches a specified hour angle as seen by an observer on the Earth.
@@ -6380,9 +6631,17 @@ class SeasonInfo:
         self.sep_equinox = sep_equinox
         self.dec_solstice = dec_solstice
 
+    def __repr__(self):
+        return 'SeasonInfo(mar_equinox={}, jun_solstice={}, sep_equinox={}, dec_solstice={})'.format(
+            repr(self.mar_equinox),
+            repr(self.jun_solstice),
+            repr(self.sep_equinox),
+            repr(self.dec_solstice)
+        )
+
 def _FindSeasonChange(targetLon, year, month, day):
     startTime = Time.Make(year, month, day, 0, 0, 0)
-    time = SearchSunLongitude(targetLon, startTime, 4.0)
+    time = SearchSunLongitude(targetLon, startTime, 20.0)
     if time is None:
         # We should always be able to find a season change.
         raise InternalError()
@@ -6424,10 +6683,17 @@ def Seasons(year):
     -------
     SeasonInfo
     """
-    mar_equinox = _FindSeasonChange(0, year, 3, 19)
-    jun_solstice = _FindSeasonChange(90, year, 6, 19)
-    sep_equinox = _FindSeasonChange(180, year, 9, 21)
-    dec_solstice = _FindSeasonChange(270, year, 12, 20)
+    # https://github.com/cosinekitty/astronomy/issues/187
+    # Solstices and equinoxes drift over long spans of time,
+    # due to precession of the Earth's axis.
+    # Therefore, we have to search a wider range of time than
+    # one might expect. It turns out this has very little
+    # effect on efficiency, thanks to the quick convergence
+    # of quadratic interpolation inside the `Search` function.
+    mar_equinox  = _FindSeasonChange(  0, year,  3, 10)
+    jun_solstice = _FindSeasonChange( 90, year,  6, 10)
+    sep_equinox  = _FindSeasonChange(180, year,  9, 10)
+    dec_solstice = _FindSeasonChange(270, year, 12, 10)
     return SeasonInfo(mar_equinox, jun_solstice, sep_equinox, dec_solstice)
 
 def _MoonDistance(time):
@@ -6491,6 +6757,13 @@ class Apsis:
         self.kind = kind
         self.dist_au = dist_au
         self.dist_km = dist_au * KM_PER_AU
+
+    def __repr__(self):
+        return 'Apsis({}, {}, dist_au={})'.format(
+            repr(self.time),
+            self.kind,
+            self.dist_au
+        )
 
 def SearchLunarApsis(startTime):
     """Finds the time of the first lunar apogee or perigee after the given time.
@@ -6926,7 +7199,7 @@ def InverseRotation(rotation):
     """Calculates the inverse of a rotation matrix.
 
     Given a rotation matrix that performs some coordinate transform,
-    this function returns the matrix that reverses that trasnform.
+    this function returns the matrix that reverses that transform.
 
     Parameters
     ----------
@@ -7307,7 +7580,7 @@ def Rotation_HOR_EQJ(time, observer):
     Returns
     -------
     RotationMatrix
-        A rotation matrix that converts HOR to EQD at `time` and for `observer`.
+        A rotation matrix that converts HOR to EQJ at `time` and for `observer`.
     """
     hor_eqd = Rotation_HOR_EQD(time, observer)
     eqd_eqj = Rotation_EQD_EQJ(time)
@@ -7514,6 +7787,14 @@ class ConstellationInfo:
         self.name = name
         self.ra1875 = ra1875
         self.dec1875 = dec1875
+
+    def __repr__(self):
+        return 'ConstellationInfo(symbol={}, name={}, ra1875={}, dec1875={})'.format(
+            repr(self.symbol),
+            repr(self.name),
+            self.ra1875,
+            self.dec1875
+        )
 
 
 _ConstelRot = None
@@ -8195,7 +8476,7 @@ class LunarEclipseInfo:
     Returned by #SearchLunarEclipse or #NextLunarEclipse
     to report information about a lunar eclipse event.
     When a lunar eclipse is found, it is classified as penumbral, partial, or total.
-    Penumbral eclipses are difficult to observe, because the moon is only slightly dimmed
+    Penumbral eclipses are difficult to observe, because the Moon is only slightly dimmed
     by the Earth's penumbra; no part of the Moon touches the Earth's umbra.
     Partial eclipses occur when part, but not all, of the Moon touches the Earth's umbra.
     Total eclipses occur when the entire Moon passes into the Earth's umbra.
@@ -8213,7 +8494,7 @@ class LunarEclipseInfo:
 
     Attributes
     ----------
-    kind : string
+    kind : EclipseKind
          The type of lunar eclipse found.
     peak : Time
          The time of the eclipse at its peak.
@@ -8231,15 +8512,21 @@ class LunarEclipseInfo:
         self.sd_partial = sd_partial
         self.sd_total = sd_total
 
+    def __repr__(self):
+        return 'LunarEclipseInfo({}, peak={}, sd_penum={}, sd_partial={}, sd_total={})'.format(
+            self.kind,
+            repr(self.peak),
+            self.sd_penum,
+            self.sd_partial,
+            self.sd_total
+        )
+
 
 class GlobalSolarEclipseInfo:
     """Reports the time and geographic location of the peak of a solar eclipse.
 
     Returned by #SearchGlobalSolarEclipse or #NextGlobalSolarEclipse
     to report information about a solar eclipse event.
-
-    Field `peak` holds the date and time of the peak of the eclipse, defined as
-    the instant when the axis of the Moon's shadow cone passes closest to the Earth's center.
 
     The eclipse is classified as partial, annular, or total, depending on the
     maximum amount of the Sun's disc obscured, as seen at the peak location
@@ -8263,7 +8550,8 @@ class GlobalSolarEclipseInfo:
     kind : EclipseKind
         The type of solar eclipse: `EclipseKind.Partial`, `EclipseKind.Annular`, or `EclipseKind.Total`.
     peak : Time
-        The date and time of the eclipse at its peak.
+        The date and time when the solar eclipse is darkest.
+        This is the instant when the axis of the Moon's shadow cone passes closest to the Earth's center.
     distance : float
         The distance between the Sun/Moon shadow axis and the center of the Earth, in kilometers.
     latitude : float
@@ -8278,6 +8566,15 @@ class GlobalSolarEclipseInfo:
         self.latitude = latitude
         self.longitude = longitude
 
+    def __repr__(self):
+        return 'GlobalSolarEclipseInfo({}, peak={}, distance={}, latitude={}, longitude={})'.format(
+            self.kind,
+            repr(self.peak),
+            self.distance,
+            self.latitude,
+            self.longitude
+        )
+
 
 class EclipseEvent:
     """Holds a time and the observed altitude of the Sun at that time.
@@ -8286,7 +8583,7 @@ class EclipseEvent:
     (a "local" solar eclipse), a series of events occur. In addition
     to the time of each event, it is important to know the altitude of the Sun,
     because each event may be invisible to the observer if the Sun is below
-    the horizon (i.e. it at night).
+    the horizon.
 
     If `altitude` is negative, the event is theoretical only; it would be
     visible if the Earth were transparent, but the observer cannot actually see it.
@@ -8304,6 +8601,12 @@ class EclipseEvent:
     def __init__(self, time, altitude):
         self.time = time
         self.altitude = altitude
+
+    def __repr__(self):
+        return 'EclipseEvent({}, altitude={})'.format(
+            repr(self.time),
+            self.altitude
+        )
 
 
 class LocalSolarEclipseInfo:
@@ -8353,6 +8656,16 @@ class LocalSolarEclipseInfo:
         self.peak = peak
         self.total_end = total_end
         self.partial_end = partial_end
+
+    def __repr__(self):
+        return 'LocalSolarEclipseInfo({}, partial_begin={}, total_begin={}, peak={}, total_end={}, partial_end={})'.format(
+            self.kind,
+            repr(self.partial_begin),
+            repr(self.total_begin),
+            repr(self.peak),
+            repr(self.total_end),
+            repr(self.partial_end)
+        )
 
 
 def _EclipseKindFromUmbra(k):
@@ -8558,7 +8871,7 @@ def SearchLunarEclipse(startTime):
         # Search for the next full moon. Any eclipse will be near it.
         fullmoon = SearchMoonPhase(180, fmtime, 40)
         if fullmoon is None:
-            raise Error('Cannot find full moon.')
+            raise InternalError()   # should have always found the next full moon
 
         # Pruning: if the full Moon's ecliptic latitude is too large,
         # a lunar eclipse is not possible. Avoid needless work searching for
@@ -8642,7 +8955,7 @@ def SearchGlobalSolarEclipse(startTime):
         # Search for the next new moon. Any eclipse will be near it.
         newmoon = SearchMoonPhase(0.0, nmtime, 40.0)
         if newmoon is None:
-            raise Error('Cannot find new moon')
+            raise InternalError()   # should always find the next new moon
 
         # Pruning: if the new moon's ecliptic latitude is too large, a solar eclipse is not possible.
         eclip_lat = _MoonEclipticLatitudeDegrees(newmoon)
@@ -8717,6 +9030,8 @@ def SearchLocalSolarEclipse(startTime, observer):
     while True:
         # Search for the next new moon. Any eclipse will be near it.
         newmoon = SearchMoonPhase(0.0, nmtime, 40.0)
+        if newmoon is None:
+            raise InternalError()   # should always find the next new moon
 
         # Pruning: if the new moon's ecliptic latitude is too large, a solar eclipse is not possible.
         eclip_lat = _MoonEclipticLatitudeDegrees(newmoon)
@@ -8791,6 +9106,14 @@ class TransitInfo:
         self.peak = peak
         self.finish = finish
         self.separation = separation
+
+    def __repr__(self):
+        return 'TransitInfo(start={}, peak={}, finish={}, separation={})'.format(
+            repr(self.start),
+            repr(self.peak),
+            repr(self.finish),
+            self.separation
+        )
 
 
 def _PlanetShadowBoundary(context, time):
@@ -8921,6 +9244,9 @@ class NodeEventInfo:
         self.kind = kind
         self.time = time
 
+    def __repr__(self):
+        return 'NodeEventInfo({}, {})'.format(self.kind, repr(self.time))
+
 _MoonNodeStepDays = +10.0   # a safe number of days to step without missing a Moon node
 
 def _MoonNodeSearchFunc(direction, time):
@@ -8960,7 +9286,7 @@ def SearchMoonNode(startTime):
             kind = NodeEventKind.Ascending if (eclip2.lat > eclip1.lat) else NodeEventKind.Descending
             result = Search(_MoonNodeSearchFunc, kind.value, time1, time2, 1.0)
             if result is None:
-                raise InternalError()
+                raise InternalError()   # should always find the next lunar node
             return NodeEventInfo(kind, result)
         time1 = time2
         eclip1 = eclip2
@@ -9007,9 +9333,9 @@ class LibrationInfo:
     elon : float
         Sub-Earth libration ecliptic longitude angle, in degrees.
     mlat : float
-        Moon's geocentric ecliptic latitude.
+        Moon's geocentric ecliptic latitude, in degrees.
     mlon : float
-        Moon's geocentric ecliptic longitude.
+        Moon's geocentric ecliptic longitude, in degrees.
     dist_km : float
         Distance between the centers of the Earth and Moon in kilometers.
     diam_deg : float
@@ -9022,6 +9348,16 @@ class LibrationInfo:
         self.mlon = mlon
         self.dist_km = dist_km
         self.diam_deg = diam_deg
+
+    def __repr__(self):
+        return 'LibrationInfo(elat={}, elon={}, mlat={}, mlon={}, dist_km={}, diam_deg={})'.format(
+            self.elat,
+            self.elon,
+            self.mlat,
+            self.mlon,
+            self.dist_km,
+            self.diam_deg
+        )
 
 
 def Libration(time):
@@ -9145,7 +9481,7 @@ def Libration(time):
     ldash2 = -tau + (rho*math.cos(a) + sigma*math.sin(a))*math.tan(bdash)
     bdash = math.degrees(bdash)
     bdash2 = sigma*math.cos(a) - rho*math.sin(a)
-    return LibrationInfo(bdash + bdash2, ldash + ldash2, mlat, mlon, dist_km, diam_deg)
+    return LibrationInfo(bdash + bdash2, ldash + ldash2, math.degrees(mlat), math.degrees(mlon), dist_km, diam_deg)
 
 
 class AxisInfo:
@@ -9189,6 +9525,14 @@ class AxisInfo:
         self.dec = dec
         self.spin = spin
         self.north = north
+
+    def __repr__(self):
+        return 'AxisInfo(ra={}, dec={}, spin={}, north={})'.format(
+            self.ra,
+            self.dec,
+            self.spin,
+            repr(self.north)
+        )
 
 
 def _EarthRotationAxis(time):
@@ -9652,3 +9996,325 @@ def LagrangePointFast(point, major_state, major_mass, minor_state, minor_mass):
             break
     scale = (x - r1) / R
     return StateVector(scale*dx, scale*dy, scale*dz, scale*vx, scale*vy, scale*vz, major_state.t)
+
+#--------------------------------------------------------------------------------------------------
+
+class GravitySimulator:
+    """A simulation of zero or more small bodies moving through the Solar System.
+
+    This class calculates the movement of arbitrary small bodies,
+    such as asteroids or comets, that move through the Solar System.
+    It does so by calculating the gravitational forces on the bodies
+    from the Sun and planets. The user of this class supplies a
+    list of initial positions and velocities for the small bodies.
+    Then the class can update the positions and velocities over small
+    time steps.
+    """
+
+    def __init__(self, originBody, time, bodyStates):
+        """Creates a gravity simulation object.
+
+        Parameters
+        ----------
+        originBody: Body
+            Specifies the origin of the reference frame.
+            All position vectors and velocity vectors will use `originBody`
+            as the origin of the coordinate system.
+            This origin applies to all the input vectors provided in the
+            `bodyStates` parameter of this function, along with all
+            output vectors returned by #GravitySimulator.Update.
+            Most callers will want to provide one of the following:
+            `Body.Sun` for heliocentric coordinates,
+            `Body.SSB` for solar system barycentric coordinates,
+            or `Body.Earth` for geocentric coordinates. Note that the
+            gravity simulator does not correct for light travel time;
+            all state vectors are tied to a Newtonian "instantaneous" time.
+        time: Time
+            The initial time at which to start the simulation.
+        bodyStates: StateVector[]
+            An array of zero or more initial state vectors (positions and velocities)
+            of the small bodies to be simulated.
+            The caller must know the positions and velocities of the small bodies at an initial moment in time.
+            Their positions and velocities are expressed with respect to `originBody`,
+            using equatorial J2000 orientation (EQJ).
+            Positions are expressed in astronomical units (AU).
+            Velocities are expressed in AU/day.
+            All the times embedded within the state vectors must exactly match `time`,
+            or this constructor will throw an exception.
+        """
+        self._originBody = originBody
+        # Verify that the state vectors have matching times.
+        for b in bodyStates:
+            if b.t.tt != time.tt:
+                raise Error('Inconsistent times in bodyStates')
+
+        # Create a stub list of small body states that we will append to later.
+        # We just need the stub to put into `self.curr`
+        smallBodyList = []
+
+        # Calculate the states of the Sun and planets at the initial time.
+        largeBodyDict = _CalcSolarSystem(time)
+
+        # Create a simulation endpoint for the initial time.
+        self.curr = _GravSimEndpoint(time, largeBodyDict, smallBodyList)
+
+        # Convert origin-centric bodyStates vectors into a barycentric `_body_grav_calc_t` array.
+        o = self._InternalBodyState(originBody)
+        for b in bodyStates:
+            r = _TerseVector(b.x + o.r.x, b.y + o.r.y, b.z + o.r.z)
+            v = _TerseVector(b.vx + o.v.x, b.vy + o.v.y, b.vz + o.v.z)
+            a = _TerseVector.zero()
+            smallBodyList.append(_body_grav_calc_t(time.tt, r, v, a))
+
+        # Calculate the net acceleration experienced by the small bodies.
+        self._CalcBodyAccelerations()
+
+        # To prepare for a possible swap operation, duplicate the current state into the previous state.
+        self.prev = self._Duplicate()
+
+    def Time(self):
+        """The time represented by the current step of the gravity simulation.
+
+        Returns
+        -------
+        Time
+        """
+        return self.curr.time
+
+    def OriginBody(self):
+        """The origin of the reference frame. See constructor for more info.
+
+        Returns
+        -------
+        Body
+        """
+        return self._originBody
+
+    def Update(self, time):
+        """Advances the gravity simulation by a small time step.
+
+        Updates the simulation of the user-supplied small bodies
+        to the time indicated by the `time` parameter.
+        Returns an array of state vectors for the simulated bodies.
+        The array is in the same order as the original array that
+        was used to construct this simulator object.
+        The positions and velocities in the returned array are
+        referenced to the `originBody` that was used to construct
+        this simulator.
+
+        Parameters
+        ----------
+        time : Time
+            A time that is a small increment away from the current simulation time.
+            It is up to the developer to figure out an appropriate time increment.
+            Depending on the trajectories, a smaller or larger increment
+            may be needed for the desired accuracy. Some experimentation may be needed.
+            Generally, bodies that stay in the outer Solar System and move slowly can
+            use larger time steps. Bodies that pass into the inner Solar System and
+            move faster will need a smaller time step to maintain accuracy.
+            The `time` value may be after or before the current simulation time
+            to move forward or backward in time.
+
+        Returns
+        -------
+        StateVector[]
+            An array of state vectors, one for each small body.
+        """
+        dt = time.tt - self.curr.time.tt
+        if dt == 0.0:
+            # Special case: the time has not changed, so skip the usual physics calculations.
+            # This allows another way for the caller to query the current body states.
+            # It is also necessary to avoid dividing by `dt` if `dt` is zero.
+            # To prepare for a possible swap operation, duplicate the current state into the previous state.
+            self.prev = self._Duplicate()
+        else:
+            # Exchange the current state with the previous state. Then calculate the new current state.
+            self.Swap()
+
+            # Update the current time
+            self.curr.time = time
+
+            # Calculate the positions and velocities of the Sun and planets at the given time.
+            self.curr.gravitators = _CalcSolarSystem(time)
+
+            # Estimate the positions of the small bodies as if their existing
+            # existing accelerations apply across the whole time interval.
+            nbodies = len(self.curr.bodies)
+            for i in range(nbodies):
+                p = self.prev.bodies[i]
+                c = self.curr.bodies[i]
+                c.r = _UpdatePosition(dt, p.r, p.v, p.a)
+
+            # Calculate the acceleration experienced by the small bodies at
+            # their respective approximate next locations.
+            self._CalcBodyAccelerations()
+
+            for i in range(nbodies):
+                # Calculate the average of the acceleration vectors
+                # experienced by the previous body positions and
+                # their estimated next positions.
+                # These become estimates of the mean effective accelerations
+                # over the whole interval.
+                p = self.prev.bodies[i]
+                c = self.curr.bodies[i]
+                acc = p.a.mean(c.a)
+                # Refine the estimates of position and velocity at the next time step,
+                # using the mean acceleration as a better approximation of the
+                # continuously changing acceleration acting on each body.
+                c.tt = time.tt
+                c.r = _UpdatePosition(dt, p.r, p.v, acc)
+                c.v = _UpdateVelocity(dt, p.v, acc)
+
+            # Re-calculate accelerations experienced by each body.
+            # These will be needed for the next simulation step (if any).
+            # Also, they will be potentially useful if some day we add
+            # a function to query the acceleration vectors for the bodies.
+            self._CalcBodyAccelerations()
+
+        # Translate our internal calculations of body positions and velocities
+        # into state vectors that the caller can understand.
+        # We have to convert the internal type _body_grav_calc_t to the public type StateVector.
+        # Also convert from barycentric coordinates to coordinates based on the selected origin body.
+        bodyStates = []
+        ostate = self._InternalBodyState(self._originBody)
+        for bcalc in self.curr.bodies:
+            bodyStates.append(StateVector(
+                bcalc.r.x - ostate.r.x,
+                bcalc.r.y - ostate.r.y,
+                bcalc.r.z - ostate.r.z,
+                bcalc.v.x - ostate.v.x,
+                bcalc.v.y - ostate.v.y,
+                bcalc.v.z - ostate.v.z,
+                time
+            ))
+        return bodyStates
+
+
+    def Swap(self):
+        """Exchange the current time step with the previous time step.
+
+        Sometimes it is helpful to "explore" various times near a given
+        simulation time step, while repeatedly returning to the original
+        time step. For example, when backdating a position for light travel
+        time, the caller may wish to repeatedly try different amounts of
+        backdating. When the backdating solver has converged, the caller
+        wants to leave the simulation in its original state.
+
+        This function allows a single "undo" of a simulation, and does so
+        very efficiently.
+
+        Usually this function will be called immediately after a matching
+        call to #GravitySimulator.Update. It has the effect of rolling
+        back the most recent update. If called twice in a row, it reverts
+        the swap and thus has no net effect.
+
+        The constructor initializes the current state and previous
+        state to be identical. Both states represent the `time` parameter that was
+        passed into the constructor. Therefore, `Swap` will
+        have no effect from the caller's point of view when passed a simulator
+        that has not yet been updated by a call to #GravitySimulator.Update.
+        """
+        (self.curr, self.prev) = (self.prev, self.curr)
+
+    def SolarSystemBodyState(self, body):
+        """Get the position and velocity of a Solar System body included in the simulation.
+
+        In order to simulate the movement of small bodies through the Solar System,
+        the simulator needs to calculate the state vectors for the Sun and planets.
+
+        If an application wants to know the positions of one or more of the planets
+        in addition to the small bodies, this function provides a way to obtain
+        their state vectors. This is provided for the sake of efficiency, to avoid
+        redundant calculations.
+
+        The state vector is returned relative to the position and velocity
+        of the `originBody` parameter that was passed to this object's constructor.
+
+        Parameters
+        ----------
+        body : Body
+            The Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, or Neptune.
+
+        Returns
+        -------
+        StateVector
+            The state vector of the requested Solar System body.
+        """
+        bstate = self._InternalBodyState(body)
+        ostate = self._InternalBodyState(self._originBody)
+        return _ExportState(bstate - ostate, self.curr.time)
+
+    def _InternalBodyState(self, body):
+        if body == Body.SSB:
+            return _body_state_t(self.curr.time.tt, _TerseVector.zero(), _TerseVector.zero())
+        if body in self.curr.gravitators:
+            return self.curr.gravitators[body]
+        raise Error('Invalid body: {}'.format(body))
+
+    def _CalcBodyAccelerations(self):
+        for b in self.curr.bodies:
+            b.a = _TerseVector.zero()
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Sun    ].r, _SUN_GM)
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Mercury].r, _MERCURY_GM)
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Venus  ].r, _VENUS_GM)
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Earth  ].r, _EARTH_GM + _MOON_GM)
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Mars   ].r, _MARS_GM)
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Jupiter].r, _JUPITER_GM)
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Saturn ].r, _SATURN_GM)
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Uranus ].r, _URANUS_GM)
+            _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Neptune].r, _NEPTUNE_GM)
+
+    def _Duplicate(self):
+        # Copy the current stateinto the previous state, so that both become the same moment in time.
+        gravitators = {}
+        for body, grav in self.curr.gravitators.items():
+            gravitators[body] = grav.clone()
+
+        bodies = []
+        for b in self.curr.bodies:
+            bodies.append(b.clone())
+
+        return _GravSimEndpoint(self.curr.time, gravitators, bodies)
+
+class _GravSimEndpoint:
+    def __init__(self, time, gravitators, bodies):
+        self.time = time
+        self.gravitators = gravitators
+        self.bodies = bodies
+
+def _CalcSolarSystem(time):
+    d = {}
+    # Start with the SSB at zero position and velocity.
+    ssb = _body_state_t(time.tt, _TerseVector.zero(), _TerseVector.zero())
+
+    # Calculate the heliocentric position of each planet, and adjust the SSB
+    # based on each planet's pull on the Sun.
+    d[Body.Mercury] = _AdjustBarycenterPosVel(ssb, time.tt, Body.Mercury, _MERCURY_GM)
+    d[Body.Venus  ] = _AdjustBarycenterPosVel(ssb, time.tt, Body.Venus,   _VENUS_GM)
+    d[Body.Earth  ] = _AdjustBarycenterPosVel(ssb, time.tt, Body.Earth,   _EARTH_GM + _MOON_GM)
+    d[Body.Mars   ] = _AdjustBarycenterPosVel(ssb, time.tt, Body.Mars,    _MARS_GM)
+    d[Body.Jupiter] = _AdjustBarycenterPosVel(ssb, time.tt, Body.Jupiter, _JUPITER_GM)
+    d[Body.Saturn ] = _AdjustBarycenterPosVel(ssb, time.tt, Body.Saturn,  _SATURN_GM)
+    d[Body.Uranus ] = _AdjustBarycenterPosVel(ssb, time.tt, Body.Uranus,  _URANUS_GM)
+    d[Body.Neptune] = _AdjustBarycenterPosVel(ssb, time.tt, Body.Neptune, _NEPTUNE_GM)
+
+    # Convert planet states from heliocentric to barycentric.
+    for b in d.values():
+        b.r -= ssb.r
+        b.v -= ssb.v
+
+    # Convert heliocentric SSB to barycentric Sun.
+    d[Body.Sun] = _body_state_t(time.tt, -1.0 * ssb.r, -1.0 * ssb.v)
+    return d
+
+def _AddAcceleration(acc, smallPos, majorPos, gm):
+    dx = majorPos.x - smallPos.x
+    dy = majorPos.y - smallPos.y
+    dz = majorPos.z - smallPos.z
+    r2 = dx*dx + dy*dy + dz*dz
+    pull = gm / (r2 * math.sqrt(r2))
+    acc.x += dx * pull
+    acc.y += dy * pull
+    acc.z += dz * pull
+
+#--------------------------------------------------------------------------------------------------

@@ -5,10 +5,10 @@ require_once __DIR__ . '/../../lib/IslamicNetwork/PrayerTimes/Method.php';
 require_once __DIR__ . '/../../lib/IslamicNetwork/PrayerTimes/DMath.php';
 require_once __DIR__ . '/../../lib/IslamicNetwork/MoonSighting/PrayerTimes.php';
 require_once __DIR__ . '/../../lib/IslamicNetwork/MoonSighting/Isha.php';
-require_once __DIR__ . '/../../lib/IslamicNetwork/hijri/hijri_date.php';
+require_once __DIR__ . '/../../lib/IslamicNetwork/Hijri/HijriDate.php';
 
 use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
-use OCA\SalatTime\IslamicNetwork\hijri\HijriDate;
+use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
 
 // Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
 
@@ -47,22 +47,20 @@ $hijri = new HijriDate($curtime);
 if ($_['day'] != "")
    $hijri->tune($_['day']);
 
-echo "<div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">", $hijri->get_date(), '</h2>';
-
-//echo "Sunrise: &emsp;", $times['Sunrise'], '<br>';
+echo "<div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">",  $l->t($hijri->get_day_name()) . ' ' . $hijri->get_day() . ' ' . $l->t($hijri->get_month_name()) . ' ' . $hijri->get_year() . 'H', '</h2>';
 
 echo "<br><table id=\"salat\">
 <thead>
 <tr>
-<th>Day</th>";
+<th>", $l->t('Day'), "</th>";
 if ( $hijri->get_month() == 9) //Ramadhane
-    echo "<th>Imsak</th>";
-echo "<th>Fajr</th>
-<th>Sunrise</th>
-<th>Dhuhr</th>
-<th>Asr</th>
-<th>Maghrib</th>
-<th>Isha</th>
+    echo "<th>", $l->t('Imsak'), "</th>";
+echo "<th>", $l->t('Fajr'), "</th>
+<th>", $l->t('Sunrise'), "</th>
+<th>", $l->t('Dhuhr'), "</th>
+<th>", $l->t('Asr'), "</th>
+<th>", $l->t('Maghrib'), "</th>
+<th>", $l->t('Isha'), "</th>
 </tr>
 </thead>
 <tbody>";
@@ -96,5 +94,4 @@ echo "</tbody>
 
 //echo "latitude: ", $_['latitude'], " ",$_['longitude'], " ",$_['timezone'], " ",$_['day'];
 //echo "Date", $date->format('d-m-Y H:i:s');
-
 ?>

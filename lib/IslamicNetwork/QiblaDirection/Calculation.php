@@ -1,5 +1,5 @@
 <?php
-namespace OCA\SalatTime\IslamicNetwork\qibla-direction;
+namespace OCA\SalatTime\IslamicNetwork\QiblaDirection;
 
 class Calculation
 {
@@ -37,7 +37,7 @@ class Calculation
         // Azimuth is not negative
         $C += ($C < 0) * 360;
 
-        return $C;
+        return round($C, 2);
     }
 
     /**

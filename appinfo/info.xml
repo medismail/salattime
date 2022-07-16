@@ -7,10 +7,10 @@
     <description><![CDATA[Give 5 times prayer.]]></description>
     <version>0.1.0</version>
     <licence>agpl</licence>
-    <author mail="mmismailm@hotmail.com" >Mohamed</author>
+    <author mail="imejri@hotmail.com" >Mohamed</author>
     <namespace>SalatTime</namespace>
     <category>tools</category>
-    <bugs>http://mmismailm.com/</bugs>
+    <bugs>https://github.com/medismail/salattime/issues</bugs>
     <dependencies>
         <nextcloud min-version="21" max-version="24"/>
     </dependencies>

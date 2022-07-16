@@ -1,10 +1,5 @@
 <?php
-
-namespace OCA\SalatTime\IslamicNetwork\hijri;
-
-use DateInterval;
-
-/*
+/**
  SunCalc is a PHP library for calculating sun/moon position and light phases.
  https://github.com/gregseth/suncalc-php
 
@@ -25,6 +20,11 @@ use DateInterval;
  Calculations for moon rise/set times are based on
  http://www.stargazing.net/kepler/moonrise.html article.
 */
+
+
+namespace OCA\SalatTime\IslamicNetwork\SunMoonCalc;
+
+use DateInterval;
 
 
 // shortcuts for easier to read formulas
