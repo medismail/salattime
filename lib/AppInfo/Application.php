@@ -16,21 +16,21 @@ class Application extends App implements IBootstrap {
 	public function __construct(array $params = []) {
 		parent::__construct(self::APP_ID, $params);
 
-            $container = $this->getContainer();
+		$container = $this->getContainer();
 
-            /**
-             * Controllers
-             */
+		/**
+		 * Controllers
+		 */
 
-            $container->registerService('Config', function($c) {
-                return $c->query('ServerContainer')->getConfig();
-            });
+		$container->registerService('Config', function($c) {
+			return $c->query('ServerContainer')->getConfig();
+		});
 	}
 
-        public function register(IRegistrationContext $context): void {
-                $context->registerDashboardWidget(SalatTimeWidget::class);
-        }
+	public function register(IRegistrationContext $context): void {
+		$context->registerDashboardWidget(SalatTimeWidget::class);
+	}
 
-        public function boot(IBootContext $context): void {
-        }
+	public function boot(IBootContext $context): void {
+	}
 }

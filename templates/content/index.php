@@ -3,11 +3,11 @@
 require_once __DIR__ . '/../../lib/IslamicNetwork/PrayerTimes/PrayerTimes.php';
 use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
 
-echo "<div id=\"main-content-div\"><div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">", $_[PrayerTimes::HIJRI], '</h2>';
+echo "<div id=\"main-content-div\"><div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">", $_['Hijri'], '</h2>';
 
 echo $l->t('Next') . ": <b>" . $_[PrayerTimes::SALAT] . "</b> " . $l->t('after') . ": <b>" . $_[PrayerTimes::REMAIN] . '</b><br>';
 
-echo $l->t('Day length') . ": &emsp;", $_[PrayerTimes::DAYLENGETH], '<br>';
+echo $l->t('Day length') . ": &emsp;", $_['DayLength'], '<br>';
 
 if ( $_[PrayerTimes::IMSAK] != "") //Ramadhane
     echo $l->t('Imsak') . ":&emsp;&emsp;", $_[PrayerTimes::IMSAK], '<br>';

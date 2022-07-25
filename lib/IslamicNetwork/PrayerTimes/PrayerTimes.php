@@ -34,6 +34,8 @@ class PrayerTimes
     const MAGHRIB = 'Maghrib';
     const ISHA = 'Isha';
     const MIDNIGHT = 'Midnight';
+    const FIRST_THIRD = 'Firstthird';
+    const LAST_THIRD = 'Lastthird';
     const MOONRISE = 'Moonrise';
     const MOONSET = 'Moonset';
 
@@ -70,9 +72,6 @@ class PrayerTimes
      * If we're unable to calculate a time, we'll return this
      */
     const INVALID_TIME = '-----';
-
-    const HIJRI = 'Hijri';
-    const DAYLENGETH = 'DayLength';
 
     /**
      * Next
@@ -270,8 +269,11 @@ class PrayerTimes
 
         $times = $this->adjustTimes($times);
 
-        // add midnight time
-        $times[self::MIDNIGHT] = ($this->midnightMode == self::MIDNIGHT_MODE_JAFARI) ? $times[self::SUNSET] + $this->timeDiff($times[self::SUNSET], $times[self::FAJR]) / 2 : $times[self::SUNSET] + $this->timeDiff($times[self::SUNSET], $times[self::SUNRISE]) / 2;
+        // add night times
+        $diff = ($this->midnightMode == self::MIDNIGHT_MODE_JAFARI) ? $this->timeDiff($times[self::SUNSET], $times[self::FAJR]) : $this->timeDiff($times[self::SUNSET], $times[self::SUNRISE]);
+        $times[self::MIDNIGHT] = $times[self::SUNSET] + $diff / 2;
+        $times[self::FIRST_THIRD] = $times[self::SUNSET] + $diff / 3;
+        $times[self::LAST_THIRD] = $times[self::SUNSET] + 2 * ($diff / 3);
 
         // If our method is Moonsighting, reset the Fajr and Isha times
         if ($this->method == Method::METHOD_MOONSIGHTING) {
@@ -811,54 +813,58 @@ class PrayerTimes
         return $result;
     }
 
-    public function getNextPrayer($prayer = null)
+    /**
+     * Give Next prayer and remaing time
+     * @param array times
+     * @param sting prayer
+     * @return array of Prayer Name and Remaing time
+     */
+    public function getNextPrayer(array $times, string $prayer = null)
     {
-        return $this->getNextPrayerFromDate($this->date, $prayer);
+        return $this->getNextPrayerFromDate($this->date, $times, $prayer);
     }
 
     /**
+     * Give Next prayer and remaing time from define date
      * @param DateTime $date
+     * @param array times
+     * @param sting prayer
+     * @return array of Prayer Name and Remaing time
      */
-    public function getNextPrayerFromDate(DateTime $date, $prayer = null)
+    public function getNextPrayerFromDate(DateTime $date, array $times, string $prayer = null)
     {
         $curtime = strtotime($date->format('H:i'));
 
-        $times = $this->computeTimes();
+        //$times = $this->computeTimes();
         $offset = 0;
 
-        if ($prayer)
-        {
+        if ($prayer) {
             $salat = $prayer;
             if (strtotime($times[$salat]) < $curtime)
                 $offset = 86400;
-        } elseif (strtotime($times[self::FAJR]) > $curtime)
-        {
+        } elseif (strtotime($times[self::FAJR]) > $curtime) {
             $salat = self::FAJR;
-        } elseif (strtotime($times[self::ZHUHR]) > $curtime)
-        {
+        } elseif (strtotime($times[self::ZHUHR]) > $curtime) {
             $salat = self::ZHUHR;
-        } elseif (strtotime($times[self::ASR]) > $curtime)
-        {
+        } elseif (strtotime($times[self::ASR]) > $curtime) {
             $salat = self::ASR;
-        } elseif (strtotime($times[self::MAGHRIB]) > $curtime)
-        {
+        } elseif (strtotime($times[self::MAGHRIB]) > $curtime) {
             $salat = self::MAGHRIB;
-        } elseif (strtotime($times[self::ISHA]) > $curtime)
-        {
+        } elseif (strtotime($times[self::ISHA]) > $curtime) {
             $salat = self::ISHA;
         } else {
             $offset = 86400;
             $ishaTime = strtotime($times[self::ISHA]);
-            if (($ishaTime < strtotime($times[self::FAJR])) && ($ishaTime + 86400 > $curtime))
-            {
+            if (($ishaTime < strtotime($times[self::FAJR])) && ($ishaTime + 86400 > $curtime)) {
                 $salat = self::ISHA;
             } else {
                 $salat = self::FAJR;
             }
         }
 
-        $minutes = $this->twoDigitsFormat((int)((strtotime($times[$salat]) + $offset - $curtime) / 60) % 60);
-        $hours = $this->twoDigitsFormat((int)((strtotime($times[$salat]) + $offset - $curtime) / 3600));
+        $seconds = strtotime($times[$salat]) + $offset - $curtime;
+        $minutes = $this->twoDigitsFormat((int)($seconds / 60) % 60);
+        $hours = $this->twoDigitsFormat((int)($seconds / 3600));
         $remain = $hours . ":" . $minutes;
         return [
             self::SALAT => $salat,
@@ -866,15 +872,4 @@ class PrayerTimes
         ];
     }
 
-    /**
-     * @param string sunrise
-     * @param string sunset
-     */
-    public function getDayLength($sunrise, $sunset)
-    {
-        $daylength = strtotime($sunset) - strtotime($sunrise);
-        $minutes = $this->twoDigitsFormat((int)(($daylength) / 60) % 60);
-        $hours = $this->twoDigitsFormat((int)(($daylength) / 3600));
-        return $hours . ":" . $minutes;
-    }
 }

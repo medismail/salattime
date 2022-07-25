@@ -57,7 +57,7 @@ export default {
 			const url = generateUrl('/apps/salattime/widget-content')
 			axios.get(url).then((response) => {
 				this.content = response.data.ocs.data.content
-				console.debug('"' + this.content + '"')
+				// console.debug('"' + this.content + '"')
 			}).catch((error) => {
 				console.debug(error)
 			}).then(() => {
@@ -69,7 +69,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-::v-deep .markdown-content {
+:deep(.markdown-content) {
 	h1, h2, h3, h4, h5 {
 		font-weight: bold;
 		margin: 12px 0 12px 0;
