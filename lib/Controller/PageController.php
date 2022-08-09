@@ -55,7 +55,7 @@ class PageController extends Controller {
 	public function index() : TemplateResponse {
 		$templateName = 'index';  // will use templates/index.php
 		$times = $this->calculationService->getPrayerTimes($this->userId);
-		$sunmoon = $this->calculationService->getSunMoonCalc($this->userId);
+		$sunmoon = $this->calculationService->getSunMoonCalc($this->userId, $times['DayOffset']);
 		$parameters = array_merge($times, $sunmoon);
 		return new TemplateResponse(Application::APP_ID, $templateName, $parameters);
 	}

@@ -5,6 +5,9 @@ use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
 
 echo "<div id=\"main-content-div\"><div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">", $_['Hijri'], '</h2>';
 
+if ($_['SpecialDay'])
+    echo $l->t('Today is '), ": &emsp; <b>", $_['SpecialDay'], '</b><br>';
+
 echo $l->t('Next') . ": <b>" . $_[PrayerTimes::SALAT] . "</b> " . $l->t('after') . ": <b>" . $_[PrayerTimes::REMAIN] . '</b><br>';
 
 echo $l->t('Day length') . ": &emsp;", $_['DayLength'], '<br>';

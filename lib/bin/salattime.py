@@ -20,18 +20,19 @@ from astronomy import Body, Direction, SearchRiseSet, Refraction, Equator, Horiz
 
 
 def ParseArgs(args):
-    if len(args) not in [4, 5]:
-        print('USAGE: {} latitude longitude elevation [yyyy-mm-ddThh:mm:ssZ]'.format(args[0]))
+    if len(args) not in [5, 6]:
+        print('USAGE: {} latitude longitude elevation timezone [yyyy-mm-ddThh:mm:ssZ]'.format(args[0]))
         sys.exit(1)
     latitude = float(args[1])
     longitude = float(args[2])
     elevation = float(args[3])
-    if len(args) == 5:
-        time = astronomy.Time.Parse(args[4])
+    timezone = float(args[4])/3600
+    if len(args) == 6:
+        time = astronomy.Time.Parse(args[5])
     else:
         time = astronomy.Time.Now()
     observer = astronomy.Observer(latitude, longitude, elevation)
-    return (observer, time)
+    return (observer, time, timezone)
 
 def QuarterName(quarter):
     return [
@@ -47,19 +48,37 @@ def PrintEvent(name, time):
     print('{:<8s} : {}'.format(name, time))
 
 def main(args):
-    observer, time = ParseArgs(args)
-    daytime = str(time).split('T')[0].split('-')
-    timers = astronomy.Time.Make(int(daytime[0]), int(daytime[1]), int(daytime[2]),0,0,0)
-    sunrise  = SearchRiseSet(Body.Sun,  observer, Direction.Rise, timers, 1)
-    sunset   = SearchRiseSet(Body.Sun,  observer, Direction.Set,  timers, 1)
-    moonrise = SearchRiseSet(Body.Moon, observer, Direction.Rise, timers, 1)
-    moonset  = SearchRiseSet(Body.Moon, observer, Direction.Set,  timers, 1)
+    observer, time, timezone = ParseArgs(args)
+    curhour = int(str(time).split('T')[1].split(':')[0])
+    dayoffset = 0
+    if timezone > 12:
+        dayoffset = -1
+        timezone = timezone-25
+    midhour = int(-timezone)
+    if timezone > 0:
+        midhour = midhour+24
+    if curhour < midhour:
+        dayoffset = dayoffset-1
+    ytime = time.AddDays(dayoffset)
+    daytime = str(ytime).split('T')[0].split('-')
+    midTime = astronomy.Time.Make(int(daytime[0]), int(daytime[1]), int(daytime[2]), midhour,0,0)
+    sunrise  = SearchRiseSet(Body.Sun,  observer, Direction.Rise, midTime, 1)
+    sunset   = SearchRiseSet(Body.Sun,  observer, Direction.Set,  midTime, 1)
+    moonrise = SearchRiseSet(Body.Moon, observer, Direction.Rise, midTime, 1)
+    moonset  = SearchRiseSet(Body.Moon, observer, Direction.Set,  midTime, 1)
 
     PrintEvent('search',   time)
     print(sunrise)
     print(sunset)
-    print(moonrise)
-    print(moonset)
+    timeEnd = midTime.AddDays(1)
+    if moonrise <= timeEnd:
+        print(moonrise)
+    else:
+        print('')
+    if moonset <= timeEnd:
+        print(moonset)
+    else:
+        print('')
 
     mq = astronomy.SearchMoonQuarter(time)
     #print('{} : {}'.format(mq.time, QuarterName(mq.quarter)))

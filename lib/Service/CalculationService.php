@@ -90,7 +90,7 @@ class CalculationService {
 		$times = $pt->getTimesForToday($p_settings['latitude'], $p_settings['longitude'], $p_settings['timezone'], $p_settings['elevation'], $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $p_settings['format_12_24']);
 
 		$next = $pt->getNextPrayer($times);
-
+		$times['DayOffset'] = 0;
 		$date = new DateTime(null, new DateTimezone($p_settings['timezone']));
 		$curtime = strtotime($date->format('d-m-Y H:i:s'));
 		if (($next[PrayerTimes::SALAT] == PrayerTimes::FAJR)&&($date->format('H') > 12)) {
@@ -99,6 +99,7 @@ class CalculationService {
 			$next = $pt->getNextPrayerFromDate($date, $times, PrayerTimes::FAJR);
 			$curtime = strtotime($nextday->format('d-m-Y H:i:s'));
 			$date = $nextday;
+			$times['DayOffset'] = 90000;
 		}
 
 		$hijri = new HijriDate($curtime);
@@ -109,7 +110,7 @@ class CalculationService {
 		$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
 		$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
 		$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
-		$times['SpecialDay'] = $hijri->get_day_special_name();
+		$times['SpecialDay'] = $this->l->t(implode(" ", $hijri->get_day_special_name()));
 		if (date('N',$curtime) == 5)
 			$times['Jumaa'] = "Juma'a";
 		if ($hijri->get_month() != 9) //Ramadhane
@@ -124,7 +125,7 @@ class CalculationService {
 	 * @param string UserId
 	 * @return array sun and moons informations
 	 */
-	public function getSunMoonCalc(string $userId): array {
+	public function getSunMoonCalc(string $userId, int $dayoffset=0): array {
 		$p_settings = $this->configService->getSettingsValue($userId);
 		if (!$p_settings['elevation'])
 			$p_settings['elevation'] = 0.0;
@@ -133,14 +134,16 @@ class CalculationService {
 		else
 			$textFormat_12_24 = 'G:i';
 
+		$udtz = new DateTimezone($p_settings['timezone']);
+		$date = new DateTime(null, $udtz);
 		if (Helper::pythonInstalled()) {
 			$output=null;
 			$retval=null;
-			exec( __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'], $output, $retval);
-			$sunMoonTimes['Sunrise'] = $this->timeConversion($output[1], $p_settings['timezone'], $textFormat_12_24);
-			$sunMoonTimes['Sunset'] = $this->timeConversion($output[2], $p_settings['timezone'], $textFormat_12_24);
-			$sunMoonTimes['Moonrise'] = $this->timeConversion($output[3], $p_settings['timezone'], $textFormat_12_24);
-			$sunMoonTimes['Moonset'] = $this->timeConversion($output[4], $p_settings['timezone'], $textFormat_12_24);
+			exec( __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date)+$dayoffset, $output, $retval);
+			$sunMoonTimes['Sunrise'] = $this->timeConversion($output[1], $udtz, $textFormat_12_24);
+			$sunMoonTimes['Sunset'] = $this->timeConversion($output[2], $udtz, $textFormat_12_24);
+			$sunMoonTimes['Moonrise'] = $this->timeConversion($output[3], $udtz, $textFormat_12_24);
+			$sunMoonTimes['Moonset'] = $this->timeConversion($output[4], $udtz, $textFormat_12_24);
 			$sunMoonTimes['MoonPhase'] = $output[5];
 			$sunMoonTimes['MoonPhaseAngle'] = $output[6];
 			$sunMoonTimes['IlluminatedFraction'] = $output[7];
@@ -149,7 +152,8 @@ class CalculationService {
 			$sunMoonTimes['MoonAzimuth'] = $output[10];
 			$sunMoonTimes['MoonAltitude'] = $output[11];
 		} else {
-			$date = new DateTime(null, new DateTimezone($p_settings['timezone']));
+			if ($dayoffset)
+				$date = new DateTime('today +1 day', $udtz);
 			$sc = new SunCalc($date, $p_settings['latitude'], $p_settings['longitude']);
 			//$sunTimes = $sc->getSunTimes();
 			$moonTimes = $sc->getMoonTimes();
@@ -218,11 +222,11 @@ class CalculationService {
 	 * @param string format
 	 * @return string of php time
 	 */
-	private function timeConversion(string $time, string $timezone, string $format): string {
+	private function timeConversion(string $time, DateTimeZone $timezone, string $format): string {
 		$ret = "";
 		$date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $time, new DateTimezone('UTC'));
 		if ($date)
-			$ret = $date->setTimezone(new DateTimeZone($timezone))->format($format);
+			$ret = $date->setTimezone($timezone)->format($format);
 		return $ret;
 	}
 
