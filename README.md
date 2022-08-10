@@ -1,5 +1,6 @@
 # Salat Time
-Place this app in **nextcloud/apps/**
+Give 5 muslim prayers time and many others useful informations.
+
 
 ## Building the app
 
@@ -25,14 +26,6 @@ The make command will install or update Composer dependencies if a composer.json
 }
 ```
 
-
-## Publish to App Store
-
-First get an account for the [App Store](http://apps.nextcloud.com/) then run:
-
-    make && make appstore
-
-The archive is located in build/artifacts/appstore and can then be uploaded to the App Store.
 
 ## Running tests
 You can use the provided Makefile to run all tests by using:
