@@ -75,7 +75,7 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function prayertime(): TemplateResponse {
-		$templateName = 'prayers';  // will use templates/prayer.php
+		$templateName = 'prayers';  // will use templates/prayers.php
 		$confSettings = $this->calculationService->getConfigSettings($this->userId);
 		$confAdjustments = $this->calculationService->getConfigAdjustments($this->userId);
 		$parameters = array_merge($confSettings, $confAdjustments);

@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Copyright (c) 2020 Julien Veyssier <eneiluj@posteo.net>
+ * @copyright Copyright (c) 2022 Mohamed-Ismail MEJRI <imejri@hotmail.com>
  *
  * @author Mohamed-Ismail MEJRI
  *

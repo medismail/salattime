@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Copyright (c) 2016 Joas Schilling <coding@schilljs.com>
+ * @copyright Copyright (c) 2022 Mohamed-Ismail MEJRI <imejri@hotmail.com>
  *
  * @license GNU AGPL version 3 or any later version
  *

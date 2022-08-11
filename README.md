@@ -1,6 +1,10 @@
 # Salat Time
-Give 5 muslim prayers time and many others useful informations.
+ * 5 muslim daily prayer times
+ * Hijri date
+ * Qibla direction 
+ * and many others useful informations.
 
+![](img/salattime.png)
 
 ## Building the app
 
