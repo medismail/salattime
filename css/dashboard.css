@@ -1,0 +1,7 @@
+.icon-salattime {
+    background-image: url(./../img/app-dark.svg);
+}
+
+body.theme--dark .icon-salattime {
+    background-image: url(./../img/app.svg);
+}
