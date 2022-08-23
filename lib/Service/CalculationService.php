@@ -51,7 +51,7 @@ class CalculationService {
 	private $cache;
 
 	/** @var IL10N */
-	private $l;
+	private $l10n;
 
 	public function __construct(
 					   ConfigService $configService,
@@ -68,7 +68,7 @@ class CalculationService {
 		$this->clientService = $clientService;
 		$this->client = $clientService->newClient();
 		$this->cache = $cacheFactory->createDistributed('salattime');
-		$this->l = $l;
+		$this->l10n = $l;
 	}
 
 	/**
@@ -102,15 +102,15 @@ class CalculationService {
 			$times['DayOffset'] = 90000;
 		}
 
-		$hijri = new HijriDate($curtime);
+		$hijri = new HijriDate($curtime, $this->l10n);
 		if ($adjustments['day'] != "")
 			$hijri->tune($adjustments['day']);
 
-		$times['Hijri'] = $this->l->t($hijri->get_day_name()) . ' ' . $hijri->get_day() . ' ' . $this->l->t($hijri->get_month_name()) . ' ' . $hijri->get_year() . 'H';
+		$times['Hijri'] = $hijri->get_day_name() . ' ' . $hijri->get_day() . ' ' . $hijri->get_month_name() . ' ' . $hijri->get_year() . $this->l10n->t('H');
 		$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
 		$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
 		$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
-		$times['SpecialDay'] = $this->l->t(implode(" ", $hijri->get_day_special_name()));
+		$times['SpecialDay'] = implode(" ", $hijri->get_day_special_name());
 		if (date('N',$curtime) == 5)
 			$times['Jumaa'] = "Juma'a";
 		if ($hijri->get_month() != 9) //Ramadhane
@@ -308,6 +308,7 @@ class CalculationService {
 			return ['success' => false];
 		}
 	}
+
 	/**
 	 * Try to use the address set in user personal settings as weather location
 	 *
@@ -325,6 +326,7 @@ class CalculationService {
 		}
 		return $this->getGeoCode($address);
 	}
+
 	/**
 	 * Make a HTTP GET request and parse JSON result.
 	 * Request results are cached until the 'Expires' response header says so

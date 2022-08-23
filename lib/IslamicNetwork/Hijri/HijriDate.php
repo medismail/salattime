@@ -15,16 +15,22 @@
 
 namespace OCA\SalatTime\IslamicNetwork\Hijri;
 
+use OCP\IL10N;
+
 class HijriDate{
 
     private $hijri;
 
     private $time;
 
-    public function __construct( $time = false ){
+    /** @var IL10N */
+    private $l10n;
+
+    public function __construct($time = false, IL10N $l){
         if(!$time) $time = time();
         $this->time = $time;
         $this->hijri = $this->GregorianToHijri($time);
+        $this->l10n = $l;
     }
 
     public function get_date(){
@@ -45,75 +51,66 @@ class HijriDate{
 
     public function get_day_name(){
         //return ($this->hijriWeekdays())[date('l',strtotime())]['en'];
-         return (self::hijriWeekdays())[date('l', $this->time)]['en'];
+         return ($this->hijriWeekdays())[date('l', $this->time)]['tx'];
     }
 
     public function get_month_name(){
-           return (self::getIslamicMonths())[$this->hijri[0]]['en'];
+           return ($this->getIslamicMonths())[$this->hijri[0]]['tx'];
     }
 
     public function get_day_special_name(){
-         return (self::getHijriHolidays($this->hijri[1], $this->hijri[0]));
+         return ($this->getHijriHolidays($this->hijri[1], $this->hijri[0]));
     }
 
-    public function get_name_of_month($i){
-        static $month  = array(
-            "muharram", "safar", "rabiulawal", "rabiulakhir",
-            "jamadilawal", "jamadilakhir", "rejab", "syaaban",
-            "ramadhan", "syawal", "zulkaedah", "zulhijjah"
-        );
-        return $month[$i-1];
-    }
-
-    public static function specialDays()
+    public function specialDays()
     {
         $days = [];
-        $days[] = ['month' => 1, 'day' => 10, 'name' => 'Ashura'];
-        $days[] = ['month' => 3, 'day' => 12, 'name' => 'Mawlid al-Nabi'];
-        $days[] = ['month' => 7, 'day' => 27, 'name' => 'Lailat-ul-Miraj'];
-        $days[] = ['month' => 8, 'day' => 15, 'name' => 'Lailat-ul-Bara\'at'];
-        $days[] = ['month' => 9, 'day' => 1, 'name' => '1st Day of Ramadan'];
-        $days[] = ['month' => 9, 'day' => 21, 'name' => 'Lailat-ul-Qadr'];
-        $days[] = ['month' => 9, 'day' => 23, 'name' => 'Lailat-ul-Qadr'];
-        $days[] = ['month' => 9, 'day' => 25, 'name' => 'Lailat-ul-Qadr'];
-        $days[] = ['month' => 9, 'day' => 27, 'name' => 'Lailat-ul-Qadr'];
-        $days[] = ['month' => 9, 'day' => 29, 'name' => 'Lailat-ul-Qadr'];
-        $days[] = ['month' => 10, 'day' => 1, 'name' => 'Eid-ul-Fitr'];
-        $days[] = ['month' => 12, 'day' => 8, 'name' => 'Hajj'];
-        $days[] = ['month' => 12, 'day' => 9, 'name' => 'Hajj'];
-        $days[] = ['month' => 12, 'day' => 9, 'name' => 'Arafa'];
-        $days[] = ['month' => 12, 'day' => 10, 'name' => 'Eid-ul-Adha'];
-        $days[] = ['month' => 12, 'day' => 10, 'name' => 'Hajj'];
-        $days[] = ['month' => 12, 'day' => 11, 'name' => 'Hajj'];
-        $days[] = ['month' => 12, 'day' => 12, 'name' => 'Hajj'];
-        $days[] = ['month' => 12, 'day' => 13, 'name' => 'Hajj'];
+        $days[] = ['month' => 1, 'day' => 10, 'name' => 'Ashura', 'tx' => $this->l10n->t('Ashura')];
+        $days[] = ['month' => 3, 'day' => 12, 'name' => 'Mawlid al-Nabi', 'tx' => $this->l10n->t('Mawlid al-Nabi')];
+        $days[] = ['month' => 7, 'day' => 27, 'name' => 'Lailat-ul-Miraj', 'tx' => $this->l10n->t('Lailat-ul-Miraj')];
+        $days[] = ['month' => 8, 'day' => 15, 'name' => 'Lailat-ul-Bara\'at', 'tx' => $this->l10n->t('Lailat-ul-Bara\'at')];
+        $days[] = ['month' => 9, 'day' => 1, 'name' => '1st Day of Ramadan', 'tx' => $this->l10n->t('1st Day of Ramadan')];
+        $days[] = ['month' => 9, 'day' => 21, 'name' => 'Lailat-ul-Qadr', 'tx' => $this->l10n->t('Lailat-ul-Qadr')];
+        $days[] = ['month' => 9, 'day' => 23, 'name' => 'Lailat-ul-Qadr', 'tx' => $this->l10n->t('Lailat-ul-Qadr')];
+        $days[] = ['month' => 9, 'day' => 25, 'name' => 'Lailat-ul-Qadr', 'tx' => $this->l10n->t('Lailat-ul-Qadr')];
+        $days[] = ['month' => 9, 'day' => 27, 'name' => 'Lailat-ul-Qadr', 'tx' => $this->l10n->t('Lailat-ul-Qadr')];
+        $days[] = ['month' => 9, 'day' => 29, 'name' => 'Lailat-ul-Qadr', 'tx' => $this->l10n->t('Lailat-ul-Qadr')];
+        $days[] = ['month' => 10, 'day' => 1, 'name' => 'Eid-ul-Fitr', 'tx' => $this->l10n->t('Eid-ul-Fitr')];
+        $days[] = ['month' => 12, 'day' => 8, 'name' => 'Hajj', 'tx' => $this->l10n->t('Hajj')];
+        $days[] = ['month' => 12, 'day' => 9, 'name' => 'Hajj', 'tx' => $this->l10n->t('Hajj')];
+        $days[] = ['month' => 12, 'day' => 9, 'name' => 'Arafa', 'tx' => $this->l10n->t('Arafa')];
+        $days[] = ['month' => 12, 'day' => 10, 'name' => 'Eid-ul-Adha', 'tx' => $this->l10n->t('Eid-ul-Adha')];
+        $days[] = ['month' => 12, 'day' => 10, 'name' => 'Hajj', 'tx' => $this->l10n->t('Hajj')];
+        $days[] = ['month' => 12, 'day' => 11, 'name' => 'Hajj', 'tx' => $this->l10n->t('Hajj')];
+        $days[] = ['month' => 12, 'day' => 12, 'name' => 'Hajj', 'tx' => $this->l10n->t('Hajj')];
+        $days[] = ['month' => 12, 'day' => 13, 'name' => 'Hajj', 'tx' => $this->l10n->t('Hajj')];
 
         return $days;
     }
 
-    public static function getHijriHolidays($day, $month)
+    public function getHijriHolidays($day, $month)
     {
         $holydays = [];
         $day = (int) $day;
         $month = (int) $month;
-        foreach (self::specialDays() as $hol) {
+        foreach ($this->specialDays() as $hol) {
             if ($hol['day'] == $day && $hol['month'] == $month) {
-                $holydays[] = $hol['name'];
+                $holydays[] = $hol['tx'];
             }
         }
         return $holydays;
     }
 
-    public static function hijriWeekdays($gDay = '')
+    public function hijriWeekdays($gDay = '')
     {
         $week = [
-            'Monday' => ['en' => 'Al Athnayn', 'ar' => 'الاثنين'],
-            'Tuesday' => ['en' => 'Al Thulaatha', 'ar' => 'الثلاثاء'],
-            'Wednesday' => ['en' => 'Al Arbya\'a', 'ar' => 'الاربعاء'],
-            'Thursday' => ['en' => 'Al Khamees', 'ar' => 'الخميس'],
-            'Friday' => ['en' => 'Al Juma\'a', 'ar' => 'الجمعة'],
-            'Saturday' => ['en' => 'Al Sabt', 'ar' => 'السبت'],
-            'Sunday' => ['en' => 'Al Ahad', 'ar' => 'الاحد']
+            'Monday' => ['en' => 'Al Athnayn', 'ar' => 'الاثنين', 'tx' => $this->l10n->t('Al Athnayn')],
+            'Tuesday' => ['en' => 'Al Thulaatha', 'ar' => 'الثلاثاء', 'tx' => $this->l10n->t('Al Thulaatha')],
+            'Wednesday' => ['en' => 'Al Arbya\'a', 'ar' => 'الاربعاء', 'tx' => $this->l10n->t('Al Arbya\'a')],
+            'Thursday' => ['en' => 'Al Khamees', 'ar' => 'الخميس', 'tx' => $this->l10n->t('Al Khamees')],
+            'Friday' => ['en' => 'Al Juma\'a', 'ar' => 'الجمعة', 'tx' => $this->l10n->t('Al Juma\'a')],
+            'Saturday' => ['en' => 'Al Sabt', 'ar' => 'السبت', 'tx' => $this->l10n->t('Al Sabt')],
+            'Sunday' => ['en' => 'Al Ahad', 'ar' => 'الاحد', 'tx' => $this->l10n->t('Al Ahad')]
         ];
         if ($gDay == '') {
             return $week;
@@ -140,21 +137,21 @@ class HijriDate{
         ];
     }
 
-    public static function getIslamicMonths()
+    public function getIslamicMonths()
     {
         return [
-            1 => ['number' => 1, 'en' => 'Muḥarram', 'ar' => 'مُحَرَّم'],
-            2 => ['number' => 2,'en' => 'Ṣafar', 'ar' => 'صَفَر'],
-            3 => ['number' => 3,'en' => 'Rabīʿ al-awwal', 'ar' => 'رَبيع الأوّل'],
-            4 => ['number' => 4,'en' => 'Rabīʿ al-thānī', 'ar' => 'رَبيع الثاني'],
-            5 => ['number' => 5,'en' => 'Jumādá al-ūlá', 'ar' => 'جُمادى الأولى'],
-            6 => ['number' => 6,'en' => 'Jumādá al-ākhirah', 'ar' => 'جُمادى الآخرة'],
-            7 => ['number' => 7,'en' => 'Rajab', 'ar' => 'رَجَب'],
-            8 => ['number' => 8,'en' => 'Shaʿbān', 'ar' => 'شَعْبان'],
-            9 => ['number' => 9,'en' => 'Ramaḍān', 'ar' => 'رَمَضان'],
-            10 => ['number' => 10,'en' => 'Shawwāl', 'ar' => 'شَوّال'],
-            11 => ['number' => 11,'en' => 'Dhū al-Qaʿdah', 'ar' => 'ذوالقعدة'],
-            12 => ['number' => 12,'en' => 'Dhū al-Ḥijjah', 'ar' => 'ذوالحجة']
+            1 => ['number' => 1, 'en' => 'Muḥarram', 'ar' => 'مُحَرَّم', 'tx' => $this->l10n->t('Muharram')],
+            2 => ['number' => 2,'en' => 'Ṣafar', 'ar' => 'صَفَر', 'tx' => $this->l10n->t('Safar')],
+            3 => ['number' => 3,'en' => 'Rabīʿ al-awwal', 'ar' => 'رَبيع الأوّل', 'tx' => $this->l10n->t('Rabiulawal')],
+            4 => ['number' => 4,'en' => 'Rabīʿ al-thānī', 'ar' => 'رَبيع الثاني', 'tx' => $this->l10n->t('Rabiulakhir')],
+            5 => ['number' => 5,'en' => 'Jumādá al-ūlá', 'ar' => 'جُمادى الأولى', 'tx' => $this->l10n->t('Jamadilawal')],
+            6 => ['number' => 6,'en' => 'Jumādá al-ākhirah', 'ar' => 'جُمادى الآخرة', 'tx' => $this->l10n->t('Jamadilakhir')],
+            7 => ['number' => 7,'en' => 'Rajab', 'ar' => 'رَجَب', 'tx' => $this->l10n->t('Rajab')],
+            8 => ['number' => 8,'en' => 'Shaʿbān', 'ar' => 'شَعْبان', 'tx' => $this->l10n->t('Syaaban')],
+            9 => ['number' => 9,'en' => 'Ramaḍān', 'ar' => 'رَمَضان', 'tx' => $this->l10n->t('Ramadhan')],
+            10 => ['number' => 10,'en' => 'Shawwāl', 'ar' => 'شَوّال', 'tx' => $this->l10n->t('Syawal')],
+            11 => ['number' => 11,'en' => 'Dhū al-Qaʿdah', 'ar' => 'ذوالقعدة', 'tx' => $this->l10n->t('Zulkaedah')],
+            12 => ['number' => 12,'en' => 'Dhū al-Ḥijjah', 'ar' => 'ذوالحجة', 'tx' => $this->l10n->t('Zulhijjah')]
         ];
     }
 

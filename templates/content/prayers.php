@@ -43,11 +43,11 @@ $pt->tune($imsak = 0, $fajr = $_['Fajr'], $sunrise = 0, $dhuhr = $_['Dhuhr'], $a
 
 $date = new DateTime(null, new DateTimezone($timezone));
 $curtime = strtotime($date->format('d-m-Y H:i:s'));
-$hijri = new HijriDate($curtime);
+$hijri = new HijriDate($curtime, $l);
 if ($_['day'] != "")
    $hijri->tune($_['day']);
 
-echo "<div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">",  $l->t($hijri->get_day_name()) . ' ' . $hijri->get_day() . ' ' . $l->t($hijri->get_month_name()) . ' ' . $hijri->get_year() . 'H', '</h2>';
+echo "<div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">",  $hijri->get_day_name() . ' ' . $hijri->get_day() . ' ' . $hijri->get_month_name() . ' ' . $hijri->get_year() . $l->t('H'), '</h2>';
 
 echo "<br><table id=\"salat\">
 <thead>
@@ -75,7 +75,7 @@ foreach($daterange as $date1){
    //$date1->setTimezone(new DateTimezone($timezone));
    $times = $pt->getTimes($date1, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format_12_24);
    $curtime = strtotime($date1->format('d-m-Y H:i:s'));
-   $hijri = new HijriDate($curtime);
+   $hijri = new HijriDate($curtime, $l);
    if ($_['day'] != "")
        $hijri->tune($_['day']);
    echo "<tr><td scope=\"row\">", $hijri->get_year(), "-", $hijri->get_month(), "-", $hijri->get_day(), "</td>";

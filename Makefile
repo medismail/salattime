@@ -60,6 +60,7 @@ build:
 #endif
 ifneq (,$(wildcard $(CURDIR)/package.json))
 	make npm
+	make js
 endif
 ifneq (,$(wildcard $(CURDIR)/js/package.json))
 	make npm
@@ -87,6 +88,12 @@ ifeq (,$(wildcard $(CURDIR)/package.json))
 else
 	npm run build
 endif
+
+# move js scripts
+.PHONY: js
+js:
+	cp src/script.js js/
+	cp src/settings.js js/
 
 # Removes the appstore build
 .PHONY: clean
@@ -126,7 +133,7 @@ source:
 appstore:
 	rm -rf $(appstore_build_directory)
 	mkdir -p $(appstore_build_directory)
-	tar cvzf $(appstore_package_name).tar.gz ../$(app_name) \
+	tar cvzf $(appstore_package_name).tar.gz \
 	--exclude-vcs \
 	--exclude="../$(app_name)/build" \
 	--exclude="../$(app_name)/tests" \
@@ -134,20 +141,24 @@ appstore:
 	--exclude="../$(app_name)/*.log" \
 	--exclude="../$(app_name)/phpunit*xml" \
 	--exclude="../$(app_name)/composer.*" \
-	--exclude="../$(app_name)/js/node_modules" \
+	--exclude="../$(app_name)/node_modules" \
 	--exclude="../$(app_name)/js/tests" \
-	--exclude="../$(app_name)/js/test" \
 	--exclude="../$(app_name)/js/*.log" \
-	--exclude="../$(app_name)/js/package.json" \
 	--exclude="../$(app_name)/js/bower.json" \
 	--exclude="../$(app_name)/js/karma.*" \
-	--exclude="../$(app_name)/js/protractor.*" \
+	--exclude="../$(app_name)/img/salattime.png" \
+	--exclude="../$(app_name)/composer.json" \
 	--exclude="../$(app_name)/package.json" \
+	--exclude="../$(app_name)/package-lock.json" \
 	--exclude="../$(app_name)/bower.json" \
 	--exclude="../$(app_name)/karma.*" \
 	--exclude="../$(app_name)/protractor\.*" \
 	--exclude="../$(app_name)/.*" \
 	--exclude="../$(app_name)/js/.*" \
+	--exclude="../$(app_name)/webpack.js" \
+	--exclude="../$(app_name)/stylelint.config.js" \
+	--exclude="../$(app_name)/src" \
+	../$(app_name)
 
 .PHONY: test
 test: composer

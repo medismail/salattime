@@ -1,22 +1,19 @@
 <?php
 
-require_once __DIR__ . '/../../lib/IslamicNetwork/PrayerTimes/PrayerTimes.php';
-use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
-
 echo "<div id=\"main-content-div\"><div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">", $_['Hijri'], '</h2>';
 
 if ($_['SpecialDay'])
     echo $l->t('Today is '), ": &emsp; <b>", $_['SpecialDay'], '</b><br>';
 
-echo $l->t('Next') . ": <b>" . $_[PrayerTimes::SALAT] . "</b> " . $l->t('after') . ": <b>" . $_[PrayerTimes::REMAIN] . '</b><br>';
+echo $l->t('Next') . ": <b>" . $_['Salat'] . "</b> " . $l->t('after') . ": <b>" . $_['Remain'] . '</b><br>';
 
 echo $l->t('Day length') . ": &emsp;", $_['DayLength'], '<br>';
 
-if ( $_[PrayerTimes::IMSAK] != "") //Ramadhane
-    echo $l->t('Imsak') . ":&emsp;&emsp;", $_[PrayerTimes::IMSAK], '<br>';
+if ( $_['Imsak'] != "") //Ramadhane
+    echo $l->t('Imsak') . ":&emsp;&emsp;", $_['Imsak'], '<br>';
 
-echo $l->t('Sunrise'), ": &emsp;", $_[PrayerTimes::SUNRISE], '<br>';
-echo $l->t('Sunset'), ": &emsp; ", $_[PrayerTimes::SUNSET], '<br>';
+echo $l->t('Sunrise'), ": &emsp;", $_['Sunrise'], '<br>';
+echo $l->t('Sunset'), ": &emsp; ", $_['Sunset'], '<br>';
 
 if ($_['Moonrise'])
     echo $l->t('Moonrise'), ": &emsp; ", $_['Moonrise'], '<br>';
@@ -24,13 +21,13 @@ if ($_['Moonset'])
     echo $l->t('Moonset'), ": &emsp; ", $_['Moonset'], '<br>';
 
 $gback = [
-            PrayerTimes::FAJR => "",
-            PrayerTimes::ZHUHR => "",
-            PrayerTimes::ASR => "",
-            PrayerTimes::MAGHRIB => "",
-            PrayerTimes::ISHA => "",
+            'Fajr' => "",
+            'Dhuhr' => "",
+            'Asr' => "",
+            'Maghrib' => "",
+            'Isha' => "",
         ];
-$gback[$_[PrayerTimes::SALAT]]=" style=\"background: gray;\"";
+$gback[$_['Salat']]=" style=\"background: gray;\"";
 
 echo "<br><table id=\"salat\">
 <thead>
@@ -41,28 +38,28 @@ echo "<br><table id=\"salat\">
 </thead>
 <tbody>
 <tr>
-<td scope=\"row\"", $gback[PrayerTimes::FAJR], ">", $l->t(PrayerTimes::FAJR), ":</td>
-<td", $gback[PrayerTimes::FAJR], ">", $_[PrayerTimes::FAJR], "</td>
+<td scope=\"row\"", $gback['Fajr'], ">", $l->t('Fajr'), ":</td>
+<td", $gback['Fajr'], ">", $_['Fajr'], "</td>
 </tr>";
 
 if (isset($_['Jumaa']))  //Juma'a
-    echo "<tr><td scope=\"row\">", $l->t('Juma\'a:'), "</td><td>", $_[PrayerTimes::ZHUHR], "</td></tr>";
+    echo "<tr><td scope=\"row\">", $l->t('Juma\'a:'), "</td><td>", $_['Dhuhr'], "</td></tr>";
 
 echo "<tr>
-<td scope=\"row\"", $gback[PrayerTimes::ZHUHR], ">", $l->t(PrayerTimes::ZHUHR), ":</td>
-<td", $gback[PrayerTimes::ZHUHR], ">", $_[PrayerTimes::ZHUHR], "</td>
+<td scope=\"row\"", $gback['Dhuhr'], ">", $l->t('Dhuhr'), ":</td>
+<td", $gback['Dhuhr'], ">", $_['Dhuhr'], "</td>
 </tr>
 <tr>
-<td scope=\"row\"", $gback[PrayerTimes::ASR], ">", $l->t(PrayerTimes::ASR), ":</td>
-<td", $gback[PrayerTimes::ASR], ">", $_[PrayerTimes::ASR], "</td>
+<td scope=\"row\"", $gback['Asr'], ">", $l->t('Asr'), ":</td>
+<td", $gback['Asr'], ">", $_['Asr'], "</td>
 </tr>
 <tr>
-<td scope=\"row\"", $gback[PrayerTimes::MAGHRIB], ">", $l->t(PrayerTimes::MAGHRIB), ":&nbsp;&nbsp;</td>
-<td", $gback[PrayerTimes::MAGHRIB], ">", $_[PrayerTimes::MAGHRIB], "</td>
+<td scope=\"row\"", $gback['Maghrib'], ">", $l->t('Maghrib'), ":&nbsp;&nbsp;</td>
+<td", $gback['Maghrib'], ">", $_['Maghrib'], "</td>
 </tr>
 <tr>
-<td scope=\"row\"", $gback[PrayerTimes::ISHA], ">", $l->t(PrayerTimes::ISHA), ":</td>
-<td", $gback[PrayerTimes::ISHA], ">", $_[PrayerTimes::ISHA], "</td>
+<td scope=\"row\"", $gback['Isha'], ">", $l->t('Isha'), ":</td>
+<td", $gback['Isha'], ">", $_['Isha'], "</td>
 </tr>
 </tbody>
 </table>
