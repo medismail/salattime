@@ -142,16 +142,16 @@ class HijriDate{
         return [
             1 => ['number' => 1, 'en' => 'Muḥarram', 'ar' => 'مُحَرَّم', 'tx' => $this->l10n->t('Muharram')],
             2 => ['number' => 2,'en' => 'Ṣafar', 'ar' => 'صَفَر', 'tx' => $this->l10n->t('Safar')],
-            3 => ['number' => 3,'en' => 'Rabīʿ al-awwal', 'ar' => 'رَبيع الأوّل', 'tx' => $this->l10n->t('Rabiulawal')],
-            4 => ['number' => 4,'en' => 'Rabīʿ al-thānī', 'ar' => 'رَبيع الثاني', 'tx' => $this->l10n->t('Rabiulakhir')],
-            5 => ['number' => 5,'en' => 'Jumādá al-ūlá', 'ar' => 'جُمادى الأولى', 'tx' => $this->l10n->t('Jamadilawal')],
-            6 => ['number' => 6,'en' => 'Jumādá al-ākhirah', 'ar' => 'جُمادى الآخرة', 'tx' => $this->l10n->t('Jamadilakhir')],
+            3 => ['number' => 3,'en' => 'Rabīʿ al-awwal', 'ar' => 'رَبيع الأوّل', 'tx' => $this->l10n->t('Rabi al-awwal')],
+            4 => ['number' => 4,'en' => 'Rabīʿ al-thānī', 'ar' => 'رَبيع الثاني', 'tx' => $this->l10n->t('Rabi al-thani')],
+            5 => ['number' => 5,'en' => 'Jumādá al-ūlá', 'ar' => 'جُمادى الأولى', 'tx' => $this->l10n->t('Jamada al-awwal')],
+            6 => ['number' => 6,'en' => 'Jumādá al-ākhirah', 'ar' => 'جُمادى الآخرة', 'tx' => $this->l10n->t('Jamada al-thani')],
             7 => ['number' => 7,'en' => 'Rajab', 'ar' => 'رَجَب', 'tx' => $this->l10n->t('Rajab')],
-            8 => ['number' => 8,'en' => 'Shaʿbān', 'ar' => 'شَعْبان', 'tx' => $this->l10n->t('Syaaban')],
+            8 => ['number' => 8,'en' => 'Shaʿbān', 'ar' => 'شَعْبان', 'tx' => $this->l10n->t('Shaaban')],
             9 => ['number' => 9,'en' => 'Ramaḍān', 'ar' => 'رَمَضان', 'tx' => $this->l10n->t('Ramadhan')],
-            10 => ['number' => 10,'en' => 'Shawwāl', 'ar' => 'شَوّال', 'tx' => $this->l10n->t('Syawal')],
-            11 => ['number' => 11,'en' => 'Dhū al-Qaʿdah', 'ar' => 'ذوالقعدة', 'tx' => $this->l10n->t('Zulkaedah')],
-            12 => ['number' => 12,'en' => 'Dhū al-Ḥijjah', 'ar' => 'ذوالحجة', 'tx' => $this->l10n->t('Zulhijjah')]
+            10 => ['number' => 10,'en' => 'Shawwāl', 'ar' => 'شَوّال', 'tx' => $this->l10n->t('Shawwal')],
+            11 => ['number' => 11,'en' => 'Dhū al-Qaʿdah', 'ar' => 'ذوالقعدة', 'tx' => $this->l10n->t('Dhu al-Qadah')],
+            12 => ['number' => 12,'en' => 'Dhū al-Ḥijjah', 'ar' => 'ذوالحجة', 'tx' => $this->l10n->t('Dhu al-Hijjah')]
         ];
     }
 

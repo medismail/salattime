@@ -144,7 +144,6 @@ export default {
 }
 
 #salattime-widget {
-	overflow: scroll;
 	height: 100%;
 	padding: 0 10px 0 10px;
 	.icon-loading {
