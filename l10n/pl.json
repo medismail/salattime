@@ -1,0 +1,25 @@
+{ "translations": {
+    "No result." : "Brak wyników.",
+    "Error" : "Błąd",
+    "Day" : "Dzień",
+    "Next" : "Następna",
+    "after" : "po",
+    "Sunrise" : "Wschód",
+    "Sunset" : "Zachód",
+    "Time" : "Czas",
+    "Altitude" : "Wysokość",
+    "Location address:" : "Adres lokalizacji:",
+    "Use 24 hours format" : "Użyj formatu 24-godzinnego",
+    "Click for manuel settings" : "Kliknij, aby przejść do ustawień ręcznych",
+    "Manuel settings:" : "Ustawienia ręczne:",
+    "Latitude:" : "Szerokość geograficzna:",
+    "Longitude:" : "Długość geograficzna:",
+    "Timezone:" : "Strefa czasowa:",
+    "Altitude:" : "Wysokość:",
+    "Caclulation method:" : "Metoda obliczeniowa:",
+    "Prayer Time" : "Czas modlitwy",
+    "Adjustments" : "Korekty",
+    "Settings" : "Ustawienia",
+    "Enable notification" : "Włącz powiadomienia"
+},"pluralForm" :"nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);"
+}

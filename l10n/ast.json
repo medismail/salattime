@@ -1,0 +1,11 @@
+{ "translations": {
+    "Error" : "Fallu",
+    "Day" : "Día",
+    "Next" : "Siguiente",
+    "after" : "dempués",
+    "Sunrise" : "Riscar",
+    "Sunset" : "Aséu",
+    "Time" : "Hora",
+    "Settings" : "Settings"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

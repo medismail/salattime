@@ -1,0 +1,9 @@
+{ "translations": {
+    "Error" : "Սխալ",
+    "Day" : "Օր",
+    "Next" : "Հաջորդ",
+    "after" : "հետո",
+    "Time" : "Ժամ",
+    "Settings" : "կարգավորումներ"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

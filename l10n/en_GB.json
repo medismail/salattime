@@ -1,0 +1,12 @@
+{ "translations": {
+    "No result." : "No result.",
+    "Error" : "Error",
+    "Day" : "Day",
+    "Next" : "Next",
+    "after" : "after",
+    "Sunrise" : "Sunrise",
+    "Sunset" : "Sunset",
+    "Time" : "Time",
+    "Settings" : "Settings"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

@@ -1,0 +1,15 @@
+OC.L10N.register(
+    "salattime",
+    {
+    "No result." : "No hi ha resultats.",
+    "Error" : "Error",
+    "Day" : "Dia",
+    "Next" : "Següent",
+    "after" : "després de",
+    "Sunrise" : "Sortida del sol",
+    "Sunset" : "Posta de sol",
+    "Time" : "Hora",
+    "Timezone:" : "Zona horària:",
+    "Settings" : "Paràmetres"
+},
+"nplurals=2; plural=(n != 1);");

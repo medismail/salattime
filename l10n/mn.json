@@ -1,0 +1,9 @@
+{ "translations": {
+    "Error" : "Алдаа",
+    "Day" : "Өдөр",
+    "Next" : "дараагийх",
+    "after" : "дараа",
+    "Time" : "Цаг",
+    "Settings" : "Тохиргоо"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

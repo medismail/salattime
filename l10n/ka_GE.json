@@ -1,0 +1,11 @@
+{ "translations": {
+    "Error" : "შეცდომა",
+    "Day" : "დღე",
+    "Next" : "შემდეგი",
+    "after" : "შემდეგ",
+    "Sunrise" : "მზის ამოსვლა",
+    "Sunset" : "მზის ჩასვლა",
+    "Time" : "დრო",
+    "Settings" : "პარამეტრები"
+},"pluralForm" :"nplurals=2; plural=(n!=1);"
+}

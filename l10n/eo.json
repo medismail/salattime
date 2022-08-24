@@ -1,0 +1,11 @@
+{ "translations": {
+    "Error" : "Eraro",
+    "Day" : "Tago",
+    "Next" : "Sekva",
+    "after" : "post",
+    "Sunrise" : "Sunleviĝo",
+    "Sunset" : "Sunsubiro",
+    "Time" : "Dato",
+    "Settings" : "Agordoj"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

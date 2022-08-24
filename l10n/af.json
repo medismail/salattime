@@ -1,0 +1,12 @@
+{ "translations": {
+    "No result." : "Geen resultaat.",
+    "Error" : "Fout",
+    "Day" : "Dag",
+    "Next" : "Volgende",
+    "after" : "na",
+    "Sunrise" : "Sonsopkoms",
+    "Sunset" : "Sondergang",
+    "Time" : "Tyd",
+    "Settings" : "Instellings"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

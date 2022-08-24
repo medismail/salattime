@@ -1,0 +1,9 @@
+{ "translations": {
+    "Error" : "Error",
+    "Day" : "Die",
+    "Next" : "Sequente",
+    "after" : "post",
+    "Time" : "Tempore",
+    "Settings" : "Configurationes"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

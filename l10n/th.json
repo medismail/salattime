@@ -1,0 +1,11 @@
+{ "translations": {
+    "Error" : "ข้อผิดพลาด",
+    "Day" : "วัน",
+    "Next" : "ถัดไป",
+    "after" : "หลัง",
+    "Sunrise" : "อาทิตย์ขึ้น",
+    "Sunset" : "อาทิตย์ตก",
+    "Time" : "เวลา",
+    "Settings" : "การตั้งค่า"
+},"pluralForm" :"nplurals=1; plural=0;"
+}

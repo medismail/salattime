@@ -1,0 +1,11 @@
+{ "translations": {
+    "Error" : "Viga",
+    "Day" : "Päev",
+    "Next" : "Järgmine",
+    "after" : "pärast",
+    "Sunrise" : "Päikesetõus",
+    "Sunset" : "Päikeseloojang",
+    "Time" : "Aeg",
+    "Settings" : "Seaded"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

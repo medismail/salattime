@@ -1,0 +1,14 @@
+{ "translations": {
+    "No result." : "Ei tulosta.",
+    "Error" : "Virhe",
+    "Day" : "Päivä",
+    "Next" : "Seuraava",
+    "after" : "jälkeen",
+    "Sunrise" : "Auringonnousu",
+    "Sunset" : "Auringonlasku",
+    "Time" : "Aika",
+    "Altitude" : "Korkeus",
+    "Timezone:" : "Aikavyöhyke:",
+    "Settings" : "Asetukset"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

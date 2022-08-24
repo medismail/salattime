@@ -1,0 +1,14 @@
+{ "translations": {
+    "No result." : "Ni zadetkov",
+    "Error" : "Napaka",
+    "Day" : "Dan",
+    "Next" : "Naslednji",
+    "after" : "po",
+    "Sunrise" : "Sončni vzhod",
+    "Sunset" : "Sončni zahod",
+    "Time" : "Čas",
+    "Altitude" : "Nadmorska višina",
+    "Timezone:" : "Časovni pas:",
+    "Settings" : "Nastavitve"
+},"pluralForm" :"nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);"
+}

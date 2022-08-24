@@ -1,0 +1,13 @@
+{ "translations": {
+    "No result." : "Intet resultat",
+    "Error" : "Fejl",
+    "Day" : "Dag",
+    "Next" : "Næste",
+    "after" : "efter",
+    "Sunrise" : "Solskin",
+    "Sunset" : "Solnedgang",
+    "Time" : "Tid",
+    "Timezone:" : "Tidszone:",
+    "Settings" : "Indstillinger"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}
