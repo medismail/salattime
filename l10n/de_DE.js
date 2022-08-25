@@ -2,6 +2,8 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Gebetszeit",
+    "1st Day of Ramadan" : "1. Tag des Ramadans",
+    "H" : "H",
     "No result." : "Kein Ergebnis.",
     "Error" : "Fehler",
     "Give 5 times prayer." : "5 mal beten.",
@@ -41,7 +43,7 @@ OC.L10N.register(
     "Longitude:" : "Längengrad:",
     "Timezone:" : "Zeitzone:",
     "Altitude:" : "Höhe:",
-    "Caclulation method:" : "Kalkulationsmethode:",
+    "Caclulation method:" : "Berechnungsmethode:",
     "Prayer Time" : "Gebetsstunde",
     "Adjustments" : "Anpassungen",
     "Settings" : "Einstellungen",
