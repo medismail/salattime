@@ -47,6 +47,7 @@ appstore_build_directory=$(CURDIR)/build/artifacts/appstore
 appstore_package_name=$(appstore_build_directory)/$(app_name)
 npm=$(shell which npm 2> /dev/null)
 composer=$(shell which composer 2> /dev/null)
+version=$(shell grep \<version\> appinfo/info.xml|cut -f2 -d\>|cut -f1 -d\<)
 
 all: build
 
@@ -133,7 +134,7 @@ source:
 appstore:
 	rm -rf $(appstore_build_directory)
 	mkdir -p $(appstore_build_directory)
-	tar cvzf $(appstore_package_name).tar.gz \
+	tar cvzf $(appstore_package_name)_$(version).tar.gz \
 	--exclude-vcs \
 	--exclude="../$(app_name)/build" \
 	--exclude="../$(app_name)/tests" \

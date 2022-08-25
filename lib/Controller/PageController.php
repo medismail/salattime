@@ -56,7 +56,8 @@ class PageController extends Controller {
 		$templateName = 'index';  // will use templates/index.php
 		$times = $this->calculationService->getPrayerTimes($this->userId);
 		$sunmoon = $this->calculationService->getSunMoonCalc($this->userId, $times['DayOffset']);
-		$parameters = array_merge($times, $sunmoon);
+		$relative_url = ['rurl' => $this->urlGenerator->imagePath(Application::APP_ID, '')];
+		$parameters = array_merge($times, $sunmoon, $relative_url);
 		return new TemplateResponse(Application::APP_ID, $templateName, $parameters);
 	}
 

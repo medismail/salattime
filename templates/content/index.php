@@ -66,11 +66,11 @@ echo "<tr>
 </div>
 <div id=\"infos\" class=\"viewcontainer\">
 <div id=\"compass\">
-<img src=\"img/kiblaibra.png\" id=\"kiblaibra\" style=\"transform: rotate(", $_['QiblaDirection'], "deg);\">";
+<img src=\"",  $_['rurl'], "kiblaibra.png\" id=\"kiblaibra\" style=\"transform: rotate(", $_['QiblaDirection'], "deg);\">";
 if ((isset($_['SunAltitude'])) && ($_['SunAltitude'] > 0))
-    echo "<img src=\"img/sunibra.png\" id=\"sunibra\" style=\"transform: rotate(", $_['SunAzimuth'], "deg);position: absolute;top: 0;left: 0;\">";
+    echo "<img src=\"",  $_['rurl'], "sunibra.png\" id=\"sunibra\" style=\"transform: rotate(", $_['SunAzimuth'], "deg);position: absolute;top: 0;left: 0;\">";
 if ((isset($_['MoonAltitude'])) && ($_['MoonAltitude'] > 0) && ($_['IlluminatedFraction'] > 1))
-    echo "<img src=\"img/moonibra.png\" id=\"moonibra\" style=\"transform: rotate(", $_['MoonAzimuth'], "deg);position: absolute;top: 0;left: 0;\">";
+    echo "<img src=\"",  $_['rurl'], "moonibra.png\" id=\"moonibra\" style=\"transform: rotate(", $_['MoonAzimuth'], "deg);position: absolute;top: 0;left: 0;\">";
 
 echo '</div><br>';
 if (isset($_['IlluminatedFraction']))

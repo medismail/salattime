@@ -139,7 +139,7 @@ class CalculationService {
 		if (Helper::pythonInstalled()) {
 			$output=null;
 			$retval=null;
-			exec( __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date)+$dayoffset, $output, $retval);
+			exec( 'python3 ' . __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date)+$dayoffset, $output, $retval);
 			$sunMoonTimes['Sunrise'] = $this->timeConversion($output[1], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Sunset'] = $this->timeConversion($output[2], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonrise'] = $this->timeConversion($output[3], $udtz, $textFormat_12_24);
@@ -222,11 +222,13 @@ class CalculationService {
 	 * @param string format
 	 * @return string of php time
 	 */
-	private function timeConversion(string $time, DateTimeZone $timezone, string $format): string {
+	private function timeConversion(string $time = null, DateTimeZone $timezone, string $format): string {
 		$ret = "";
-		$date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $time, new DateTimezone('UTC'));
-		if ($date)
-			$ret = $date->setTimezone($timezone)->format($format);
+		if ($time) {
+			$date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $time, new DateTimezone('UTC'));
+			if ($date)
+				$ret = $date->setTimezone($timezone)->format($format);
+		}
 		return $ret;
 	}
 

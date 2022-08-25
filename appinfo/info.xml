@@ -3,14 +3,20 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>salattime</id>
     <name>Salat Time</name>
-    <summary>Salat Time</summary>
-    <description><![CDATA[Give 5 times prayer.]]></description>
-    <version>0.1.0</version>
+    <summary>Give 5 times prayer.</summary>
+    <description><![CDATA[# Salat Time
+ * 5 muslim daily prayer times
+ * Hijri date
+ * Qibla direction
+ * and many others useful informations.]]></description>
+    <version>0.1.1</version>
     <licence>agpl</licence>
     <author mail="imejri@hotmail.com" >Mohamed</author>
+    <website>https://github.com/medismail/salattime</website>
     <namespace>SalatTime</namespace>
     <category>tools</category>
     <bugs>https://github.com/medismail/salattime/issues</bugs>
+    <screenshot>https://github.com/medismail/salattime/blob/main/img/salattime.png</screenshot>
     <dependencies>
         <nextcloud min-version="21" max-version="24"/>
     </dependencies>
