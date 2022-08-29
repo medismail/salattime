@@ -34,13 +34,13 @@ def ParseArgs(args):
     observer = astronomy.Observer(latitude, longitude, elevation)
     return (observer, time, timezone)
 
-def QuarterName(quarter):
-    return [
-        'New Moon',
-        'First Quarter',
-        'Full Moon',
-        'Third Quarter'
-    ][quarter]
+#def QuarterName(quarter):
+#    return [
+#        'New Moon',
+#        'First Quarter',
+#        'Full Moon',
+#        'Third Quarter'
+#    ][quarter]
 
 def PrintEvent(name, time):
     if time is None:
@@ -83,7 +83,7 @@ def main(args):
     mq = astronomy.SearchMoonQuarter(time)
     #print('{} : {}'.format(mq.time, QuarterName(mq.quarter)))
     #print('Moon Phase: {}'.format(QuarterName(mq.quarter-1 if mq.quarter>0 else 3)))
-    print(QuarterName(mq.quarter-1 if mq.quarter>0 else 3))
+    #print(QuarterName(mq.quarter-1 if mq.quarter>0 else 3))
 
     # Calculate the Moon's ecliptic phase angle,
     # which ranges from 0 to 360 degrees.

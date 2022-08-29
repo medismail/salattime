@@ -106,7 +106,7 @@ class Method
     {
         return [
              self::METHOD_MWL => [
-                'id' => 3,
+                'id' => 0,
                 'name' => 'Muslim World League',
                 'params' => [
                     PrayerTimes::FAJR => 18,
@@ -130,7 +130,7 @@ class Method
                 ]
             ],
             self::METHOD_EGYPT => [
-                'id' => 5,
+                'id' => 4,
                 'name' => 'Egyptian General Authority of Survey',
                 'params' => [
                     PrayerTimes::FAJR => 19.5,
@@ -142,7 +142,7 @@ class Method
                 ]
             ],
             self::METHOD_MAKKAH => [
-                'id' => 4,
+                'id' => 3,
                 'name' => 'Umm Al-Qura University, Makkah',
                 'params' => [
                     PrayerTimes::FAJR => 18.5, // Fajr was 19 degrees before 1430 hijri
@@ -180,7 +180,7 @@ class Method
                 ]
             ],
             self::METHOD_JAFARI => [
-                'id' => 0,
+                'id' => 5,
                 'name' => 'Shia Ithna-Ashari, Leva Institute, Qum',
                 'params' => [
                     PrayerTimes::FAJR => 16,

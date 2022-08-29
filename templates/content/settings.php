@@ -58,21 +58,21 @@
 </datalist>
 <?php echo $l->t('Altitude:'); ?> <input type="text" name="elevation" value=<?php echo "\"" . $_['elevation'] . "\""; ?>><br>
 <?php echo $l->t('Caclulation method:'); ?> <select name="method" id="method">
-  <option value="MWL" <?php if($_['method'] == 'MWL'){echo("selected");}?>>Muslim World League</option>
-  <option value="MAKKAH" <?php if($_['method'] == 'MAKKAH'){echo("selected");}?>>Umm Al-Qura University, Makkah</option>
-  <option value="KARACHI" <?php if($_['method'] == 'KARACHI'){echo("selected");}?>>University of Islamic Sciences, Karachi</option>
-  <option value="ISNA" <?php if($_['method'] == 'ISNA'){echo("selected");}?>>Islamic Society of North America (ISNA)</option>
-  <option value="JAFARI" <?php if($_['method'] == 'JAFARI'){echo("selected");}?>>Shia Ithna-Ashari, Leva Institute, Qum</option>
-  <option value="GULF" <?php if($_['method'] == 'GULF'){echo("selected");}?>>Gulf Region</option>
-  <option value="MOONSIGHTING" <?php if($_['method'] == 'MOONSIGHTING'){echo("selected");}?>>Moonsighting Committee Worldwide (Moonsighting.com)</option>
-  <option value="TURKEY" <?php if($_['method'] == 'TURKEY'){echo("selected");}?>>TURKEY</option>
-  <option value="TEHRAN" <?php if($_['method'] == 'TEHRAN'){echo("selected");}?>>TEHRAN</option>
-  <option value="EGYPT" <?php if($_['method'] == 'EGYPT'){echo("selected");}?>>EGYPT</option>
-  <option value="QATAR" <?php if($_['method'] == 'QATAR'){echo("selected");}?>>QATAR</option>
-  <option value="KUWAIT" <?php if($_['method'] == 'KUWAIT'){echo("selected");}?>>KUWAIT</option>
-  <option value="RUSSIA" <?php if($_['method'] == 'RUSSIA'){echo("selected");}?>>RUSSIA</option>
-  <option value="FRANCE" <?php if($_['method'] == 'FRANCE'){echo("selected");}?>>FRANCE</option>
-  <option value="SINGAPORE" <?php if($_['method'] == 'SINGAPORE'){echo("selected");}?>>SINGAPORE</option>
+  <option value="MWL" <?php if($_['method'] == 'MWL'){echo("selected");}?>><?php echo $l->t('Muslim World League'); ?></option>
+  <option value="MAKKAH" <?php if($_['method'] == 'MAKKAH'){echo("selected");}?>><?php echo $l->t('Umm Al-Qura University, Makkah'); ?></option>
+  <option value="KARACHI" <?php if($_['method'] == 'KARACHI'){echo("selected");}?>><?php echo $l->t('University of Islamic Sciences, Karachi'); ?></option>
+  <option value="ISNA" <?php if($_['method'] == 'ISNA'){echo("selected");}?>><?php echo $l->t('Islamic Society of North America (ISNA)'); ?></option>
+  <option value="JAFARI" <?php if($_['method'] == 'JAFARI'){echo("selected");}?>><?php echo $l->t('Shia Ithna-Ashari, Leva Institute, Qum'); ?></option>
+  <option value="GULF" <?php if($_['method'] == 'GULF'){echo("selected");}?>><?php echo $l->t('Gulf Region'); ?></option>
+  <option value="MOONSIGHTING" <?php if($_['method'] == 'MOONSIGHTING'){echo("selected");}?>><?php echo $l->t('Moonsighting Committee Worldwide (Moonsighting.com)'); ?></option>
+  <option value="TURKEY" <?php if($_['method'] == 'TURKEY'){echo("selected");}?>><?php echo $l->t('Diyanet İşleri Başkanlığı, Turkey'); ?></option>
+  <option value="TEHRAN" <?php if($_['method'] == 'TEHRAN'){echo("selected");}?>><?php echo $l->t('Institute of Geophysics, University of Tehran'); ?></option>
+  <option value="EGYPT" <?php if($_['method'] == 'EGYPT'){echo("selected");}?>><?php echo $l->t('Egyptian General Authority of Survey'); ?></option>
+  <option value="QATAR" <?php if($_['method'] == 'QATAR'){echo("selected");}?>><?php echo $l->t('QATAR'); ?></option>
+  <option value="KUWAIT" <?php if($_['method'] == 'KUWAIT'){echo("selected");}?>><?php echo $l->t('KUWAIT'); ?></option>
+  <option value="RUSSIA" <?php if($_['method'] == 'RUSSIA'){echo("selected");}?>><?php echo $l->t('Spiritual Administration of Muslims of Russia'); ?></option>
+  <option value="FRANCE" <?php if($_['method'] == 'FRANCE'){echo("selected");}?>><?php echo $l->t('Union Organization islamic de France'); ?></option>
+  <option value="SINGAPORE" <?php if($_['method'] == 'SINGAPORE'){echo("selected");}?>><?php echo $l->t('Majlis Ugama Islam Singapura, Singapore'); ?></option>
 </select><br>
 <input type="text" name="format_12_24" style="display: none;" value=<?php echo "\"" . $_['format_12_24'] . "\""; ?>>
 <input type="submit">

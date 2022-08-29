@@ -137,20 +137,38 @@ class CalculationService {
 		$udtz = new DateTimezone($p_settings['timezone']);
 		$date = new DateTime(null, $udtz);
 		if (Helper::pythonInstalled()) {
-			$output=null;
-			$retval=null;
+			$mphase = [ 0 => $this->l10n->t('New Moon')
+				    1 => $this->l10n->t('Waxing Crescent Moon')
+				    2 => $this->l10n->t('Waxing Crescent Moon')
+				    3 => $this->l10n->t('Waxing Crescent Moon')
+				    4 => $this->l10n->t('First Quarter Moon')
+				    5 => $this->l10n->t('Waxing Gibbous Moon')
+				    6 => $this->l10n->t('Waxing Gibbous Moon')
+				    7 => $this->l10n->t('Waxing Gibbous Moon')
+				    8 => $this->l10n->t('Full Moon')
+				    9 => $this->l10n->t('Waning Gibbous Moon')
+				    10 => $this->l10n->t('Waning Gibbous Moon')
+				    11 => $this->l10n->t('Waning Gibbous Moon')
+				    12 => $this->l10n->t('Third Quarter Moon')
+				    13 => $this->l10n->t('Waning Crescent Moon')
+				    14 => $this->l10n->t('Waning Crescent Moon')
+				    15 => $this->l10n->t('Waning Crescent Moon')
+				    16 => $this->l10n->t('New Moon')
+				  ];
+			$output = null;
+			$retval = null;
 			exec( 'python3 ' . __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date)+$dayoffset, $output, $retval);
 			$sunMoonTimes['Sunrise'] = $this->timeConversion($output[1], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Sunset'] = $this->timeConversion($output[2], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonrise'] = $this->timeConversion($output[3], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonset'] = $this->timeConversion($output[4], $udtz, $textFormat_12_24);
-			$sunMoonTimes['MoonPhase'] = $output[5];
-			$sunMoonTimes['MoonPhaseAngle'] = $output[6];
-			$sunMoonTimes['IlluminatedFraction'] = $output[7];
-			$sunMoonTimes['SunAzimuth'] = $output[8];
-			$sunMoonTimes['SunAltitude'] = $output[9];
-			$sunMoonTimes['MoonAzimuth'] = $output[10];
-			$sunMoonTimes['MoonAltitude'] = $output[11];
+			$sunMoonTimes['MoonPhase'] = $mphase[((int)$output[5]*10/225)];
+			$sunMoonTimes['MoonPhaseAngle'] = $output[5];
+			$sunMoonTimes['IlluminatedFraction'] = $output[6];
+			$sunMoonTimes['SunAzimuth'] = $output[7];
+			$sunMoonTimes['SunAltitude'] = $output[8];
+			$sunMoonTimes['MoonAzimuth'] = $output[9];
+			$sunMoonTimes['MoonAltitude'] = $output[10];
 		} else {
 			if ($dayoffset)
 				$date = new DateTime('today +1 day', $udtz);
