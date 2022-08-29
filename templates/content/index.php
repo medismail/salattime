@@ -74,7 +74,7 @@ if ((isset($_['MoonAltitude'])) && ($_['MoonAltitude'] > 0) && ($_['IlluminatedF
 
 echo '</div><br>';
 if (isset($_['IlluminatedFraction']))
-    echo $l->t('Moon\'s illuminated fraction'), ": ", $_['IlluminatedFraction'], '%<br>';
+    echo $l->t('Moon\'s illuminated fraction'), ": &emsp; ", $_['IlluminatedFraction'], '%<br>';
 if (isset($_['MoonPhase']))
     echo $l->t('Moon Phase'), ": &emsp; ", $_['MoonPhase'], '<br>';
 if (isset($_['MoonPhaseAngle'])) {

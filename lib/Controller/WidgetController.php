@@ -34,14 +34,14 @@ class WidgetController extends OCSController {
 		$times = $this->calculationService->getPrayerTimes($this->userId);
 		$name = $this->calculationService->gretNames();
 		return new DataResponse([
-			'content' => "\n ## " . $times[$name['HIJRI']] . " \n" .
+			'content' => "\n ## " . $times['Hijri'] . " \n" .
 				"| Salat | &nbsp;&nbsp;Time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | \n| ----------- | :-----------: | " .
-				"\n| " . $name['FAJR'] . " | " . $times[$name['FAJR']] . " | " .
-				"\n| " . $name['SUNRISE'] . " | " . $times[$name['SUNRISE']] . " | " .
-				"\n| " . $name['ZHUHR'] . " | " . $times[$name['ZHUHR']] . " | " .
-				"\n| " . $name['ASR'] . " | " . $times[$name['ASR']] . " | " .
-				"\n| " . $name['MAGHRIB'] . " &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| " . $times[$name['MAGHRIB']] . " | " .
-				"\n| " . $name['ISHA'] . " | " . $times[$name['ISHA']] . " |",
+				"\n| " . $name['FAJR'] . " | " . $times['Fajr'] . " | " .
+				"\n| " . $name['SUNRISE'] . " | " . $times['Sunrise'] . " | " .
+				"\n| " . $name['ZHUHR'] . " | " . $times['Dhuhr'] . " | " .
+				"\n| " . $name['ASR'] . " | " . $times['Asr'] . " | " .
+				"\n| " . $name['MAGHRIB'] . " &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| " . $times['Maghrib'] . " | " .
+				"\n| " . $name['ISHA'] . " | " . $times['Isha'] . " |",
 		]);
 		//return new DataResponse(array('msg' => 'not found!'), Http::STATUS_NOT_FOUND);
 	}

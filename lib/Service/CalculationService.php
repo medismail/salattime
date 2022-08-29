@@ -137,22 +137,23 @@ class CalculationService {
 		$udtz = new DateTimezone($p_settings['timezone']);
 		$date = new DateTime(null, $udtz);
 		if (Helper::pythonInstalled()) {
-			$mphase = [ 0 => $this->l10n->t('New Moon')
-				    1 => $this->l10n->t('Waxing Crescent Moon')
-				    2 => $this->l10n->t('Waxing Crescent Moon')
-				    3 => $this->l10n->t('Waxing Crescent Moon')
-				    4 => $this->l10n->t('First Quarter Moon')
-				    5 => $this->l10n->t('Waxing Gibbous Moon')
-				    6 => $this->l10n->t('Waxing Gibbous Moon')
-				    7 => $this->l10n->t('Waxing Gibbous Moon')
-				    8 => $this->l10n->t('Full Moon')
-				    9 => $this->l10n->t('Waning Gibbous Moon')
-				    10 => $this->l10n->t('Waning Gibbous Moon')
-				    11 => $this->l10n->t('Waning Gibbous Moon')
-				    12 => $this->l10n->t('Third Quarter Moon')
-				    13 => $this->l10n->t('Waning Crescent Moon')
-				    14 => $this->l10n->t('Waning Crescent Moon')
-				    15 => $this->l10n->t('Waning Crescent Moon')
+			$mphase = [
+				    0 => $this->l10n->t('New Moon'),
+				    1 => $this->l10n->t('Waxing Crescent Moon'),
+				    2 => $this->l10n->t('Waxing Crescent Moon'),
+				    3 => $this->l10n->t('Waxing Crescent Moon'),
+				    4 => $this->l10n->t('First Quarter Moon'),
+				    5 => $this->l10n->t('Waxing Gibbous Moon'),
+				    6 => $this->l10n->t('Waxing Gibbous Moon'),
+				    7 => $this->l10n->t('Waxing Gibbous Moon'),
+				    8 => $this->l10n->t('Full Moon'),
+				    9 => $this->l10n->t('Waning Gibbous Moon'),
+				    10 => $this->l10n->t('Waning Gibbous Moon'),
+				    11 => $this->l10n->t('Waning Gibbous Moon'),
+				    12 => $this->l10n->t('Third Quarter Moon'),
+				    13 => $this->l10n->t('Waning Crescent Moon'),
+				    14 => $this->l10n->t('Waning Crescent Moon'),
+				    15 => $this->l10n->t('Waning Crescent Moon'),
 				    16 => $this->l10n->t('New Moon')
 				  ];
 			$output = null;
@@ -193,21 +194,20 @@ class CalculationService {
 
 	public function gretNames(): array {
 		return [
-			'IMSAK' => PrayerTimes::IMSAK,
-			'FAJR' => PrayerTimes::FAJR,
-			'SUNRISE' => PrayerTimes::SUNRISE,
-			'ZHUHR' => PrayerTimes::ZHUHR,
-			'ASR' => PrayerTimes::ASR,
-			'SUNSET' => PrayerTimes::SUNSET,
-			'MAGHRIB' => PrayerTimes::MAGHRIB,
-			'ISHA' => PrayerTimes::ISHA,
-			'MIDNIGHT' => PrayerTimes::MIDNIGHT,
+			'IMSAK' => $this->l10n->t(PrayerTimes::IMSAK),
+			'FAJR' => $this->l10n->t(PrayerTimes::FAJR),
+			'SUNRISE' => $this->l10n->t(PrayerTimes::SUNRISE),
+			'ZHUHR' => $this->l10n->t(PrayerTimes::ZHUHR),
+			'ASR' => $this->l10n->t(PrayerTimes::ASR),
+			'SUNSET' => $this->l10n->t(PrayerTimes::SUNSET),
+			'MAGHRIB' => $this->l10n->t(PrayerTimes::MAGHRIB),
+			'ISHA' => $this->l10n->t(PrayerTimes::ISHA),
+			'MIDNIGHT' => $this->l10n->t(PrayerTimes::MIDNIGHT),
 			'SALAT' => PrayerTimes::SALAT,
 			'REMAIN' => PrayerTimes::REMAIN,
-			'HIJRI' => 'Hijri',
-			'MOONRISE' => PrayerTimes::MOONRISE,
-			'MOONSET' => PrayerTimes::MOONSET,
-			'DAYLENGTH' => 'DayLength'
+			'MOONRISE' => $this->l10n->t('Moonrise'),
+			'MOONSET' => $this->l10n->t('Moonset'),
+			'DAYLENGTH' => $this->l10n->t('DayLength')
 		];
 	}
 
