@@ -3,7 +3,7 @@
 echo "<div id=\"main-content-div\"><div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">", $_['Hijri'], '</h2>';
 
 if ($_['SpecialDay'])
-    echo $l->t('Today is '), ": &emsp; <b>", $_['SpecialDay'], '</b><br>';
+    echo $l->t('Today is'), ": &emsp; <b>", $_['SpecialDay'], '</b><br>';
 
 echo $l->t('Next') . ": <b>" . $l->t($_['Salat']) . "</b> " . $l->t('after') . ": <b>" . $_['Remain'] . '</b><br>';
 
@@ -79,8 +79,8 @@ if (isset($_['MoonPhase']))
     echo $l->t('Moon Phase'), ": &emsp; ", $_['MoonPhase'], '<br>';
 if (isset($_['MoonPhaseAngle'])) {
     echo $l->t('Moon\'s ecliptic phase angle'), ": ", $_['MoonPhaseAngle'], " ", $l->t('degrees'), '<br>';
-    echo $l->t('Sun Position '), " ", $l->t('Azimuth'), ": ", $_['SunAzimuth'], ", ", $l->t('Altitude'), ": ", $_['SunAltitude'], '<br>';
-    echo $l->t('Moon Position '), " ", $l->t('Azimuth'), ": ", $_['MoonAzimuth'], ", ", $l->t('Altitude'), ": ", $_['MoonAltitude'], '<br>';
+    echo $l->t('Sun Position'), " ", $l->t('Azimuth'), ": ", $_['SunAzimuth'], ", ", $l->t('Altitude'), ": ", $_['SunAltitude'], '<br>';
+    echo $l->t('Moon Position'), " ", $l->t('Azimuth'), ": ", $_['MoonAzimuth'], ", ", $l->t('Altitude'), ": ", $_['MoonAltitude'], '<br>';
 }
 
 echo $l->t('Qibla direction'), " ", $l->t('Azimuth'), ": ", $_['QiblaDirection'], "</div></div>";
