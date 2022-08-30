@@ -2,6 +2,8 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Salat Ordua",
+    "Moonrise" : "Ilargiaren agertzea",
+    "Moonset" : "Ilargiaren desagertzea",
     "No result." : "Emaitzarik ez.",
     "Error" : "Errorea",
     "Give 5 times prayer." : "Eman 5 otoitz ordu",
@@ -19,8 +21,6 @@ OC.L10N.register(
     "Imsak" : "Imsak",
     "Sunrise" : "Egunsentia",
     "Sunset" : "Ilunabarra",
-    "Moonrise" : "Ilargiaren agertzea",
-    "Moonset" : "Ilargiaren desagertzea",
     "Salat" : "Salat",
     "Time" : "Noiz",
     "Juma'a:" : "Juma'a:",

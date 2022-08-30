@@ -2,6 +2,8 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "وقت الصلاة",
+    "Moonrise" : "طلوع القمر",
+    "Moonset" : "غروب القمر",
     "No result." : "لا يوجد نتيجة",
     "Error" : "خطأ",
     "Give 5 times prayer." : "أعط أوقات الصلوات الخمس",
@@ -19,8 +21,6 @@ OC.L10N.register(
     "Imsak" : "الإمساك",
     "Sunrise" : "شروق الشمس",
     "Sunset" : "غروب الشمس",
-    "Moonrise" : "طلوع القمر",
-    "Moonset" : "غروب القمر",
     "Salat" : "صلاة",
     "Time" : "إلى وقت",
     "Juma'a:" : "الجمعة",

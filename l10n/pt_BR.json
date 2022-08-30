@@ -1,5 +1,7 @@
 { "translations": {
     "Salat Time" : "Hora do Salat",
+    "Moonrise" : "Nascer da lua",
+    "Moonset" : "Pôr da lua",
     "No result." : "Sem resultado.",
     "Error" : "Erro",
     "Salat time content is unavailable" : "O conteúdo está indisponível",
@@ -16,8 +18,6 @@
     "Imsak" : "Imsak",
     "Sunrise" : "Nascer do sol",
     "Sunset" : "Pôr do sol",
-    "Moonrise" : "Nascer da lua",
-    "Moonset" : "Pôr da lua",
     "Salat" : "Salat",
     "Time" : "Horário",
     "Juma'a:" : "Juma'a:",

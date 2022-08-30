@@ -1,4 +1,6 @@
 { "translations": {
+    "Moonrise" : "Lever de la lune",
+    "Moonset" : "Coucher de la lune",
     "No result." : "Aucun résultat.",
     "Error" : "Erreur",
     "Day" : "Jour",
@@ -6,8 +8,6 @@
     "after" : "après ",
     "Sunrise" : "Lever du soleil",
     "Sunset" : "Coucher du soleil",
-    "Moonrise" : "Lever de la lune",
-    "Moonset" : "Coucher de la lune",
     "Time" : "Heure",
     "Moon Phase" : "Phase de lune",
     "degrees" : "degrés",

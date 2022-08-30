@@ -1,6 +1,8 @@
 OC.L10N.register(
     "salattime",
     {
+    "Moonrise" : "Východ měsíce",
+    "Moonset" : "Západ měsíce",
     "No result." : "Bez výsledku.",
     "Error" : "Chyba",
     "Day" : "Den",
@@ -10,8 +12,6 @@ OC.L10N.register(
     "Day length" : "Délka dne",
     "Sunrise" : "Východ slunce",
     "Sunset" : "Západ slunce",
-    "Moonrise" : "Východ měsíce",
-    "Moonset" : "Západ měsíce",
     "Time" : "Čas",
     "Moon Phase" : "Fáze měsíce",
     "degrees" : "stupně",

@@ -2,6 +2,8 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Gebetszeit",
+    "Moonrise" : "Mondaufgang",
+    "Moonset" : "Monduntergang",
     "No result." : "Kein Ergebnis.",
     "Error" : "Fehler",
     "Give 5 times prayer." : "5 mal beten.",
@@ -19,8 +21,6 @@ OC.L10N.register(
     "Imsak" : "Imsak",
     "Sunrise" : "Sonnenaufgang",
     "Sunset" : "Sonnenuntergang",
-    "Moonrise" : "Mondaufgang",
-    "Moonset" : "Monduntergang",
     "Salat" : "Gebet",
     "Time" : "Zeit",
     "Juma'a:" : "Juma'a:",

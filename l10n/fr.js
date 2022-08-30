@@ -1,6 +1,8 @@
 OC.L10N.register(
     "salattime",
     {
+    "Moonrise" : "Lever de la lune",
+    "Moonset" : "Coucher de la lune",
     "No result." : "Aucun résultat.",
     "Error" : "Erreur",
     "Day" : "Jour",
@@ -8,8 +10,6 @@ OC.L10N.register(
     "after" : "après ",
     "Sunrise" : "Lever du soleil",
     "Sunset" : "Coucher du soleil",
-    "Moonrise" : "Lever de la lune",
-    "Moonset" : "Coucher de la lune",
     "Time" : "Heure",
     "Moon Phase" : "Phase de lune",
     "degrees" : "degrés",

@@ -2,6 +2,8 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Hora do Salat",
+    "Moonrise" : "Nascer da lua",
+    "Moonset" : "Pôr da lua",
     "No result." : "Sem resultado.",
     "Error" : "Erro",
     "Salat time content is unavailable" : "O conteúdo está indisponível",
@@ -18,8 +20,6 @@ OC.L10N.register(
     "Imsak" : "Imsak",
     "Sunrise" : "Nascer do sol",
     "Sunset" : "Pôr do sol",
-    "Moonrise" : "Nascer da lua",
-    "Moonset" : "Pôr da lua",
     "Salat" : "Salat",
     "Time" : "Horário",
     "Juma'a:" : "Juma'a:",
