@@ -13,9 +13,9 @@
 <input id="checkbox1224" type="checkbox" name="checkbox1224" class="checkbox" <?php if ($_['format_12_24'] == "24h") echo "checked"; ?> />
 <label for="checkbox1224"> <?php echo $l->t('Use 24 hours format'); ?></label><br>
 <br>
-<button id="btnmtoggle"><?php echo $l->t('Click for manuel settings'); ?></button>
+<button id="btnmtoggle"><?php echo $l->t('Click for manual settings'); ?></button>
 <div id="divmanuel" style="display: none;">
-<?php echo $l->t('Manuel settings:'); ?> <br>
+<?php echo $l->t('Manual settings:'); ?> <br>
 <form name="man" action="savesetting" method="get">
 <input type="text" name="address" style="display: none;" value"">
 <?php echo $l->t('Latitude:'); ?> <input type="text" name="latitude" value=<?php echo "\"" . $_['latitude'] . "\""; ?>><br>
@@ -57,7 +57,7 @@
   <option value="-1200">
 </datalist>
 <?php echo $l->t('Altitude:'); ?> <input type="text" name="elevation" value=<?php echo "\"" . $_['elevation'] . "\""; ?>><br>
-<?php echo $l->t('Caclulation method:'); ?> <select name="method" id="method">
+<?php echo $l->t('Calculation method:'); ?> <select name="method" id="method">
   <option value="MWL" <?php if($_['method'] == 'MWL'){echo("selected");}?>><?php echo $l->t('Muslim World League'); ?></option>
   <option value="MAKKAH" <?php if($_['method'] == 'MAKKAH'){echo("selected");}?>><?php echo $l->t('Umm Al-Qura University, Makkah'); ?></option>
   <option value="KARACHI" <?php if($_['method'] == 'KARACHI'){echo("selected");}?>><?php echo $l->t('University of Islamic Sciences, Karachi'); ?></option>
@@ -71,7 +71,7 @@
   <option value="QATAR" <?php if($_['method'] == 'QATAR'){echo("selected");}?>><?php echo $l->t('QATAR'); ?></option>
   <option value="KUWAIT" <?php if($_['method'] == 'KUWAIT'){echo("selected");}?>><?php echo $l->t('KUWAIT'); ?></option>
   <option value="RUSSIA" <?php if($_['method'] == 'RUSSIA'){echo("selected");}?>><?php echo $l->t('Spiritual Administration of Muslims of Russia'); ?></option>
-  <option value="FRANCE" <?php if($_['method'] == 'FRANCE'){echo("selected");}?>><?php echo $l->t('Union Organization islamic de France'); ?></option>
+  <option value="FRANCE" <?php if($_['method'] == 'FRANCE'){echo("selected");}?>><?php echo $l->t('Union of Islamic Organizations of France (UOIF)'); ?></option>
   <option value="SINGAPORE" <?php if($_['method'] == 'SINGAPORE'){echo("selected");}?>><?php echo $l->t('Majlis Ugama Islam Singapura, Singapore'); ?></option>
 </select><br>
 <input type="text" name="format_12_24" style="display: none;" value=<?php echo "\"" . $_['format_12_24'] . "\""; ?>>
