@@ -4,7 +4,6 @@ OC.L10N.register(
     "No result." : "Sem resultados",
     "Error" : "Erro",
     "Day" : "Dia",
-    "Today is " : "Hoje é",
     "Next" : "Seguinte",
     "after" : "depois",
     "Day length" : "Duração do dia",
