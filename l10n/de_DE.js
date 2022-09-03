@@ -75,7 +75,7 @@ OC.L10N.register(
     "Qibla direction" : "Gebetsrichtung",
     "Location address:" : "Ortsadresse:",
     "Use 24 hours format" : "24-Stunden-Format verwenden",
-    "Click for manual settings" : "Klicke für manuelle Einstellungen",
+    "Click for manual settings" : "Klicken für manuelle Einstellungen",
     "Manual settings:" : "Manuelle Einstellungen:",
     "Latitude:" : "Breitengrad:",
     "Longitude:" : "Längengrad:",
