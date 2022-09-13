@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "No result." : "Nenia rezulto.",
     "Error" : "Eraro",
     "Day" : "Tago",
     "Next" : "Sekva",
