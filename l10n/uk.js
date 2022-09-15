@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "No result." : "Жодного результату.",
     "Error" : "Помилка",
     "Day" : "День",
     "Today is" : "Сьогодні",
