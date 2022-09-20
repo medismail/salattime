@@ -6,6 +6,7 @@ OC.L10N.register(
     "Moonset" : "Pôr da lua",
     "No result." : "Sem resultado.",
     "Error" : "Erro",
+    "Give 5 times prayer." : "Dê 5 vezes a oração.",
     "Salat time content is unavailable" : "O conteúdo está indisponível",
     "Day" : "Dia",
     "Fajr" : "Fajr",
