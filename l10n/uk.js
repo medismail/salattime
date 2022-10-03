@@ -11,6 +11,7 @@ OC.L10N.register(
     "Sunset" : "Захід сонця",
     "Time" : "Час",
     "Sun Position" : "Позиція сонця",
+    "Altitude" : "Висота",
     "Moon Position" : "Положення Місяця",
     "Click for manual settings" : "Клацніть для ручних налаштувань",
     "Manual settings:" : "Ручні налаштування:",
