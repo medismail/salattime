@@ -23,6 +23,7 @@ OC.L10N.register(
     "Altitude" : "Altitude",
     "Moon Position" : "Position de la lune",
     "Use 24 hours format" : "Utiliser le format 24h",
+    "Manual settings:" : "Paramètres manuels :",
     "Latitude:" : "Latitude :",
     "Longitude:" : "Longitude :",
     "Timezone:" : "Fuseau horaire :",
