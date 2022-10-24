@@ -9,6 +9,7 @@ OC.L10N.register(
     "Sunrise" : "日出",
     "Sunset" : "日落",
     "Time" : "时间",
+    "Altitude" : "海拔",
     "Timezone:" : "时区：",
     "Settings" : "设置"
 },
