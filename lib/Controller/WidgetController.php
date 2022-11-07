@@ -35,7 +35,7 @@ class WidgetController extends OCSController {
 		$name = $this->calculationService->gretNames();
 		return new DataResponse([
 			'content' => "\n ## " . $times['Hijri'] . " \n" .
-				"| Salat | &nbsp;&nbsp;Time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | \n| ----------- | :-----------: | " .
+				"| ". $name['PRAYER'] ." | &nbsp;&nbsp;" . $name['TIME'] . "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | \n| ----------- | :-----------: | " .
 				"\n| " . $name['FAJR'] . " | " . $times['Fajr'] . " | " .
 				"\n| " . $name['SUNRISE'] . " | " . $times['Sunrise'] . " | " .
 				"\n| " . $name['ZHUHR'] . " | " . $times['Dhuhr'] . " | " .

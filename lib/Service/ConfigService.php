@@ -47,6 +47,11 @@ class ConfigService {
 			} else {
 				$ret['format_12_24']  = '12h';
 			}
+			if (isset($p_settings['6']) && ($p_settings['6'] != "")) {
+				$ret['city'] = $p_settings['6'];
+			} else {
+				$ret['city']  = '';
+			}
 		} else {
 			$ret['latitude'] = 21.3890824;
 			$ret['longitude'] = 39.8579118;
@@ -54,6 +59,7 @@ class ConfigService {
 			$ret['elevation'] = null;
 			$ret['method'] = 'MWL';
 			$ret['format_12_24']  = '12h';
+			$ret['city']  = 'Makkah';
 		}
 		return $ret;
 	}
@@ -76,5 +82,12 @@ class ConfigService {
 			$ret['Isha'] = 0;
 		}
 		return $ret;
+	}
+
+	public function setCityValue($userId, $city) {
+		$p_settings = $this->getSettingsValue($userId);
+		$str_settings = $p_settings['latitude'] . ':' . $p_settings['longitude'] . ':' . $p_settings['timezone'] . ':' . $p_settings['elevation'] . ':' . $p_settings['method'] . ':' . $p_settings['format_12_24'] . ':' . $city;
+		$this->config->setUserValue($userId, Application::APP_ID, 'settings', $str_settings);
+
 	}
 }

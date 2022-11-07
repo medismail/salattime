@@ -5,6 +5,8 @@ echo "<div id=\"main-content-div\"><div id=\"prayertime\" class=\"viewcontainer\
 if ($_['SpecialDay'])
     echo $l->t('Today is'), ": &emsp; <b>", $_['SpecialDay'], '</b><br>';
 
+echo $l->t('City') . ": " . $_['City'] . '<br>';
+
 echo $l->t('Next') . ": <b>" . $l->t($_['Salat']) . "</b> " . $l->t('after') . ": <b>" . $_['Remain'] . '</b><br>';
 
 echo $l->t('Day length') . ": &emsp;", $_['DayLength'], '<br>';

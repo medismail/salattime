@@ -115,6 +115,16 @@ class CalculationService {
 			$times['Jumaa'] = "Juma'a";
 		if ($hijri->get_month() != 9) //Ramadhane
 			$times[PrayerTimes::IMSAK] = "";
+		if ($p_settings['city'] != "") {
+			$times['City'] = $p_settings['city'];
+		} else {
+			$times['City'] = $this->getNameFromGeo($p_settings['latitude'], $p_settings['longitude']);
+			if ($times['City'] != "") {
+				$this->configService->setCityValue($userId, $times['City']);
+			} else {
+				$times['City'] = $this->l10n->t('Unknown city');
+			}
+		}
 
 		return $times;
 	}
@@ -207,7 +217,9 @@ class CalculationService {
 			'REMAIN' => PrayerTimes::REMAIN,
 			'MOONRISE' => $this->l10n->t('Moonrise'),
 			'MOONSET' => $this->l10n->t('Moonset'),
-			'DAYLENGTH' => $this->l10n->t('DayLength')
+			'DAYLENGTH' => $this->l10n->t('DayLength'),
+			'PRAYER' => $this->l10n->t('Salat'),
+			'TIME' => $this->l10n->t('Time')
 		];
 	}
 
@@ -280,6 +292,70 @@ class CalculationService {
 			return $results[0];
 		}
 		return ['error' => $this->l10n->t('No result.')];
+	}
+
+
+	public function getNameFromGeo(string $lat, string $lon): string {
+		$city_name = null;
+		$opts = array(
+			'http'=>array(
+				'method'=>"GET",
+				'header' =>
+					"User-agent: NextcloudWeather\r\n".
+					"Accept: */*\r\n".
+					"Accept-language: en\r\n".
+					"Connection: close\r\n",
+			)
+		);
+		$city_info = json_decode(file_get_contents("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&lat=".$lat."&lon=".$lon, false, stream_context_create($opts)), true);
+		if ((isset($city_info['osm_type'])) && (isset($city_info['osm_id']))) {
+			$osm_types = ['node' => 'N', 'relation' => 'R', 'way' => 'W'];
+			$city_detail = json_decode(file_get_contents("https://nominatim.openstreetmap.org/details.php?osmtype=".$osm_types[$city_info['osm_type']]."&osmid=".$city_info['osm_id']."&addressdetails=1&hierarchy=0&group_hierarchy=1&format=json", false, stream_context_create($opts)), true);
+			if (isset($city_detail['city_name']['names']['name:en'])) {
+				$city_name = $city_detail['city_name']['names']['name:en'];
+				if (isset($city_detail['city_name']['addresstags']['state'])) {
+					$city_name = $city_name . ", " . $city_detail['city_name']['addresstags']['state'];
+				} else if (isset($city_info['address']['state'])) {
+					$city_name = $city_name . ", " . $city_info['address']['state'];
+				}
+			}
+		}
+		if (!$city_name) {
+			if (isset($city_info['address']['suburb'])) {
+				$city_name = $city_info['address']['suburb'];
+			} else if (isset($city_info['address']['city_district'])) {
+				$city_name = $city_info['address']['city_district'];
+			} else if (isset($city_info['address']['town'])) {
+				$city_name = $city_info['address']['town'];
+			} else if (isset($city_info['address']['village'])) {
+				$city_name = $city_info['address']['village'];
+			} else if (isset($city_info['address']['city'])) {
+				$city_name = $city_info['address']['city'];
+			}
+			if (isset($city_info['address']['county'])) {
+				if ($city_name) {
+					$city_name = $city_name . ", " . $city_info['address']['county'];
+				} else {
+					$city_name = $city_info['address']['county'];
+				}
+			} else if (isset($city_info['address']['state'])) {
+				if ($city_name) {
+					$city_name = $city_name . ", " . $city_info['address']['state'];
+				} else {
+					$city_name = $city_info['address']['state'];
+				}
+			}
+		}
+
+		if (isset($city_info['address']['country_code'])) {
+			$countryList = array('AF' => 'Afghanistan','AX' => 'Aland Islands','AL' => 'Albania','DZ' => 'Algeria','AS' => 'American Samoa','AD' => 'Andorra','AO' => 'Angola','AI' => 'Anguilla','AQ' => 'Antarctica','AG' => 'Antigua and Barbuda','AR' => 'Argentina','AM' => 'Armenia','AW' => 'Aruba','AU' => 'Australia','AT' => 'Austria','AZ' => 'Azerbaijan','BS' => 'Bahamas the','BH' => 'Bahrain','BD' => 'Bangladesh','BB' => 'Barbados','BY' => 'Belarus','BE' => 'Belgium','BZ' => 'Belize','BJ' => 'Benin','BM' => 'Bermuda','BT' => 'Bhutan','BO' => 'Bolivia','BA' => 'Bosnia and Herzegovina','BW' => 'Botswana','BV' => 'Bouvet Island (Bouvetoya)','BR' => 'Brazil','IO' => 'British Indian Ocean Territory (Chagos Archipelago)','VG' => 'British Virgin Islands','BN' => 'Brunei Darussalam','BG' => 'Bulgaria','BF' => 'Burkina Faso','BI' => 'Burundi','KH' => 'Cambodia','CM' => 'Cameroon','CA' => 'Canada','CV' => 'Cape Verde','KY' => 'Cayman Islands','CF' => 'Central African Republic','TD' => 'Chad','CL' => 'Chile','CN' => 'China','CX' => 'Christmas Island','CC' => 'Cocos (Keeling) Islands','CO' => 'Colombia','KM' => 'Comoros the','CD' => 'Congo','CG' => 'Congo the','CK' => 'Cook Islands','CR' => 'Costa Rica','CI' => 'Cote d\'Ivoire','HR' => 'Croatia','CU' => 'Cuba','CY' => 'Cyprus','CZ' => 'Czech Republic','DK' => 'Denmark','DJ' => 'Djibouti','DM' => 'Dominica','DO' => 'Dominican Republic','EC' => 'Ecuador','EG' => 'Egypt','SV' => 'El Salvador','GQ' => 'Equatorial Guinea','ER' => 'Eritrea','EE' => 'Estonia','ET' => 'Ethiopia','FO' => 'Faroe Islands','FK' => 'Falkland Islands (Malvinas)','FJ' => 'Fiji the Fiji Islands','FI' => 'Finland','FR' => 'France','GF' => 'French Guiana','PF' => 'French Polynesia','TF' => 'French Southern Territories','GA' => 'Gabon','GM' => 'Gambia the','GE' => 'Georgia','DE' => 'Germany','GH' => 'Ghana','GI' => 'Gibraltar','GR' => 'Greece','GL' => 'Greenland','GD' => 'Grenada','GP' => 'Guadeloupe','GU' => 'Guam','GT' => 'Guatemala','GG' => 'Guernsey','GN' => 'Guinea','GW' => 'Guinea-Bissau','GY' => 'Guyana','HT' => 'Haiti','HM' => 'Heard Island and McDonald Islands','VA' => 'Holy See (Vatican City State)','HN' => 'Honduras','HK' => 'Hong Kong','HU' => 'Hungary','IS' => 'Iceland','IN' => 'India','ID' => 'Indonesia','IR' => 'Iran','IQ' => 'Iraq','IE' => 'Ireland','IM' => 'Isle of Man','IT' => 'Italy','JM' => 'Jamaica','JP' => 'Japan','JE' => 'Jersey','JO' => 'Jordan','KZ' => 'Kazakhstan','KE' => 'Kenya','KI' => 'Kiribati','KP' => 'Korea','KR' => 'Korea','KW' => 'Kuwait','KG' => 'Kyrgyz Republic','LA' => 'Lao','LV' => 'Latvia','LB' => 'Lebanon','LS' => 'Lesotho','LR' => 'Liberia','LY' => 'Libyan Arab Jamahiriya','LI' => 'Liechtenstein','LT' => 'Lithuania','LU' => 'Luxembourg','MO' => 'Macao','MK' => 'Macedonia','MG' => 'Madagascar','MW' => 'Malawi','MY' => 'Malaysia','MV' => 'Maldives','ML' => 'Mali','MT' => 'Malta','MH' => 'Marshall Islands','MQ' => 'Martinique','MR' => 'Mauritania','MU' => 'Mauritius','YT' => 'Mayotte','MX' => 'Mexico','FM' => 'Micronesia','MD' => 'Moldova','MC' => 'Monaco','MN' => 'Mongolia','ME' => 'Montenegro','MS' => 'Montserrat','MA' => 'Morocco','MZ' => 'Mozambique','MM' => 'Myanmar','NA' => 'Namibia','NR' => 'Nauru','NP' => 'Nepal','AN' => 'Netherlands Antilles','NL' => 'Netherlands the','NC' => 'New Caledonia','NZ' => 'New Zealand','NI' => 'Nicaragua','NE' => 'Niger','NG' => 'Nigeria','NU' => 'Niue','NF' => 'Norfolk Island','MP' => 'Northern Mariana Islands','NO' => 'Norway','OM' => 'Oman','PK' => 'Pakistan','PW' => 'Palau','PS' => 'Palestinian Territory','PA' => 'Panama','PG' => 'Papua New Guinea','PY' => 'Paraguay','PE' => 'Peru','PH' => 'Philippines','PN' => 'Pitcairn Islands','PL' => 'Poland','PT' => 'Portugal, Portuguese Republic','PR' => 'Puerto Rico','QA' => 'Qatar','RE' => 'Reunion','RO' => 'Romania','RU' => 'Russian Federation','RW' => 'Rwanda','BL' => 'Saint Barthelemy','SH' => 'Saint Helena','KN' => 'Saint Kitts and Nevis','LC' => 'Saint Lucia','MF' => 'Saint Martin','PM' => 'Saint Pierre and Miquelon','VC' => 'Saint Vincent and the Grenadines','WS' => 'Samoa','SM' => 'San Marino','ST' => 'Sao Tome and Principe','SA' => 'Saudi Arabia','SN' => 'Senegal','RS' => 'Serbia','SC' => 'Seychelles','SL' => 'Sierra Leone','SG' => 'Singapore','SK' => 'Slovakia (Slovak Republic)','SI' => 'Slovenia','SB' => 'Solomon Islands','SO' => 'Somalia, Somali Republic','ZA' => 'South Africa','GS' => 'South Georgia and the South Sandwich Islands','ES' => 'Spain','LK' => 'Sri Lanka','SD' => 'Sudan','SR' => 'Suriname','SJ' => 'Svalbard & Jan Mayen Islands','SZ' => 'Swaziland','SE' => 'Sweden','CH' => 'Switzerland, Swiss Confederation','SY' => 'Syrian Arab Republic','TW' => 'Taiwan','TJ' => 'Tajikistan','TZ' => 'Tanzania','TH' => 'Thailand','TL' => 'Timor-Leste','TG' => 'Togo','TK' => 'Tokelau','TO' => 'Tonga','TT' => 'Trinidad and Tobago','TN' => 'Tunisia','TR' => 'Turkey','TM' => 'Turkmenistan','TC' => 'Turks and Caicos Islands','TV' => 'Tuvalu','UG' => 'Uganda','UA' => 'Ukraine','AE' => 'United Arab Emirates','GB' => 'United Kingdom','US' => 'United States of America','UM' => 'United States Minor Outlying Islands','VI' => 'United States Virgin Islands','UY' => 'Uruguay, Eastern Republic of','UZ' => 'Uzbekistan','VU' => 'Vanuatu','VE' => 'Venezuela','VN' => 'Vietnam','WF' => 'Wallis and Futuna','EH' => 'Western Sahara','YE' => 'Yemen','ZM' => 'Zambia','ZW' => 'Zimbabwe');
+			if ($city_name) {
+				$city_name = $city_name . ", " . $countryList[strtoupper($city_info['address']['country_code'])];
+			} else {
+				$city_name = $countryList[strtoupper($city_info['address']['country_code'])];
+			}
+		}
+		return $city_name;
 	}
 
 	/**
