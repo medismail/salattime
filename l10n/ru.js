@@ -1,14 +1,15 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Время",
     "No result." : "Нет результатов",
     "Error" : "Ошибка",
     "Day" : "День",
+    "City" : "Город",
     "Next" : "Далее",
     "after" : "после",
     "Sunrise" : "Рассвет",
     "Sunset" : "Закат",
-    "Time" : "Время",
     "Altitude" : "Высота",
     "Timezone:" : "Часовой пояс:",
     "Settings" : "Настройки"

@@ -1,11 +1,12 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Thời gian",
     "Error" : "Lỗi",
     "Day" : "Ngày",
+    "City" : "Thành phố",
     "Next" : "Tiếp theo",
     "after" : "sau khi",
-    "Time" : "Thời gian",
     "Timezone:" : "Múi giờ:",
     "Settings" : "Cài đặt"
 },

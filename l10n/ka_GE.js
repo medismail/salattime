@@ -1,13 +1,14 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "დრო",
     "Error" : "შეცდომა",
     "Day" : "დღე",
+    "City" : "ქალაქი",
     "Next" : "შემდეგი",
     "after" : "შემდეგ",
     "Sunrise" : "მზის ამოსვლა",
     "Sunset" : "მზის ჩასვლა",
-    "Time" : "დრო",
     "Settings" : "პარამეტრები"
 },
 "nplurals=2; plural=(n!=1);");

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Tid",
     "No result." : "Intet resultat",
     "Error" : "Fejl",
     "Day" : "Dag",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "after" : "efter",
     "Sunrise" : "Solskin",
     "Sunset" : "Solnedgang",
-    "Time" : "Tid",
     "Timezone:" : "Tidszone:",
     "Settings" : "Indstillinger"
 },

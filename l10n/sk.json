@@ -1,12 +1,13 @@
 { "translations": {
+    "Time" : "Čas",
     "No result." : "Žiadny výsledok.",
     "Error" : "Chyba",
     "Day" : "Deň",
+    "City" : "Mesto",
     "Next" : "Ďalšie",
     "after" : "po",
     "Sunrise" : "Východ slnka",
     "Sunset" : "Západ slnka",
-    "Time" : "Čas",
     "Altitude" : "Nadmorská výška",
     "Timezone:" : "Časové pásmo:",
     "Settings" : "Nastavenia"

@@ -1,15 +1,16 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Čas",
     "No result." : "Ni zadetkov",
     "Error" : "Napaka",
     "Day" : "Dan",
+    "City" : "Mesto",
     "Next" : "Naslednji",
     "after" : "po",
     "Day length" : "Dolžina dneva",
     "Sunrise" : "Sončni vzhod",
     "Sunset" : "Sončni zahod",
-    "Time" : "Čas",
     "Moon Phase" : "Lunina mena",
     "Sun Position" : "Položaj sonca",
     "Azimuth" : "Azimut",

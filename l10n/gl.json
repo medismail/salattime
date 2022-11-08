@@ -1,12 +1,13 @@
 { "translations": {
+    "Time" : "Hora",
     "No result." : "Sen resultados.",
     "Error" : "Erro",
     "Day" : "Día",
+    "City" : "Cidade",
     "Next" : "Seguinte",
     "after" : "após",
     "Sunrise" : "Abrente",
     "Sunset" : "Solpor",
-    "Time" : "Hora",
     "Timezone:" : "Fuso horario",
     "Settings" : "Axustes"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

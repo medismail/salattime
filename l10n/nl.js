@@ -1,14 +1,15 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Tijd",
     "No result." : "Geen resultaat.",
     "Error" : "Fout",
     "Day" : "Dag",
+    "City" : "Stad",
     "Next" : "Volgende",
     "after" : "na",
     "Sunrise" : "Zonsopgang",
     "Sunset" : "Zonsondergang",
-    "Time" : "Tijd",
     "Timezone:" : "Tijdzone:",
     "Settings" : "Instellingen"
 },

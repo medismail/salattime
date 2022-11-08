@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Tyd",
     "No result." : "Geen resultaat.",
     "Error" : "Fout",
     "Day" : "Dag",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "after" : "na",
     "Sunrise" : "Sonsopkoms",
     "Sunset" : "Sondergang",
-    "Time" : "Tyd",
     "Settings" : "Instellings"
 },
 "nplurals=2; plural=(n != 1);");

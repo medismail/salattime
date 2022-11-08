@@ -1,14 +1,15 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Timp",
     "No result." : "Niciun rezultat.",
     "Error" : "Eroare",
     "Day" : "Zi",
+    "City" : "Oraș",
     "Next" : "Următorul",
     "after" : "după",
     "Sunrise" : "Răsărit",
     "Sunset" : "Apus",
-    "Time" : "Timp",
     "Timezone:" : "Fus Orar:",
     "Settings" : "Setări"
 },

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Hora",
     "No result." : "No hi ha resultats.",
     "Error" : "Error",
     "Day" : "Dia",
@@ -8,7 +9,6 @@ OC.L10N.register(
     "after" : "després de",
     "Sunrise" : "Sortida del sol",
     "Sunset" : "Posta de sol",
-    "Time" : "Hora",
     "Timezone:" : "Zona horària:",
     "Settings" : "Paràmetres"
 },

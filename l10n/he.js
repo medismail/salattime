@@ -1,14 +1,15 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "זמן",
     "No result." : "אין תוצאות.",
     "Error" : "שגיאה",
     "Day" : "יום",
+    "City" : "עיר",
     "Next" : "הבא",
     "after" : "לאחר",
     "Sunrise" : "זריחה",
     "Sunset" : "שקיעה",
-    "Time" : "זמן",
     "Timezone:" : "אזור זמן:",
     "Settings" : "הגדרות"
 },

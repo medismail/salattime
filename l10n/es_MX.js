@@ -1,13 +1,14 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Hora",
     "Error" : "Error",
     "Day" : "Día",
+    "City" : "Ciudad",
     "Next" : "Siguiente",
     "after" : "después",
     "Sunrise" : "Salida del sol",
     "Sunset" : "Puesta de sol",
-    "Time" : "Hora",
     "Timezone:" : "Zona Horaria:",
     "Settings" : "Ajustes"
 },

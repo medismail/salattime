@@ -1,4 +1,5 @@
 { "translations": {
+    "Time" : "Tid",
     "No result." : "Intet resultat",
     "Error" : "Fejl",
     "Day" : "Dag",
@@ -6,7 +7,6 @@
     "after" : "efter",
     "Sunrise" : "Solskin",
     "Sunset" : "Solnedgang",
-    "Time" : "Tid",
     "Timezone:" : "Tidszone:",
     "Settings" : "Indstillinger"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

@@ -1,14 +1,15 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Laikas",
     "No result." : "Nėra rezultatų.",
     "Error" : "Klaida",
     "Day" : "Diena",
+    "City" : "Miestas",
     "Next" : "Kitas",
     "after" : "po",
     "Sunrise" : "Saulėtekis",
     "Sunset" : "Saulėlydis",
-    "Time" : "Laikas",
     "Timezone:" : "Laiko juosta:",
     "Settings" : "Nustatymai"
 },

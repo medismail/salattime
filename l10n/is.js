@@ -1,14 +1,15 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Tími",
     "No result." : "Engar niðurstöður.",
     "Error" : "Villa",
     "Day" : "Dagur",
+    "City" : "City",
     "Next" : "Næsta",
     "after" : "eftir",
     "Sunrise" : "Sólris",
     "Sunset" : "Sólsetur",
-    "Time" : "Tími",
     "Timezone:" : "Tímabelti:",
     "Settings" : "Stillingar"
 },
