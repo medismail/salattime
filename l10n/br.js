@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Error" : "Fazi",
     "Day" : "Deiz",
+    "City" : "Ker",
     "Next" : "Da heul",
     "after" : "goude",
     "Settings" : "Arventennoù"

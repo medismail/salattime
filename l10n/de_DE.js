@@ -32,6 +32,7 @@ OC.L10N.register(
     "Dhu al-Qadah" : "Dhu l-qaʿda",
     "Dhu al-Hijjah" : "Dhū l-Hiddscha",
     "H" : "H",
+    "Unknown city" : "Unbekannte Stadt",
     "New Moon" : "Neumond",
     "Waxing Crescent Moon" : "Zunehmender Halbmond",
     "First Quarter Moon" : "Mond im ersten Viertel",

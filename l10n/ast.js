@@ -4,6 +4,7 @@ OC.L10N.register(
     "Time" : "Hora",
     "Error" : "Fallu",
     "Day" : "Día",
+    "City" : "Ciudá",
     "Next" : "Siguiente",
     "after" : "dempués",
     "Sunrise" : "Riscar",

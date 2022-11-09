@@ -18,7 +18,6 @@ OC.L10N.register(
     "Maghrib" : "Maghrib",
     "Isha" : "Ishaa",
     "Today is" : "Heute ist",
-    "City" : "Benötigt keine Übersetzung. Hier wird nur die formelle Übersetzung verwendet (de_DE). ",
     "Next" : "Nächste",
     "after" : "nach",
     "Day length" : "Tageslänge",

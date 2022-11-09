@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Geen resultaat.",
     "Error" : "Fout",
     "Day" : "Dag",
+    "City" : "Stad/dorp",
     "Next" : "Volgende",
     "after" : "na",
     "Sunrise" : "Sonsopkoms",

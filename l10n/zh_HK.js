@@ -32,6 +32,7 @@ OC.L10N.register(
     "Dhu al-Qadah" : "Dhu al-Qadah",
     "Dhu al-Hijjah" : "Dhu al-Hijjah",
     "H" : "H",
+    "Unknown city" : "城市不詳",
     "New Moon" : "New Moon",
     "Waxing Crescent Moon" : "Waxing Crescent Moon",
     "First Quarter Moon" : "First Quarter Moon",

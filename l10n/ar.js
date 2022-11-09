@@ -16,6 +16,7 @@ OC.L10N.register(
     "Asr" : "العصر",
     "Maghrib" : "المغرب",
     "Isha" : "العشاء",
+    "City" : "المدينة",
     "Next" : "التالي",
     "after" : "بعد",
     "Day length" : "طول النهار",
