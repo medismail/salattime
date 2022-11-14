@@ -32,6 +32,7 @@ OC.L10N.register(
     "Dhu al-Qadah" : "Zilkade",
     "Dhu al-Hijjah" : "Zilhicce",
     "H" : "S",
+    "Unknown city" : "İl bilinmiyor",
     "New Moon" : "Yeni ay",
     "Waxing Crescent Moon" : "Hilal",
     "First Quarter Moon" : "İlk dördün",
