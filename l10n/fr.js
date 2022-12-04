@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "Unknown city" : "Ville inconnue",
     "New Moon" : "Nouvelle lune",
     "Full Moon" : "Pleine lune",
     "Moonrise" : "Lever de la lune",
@@ -23,6 +24,7 @@ OC.L10N.register(
     "Azimuth" : "Azimut",
     "Altitude" : "Altitude",
     "Moon Position" : "Position de la lune",
+    "Location address:" : "Adresse de la position :",
     "Use 24 hours format" : "Utiliser le format 24h",
     "Manual settings:" : "Paramètres manuels :",
     "Latitude:" : "Latitude :",
