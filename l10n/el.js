@@ -1,16 +1,27 @@
 OC.L10N.register(
     "salattime",
     {
+    "1st Day of Ramadan" : "Πρώτη Ημέρα του Ραμαζανιού",
+    "Unknown city" : "Άγνωστη πόλη",
+    "New Moon" : "Νέο Φεγγάρι",
+    "First Quarter Moon" : "Πρώτο τέταρτο της Σελήνης",
+    "Full Moon" : "Πανσέληνος",
+    "Third Quarter Moon" : "Τρίτο τέταρτο της Σελήνης",
     "Time" : "Ώρα",
     "No result." : "Κανένα αποτέλεσμα.",
     "Error" : "Σφάλμα",
     "Day" : "Ημέρα",
+    "Today is" : "Σήμερα είναι",
     "City" : "Πόλη",
     "Next" : "Επόμενο",
     "after" : "μετά",
     "Sunrise" : "Ανατολή",
     "Sunset" : "Δύση",
+    "Moon Phase" : "Φάση της Σελήνης",
+    "Sun Position" : "Θέση Ηλίου",
+    "Moon Position" : "Θέση Σελήνης",
     "Timezone:" : "Χρονική ζώνη:",
-    "Settings" : "Ρυθμίσεις"
+    "Settings" : "Ρυθμίσεις",
+    "Enable notification" : "Ενεργοποίηση ειδοποιήσεων"
 },
 "nplurals=2; plural=(n != 1);");
