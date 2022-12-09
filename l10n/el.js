@@ -21,6 +21,8 @@ OC.L10N.register(
     "Sun Position" : "Θέση Ηλίου",
     "Moon Position" : "Θέση Σελήνης",
     "Timezone:" : "Χρονική ζώνη:",
+    "Spiritual Administration of Muslims of Russia" : "Πνευματική Διοίκηση των Μουσουλμάνων της Ρωσίας",
+    "Prayer Time" : "Ώρα Προσευχής",
     "Settings" : "Ρυθμίσεις",
     "Enable notification" : "Ενεργοποίηση ειδοποιήσεων"
 },
