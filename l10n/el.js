@@ -20,6 +20,7 @@ OC.L10N.register(
     "Moon Phase" : "Φάση της Σελήνης",
     "Sun Position" : "Θέση Ηλίου",
     "Moon Position" : "Θέση Σελήνης",
+    "Use 24 hours format" : "Χρήση μορφής 24ώρου",
     "Timezone:" : "Χρονική ζώνη:",
     "Spiritual Administration of Muslims of Russia" : "Πνευματική Διοίκηση των Μουσουλμάνων της Ρωσίας",
     "Prayer Time" : "Ώρα Προσευχής",
