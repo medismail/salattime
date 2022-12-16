@@ -91,7 +91,7 @@ class CalculationService {
 
 		$next = $pt->getNextPrayer($times);
 		$times['DayOffset'] = 0;
-		$date = new DateTime(null, new DateTimezone($p_settings['timezone']));
+		$date = new DateTime('', new DateTimezone($p_settings['timezone']));
 		$curtime = strtotime($date->format('d-m-Y H:i:s'));
 		if (($next[PrayerTimes::SALAT] == PrayerTimes::FAJR)&&($date->format('H') > 12)) {
 			$nextday = new DateTime('today +1 day', new DateTimezone($p_settings['timezone']));
@@ -145,7 +145,7 @@ class CalculationService {
 			$textFormat_12_24 = 'G:i';
 
 		$udtz = new DateTimezone($p_settings['timezone']);
-		$date = new DateTime(null, $udtz);
+		$date = new DateTime('', $udtz);
 		if (Helper::pythonInstalled()) {
 			$mphase = [
 				    0 => $this->l10n->t('New Moon'),
@@ -173,7 +173,7 @@ class CalculationService {
 			$sunMoonTimes['Sunset'] = $this->timeConversion($output[2], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonrise'] = $this->timeConversion($output[3], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonset'] = $this->timeConversion($output[4], $udtz, $textFormat_12_24);
-			$sunMoonTimes['MoonPhase'] = $mphase[((int)$output[5]*10/225)];
+			$sunMoonTimes['MoonPhase'] = $mphase[(int)($output[5]*10/225)];
 			$sunMoonTimes['MoonPhaseAngle'] = $output[5];
 			$sunMoonTimes['IlluminatedFraction'] = $output[6];
 			$sunMoonTimes['SunAzimuth'] = $output[7];
