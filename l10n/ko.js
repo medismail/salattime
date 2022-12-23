@@ -10,6 +10,7 @@ OC.L10N.register(
     "after" : "이후",
     "Sunrise" : "일출",
     "Sunset" : "일몰",
+    "Altitude" : "고도",
     "Timezone:" : "시간대:",
     "Settings" : "설정"
 },
