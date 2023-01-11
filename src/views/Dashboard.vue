@@ -124,6 +124,7 @@ export default {
 		padding: 6px;
 	}
 	tr:nth-child(even) {
+		color: black;
 		background-color: #f2f2f2;
 	}
 	th {

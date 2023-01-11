@@ -5,3 +5,7 @@
 body.theme--dark .icon-salattime {
     background-image: url(./../img/app.svg);
 }
+
+@media (prefers-color-scheme: dark) {
+  .icon-salattime   { background-image: url(./../img/app.svg); }
+}

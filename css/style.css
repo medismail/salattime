@@ -9,7 +9,10 @@
   padding: 6px;
 }
 
-#salat tr:nth-child(even){background-color: #f2f2f2;}
+#salat tr:nth-child(even) {
+ color: black;
+ background-color: #f2f2f2;
+}
 
 #salat tr:hover {background-color: #ddd;}
 
