@@ -24,6 +24,7 @@
     "Moon Position" : "Position de la lune",
     "Location address:" : "Adresse de la position :",
     "Use 24 hours format" : "Utiliser le format 24h",
+    "Click for manual settings" : "Cliquer pour un paramétrage manuel",
     "Manual settings:" : "Paramètres manuels :",
     "Latitude:" : "Latitude :",
     "Longitude:" : "Longitude :",
@@ -32,6 +33,7 @@
     "Calculation method:" : "Méthode de calcul :",
     "QATAR" : "QATAR",
     "KUWAIT" : "KOWEÏT",
+    "Union of Islamic Organizations of France (UOIF)" : "Union des Organisations Islamiques de France (UOIF)",
     "Settings" : "Paramètres",
     "Enable notification" : "Activer les notifications"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
