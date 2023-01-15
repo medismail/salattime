@@ -32,6 +32,7 @@ OC.L10N.register(
     "Dhu al-Qadah" : "Dhu al-Qadah",
     "Dhu al-Hijjah" : "Dhu al-Hijjah",
     "H" : "H",
+    "Unknown city" : "Hiri ezezaguna",
     "New Moon" : "Ilargi berria",
     "Waxing Crescent Moon" : "Ilargia ilgora",
     "First Quarter Moon" : "Ilargi-laurdena ilgoran",

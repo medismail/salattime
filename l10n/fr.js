@@ -26,6 +26,7 @@ OC.L10N.register(
     "Moon Position" : "Position de la lune",
     "Location address:" : "Adresse de la position :",
     "Use 24 hours format" : "Utiliser le format 24h",
+    "Click for manual settings" : "Cliquer pour un paramétrage manuel",
     "Manual settings:" : "Paramètres manuels :",
     "Latitude:" : "Latitude :",
     "Longitude:" : "Longitude :",
@@ -34,6 +35,7 @@ OC.L10N.register(
     "Calculation method:" : "Méthode de calcul :",
     "QATAR" : "QATAR",
     "KUWAIT" : "KOWEÏT",
+    "Union of Islamic Organizations of France (UOIF)" : "Union des Organisations Islamiques de France (UOIF)",
     "Settings" : "Paramètres",
     "Enable notification" : "Activer les notifications"
 },
