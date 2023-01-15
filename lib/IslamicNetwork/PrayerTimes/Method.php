@@ -24,6 +24,9 @@ class Method
     const METHOD_TURKEY = 'TURKEY'; // 13
     const METHOD_RUSSIA = 'RUSSIA'; // 14
     const METHOD_MOONSIGHTING = 'MOONSIGHTING'; // 15
+    const METHOD_TUNISIA = 'TUNISIA'; // 16
+    const METHOD_INDONISIA = 'INDONESIA'; // 17
+    const METHOD_MOROCCO = 'MOROCCO'; // 18
     const METHOD_CUSTOM = 'CUSTOM'; // 99
 
     /**
@@ -284,6 +287,46 @@ class Method
                 'params' => [
                     'shafaq' => Isha::SHAFAQ_GENERAL
                 ]
+            ],
+
+            self::METHOD_TUNISIA => [
+                'id' => 16,
+                'name' => '',
+                'params' => [
+                    PrayerTimes::FAJR => 18,
+                    PrayerTimes::ISHA => 18
+                ],
+                'location' => [ // Tunis, Tunisia
+                    'latitude' => 36.7960786,
+                    'longitude' => 10.1868741
+                ]
+
+            ],
+            self::METHOD_INDONESIA => [
+                'id' => 17,
+                'name' => '',
+                'params' => [
+                    PrayerTimes::FAJR => 18,
+                    PrayerTimes::ISHA => 18
+                ],
+                'location' => [ // Jakarta, Indonesia
+                    'latitude' => -6.2129222,
+                    'longitude' => 106.8487229
+                ]
+
+            ],
+            self::METHOD_MOROCCO => [
+                'id' => 18,
+                'name' => '',
+                'params' => [
+                    PrayerTimes::FAJR => 18,
+                    PrayerTimes::ISHA => 17
+                ],
+                'location' => [ // Rabat, Morocco
+                    'latitude' => 33.999501,
+                    'longitude' => -6.8496529
+                ]
+
             ],
             self::METHOD_CUSTOM => [
                 'id' => 99

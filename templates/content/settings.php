@@ -70,6 +70,9 @@
   <option value="EGYPT" <?php if($_['method'] == 'EGYPT'){echo("selected");}?>><?php echo $l->t('Egyptian General Authority of Survey'); ?></option>
   <option value="QATAR" <?php if($_['method'] == 'QATAR'){echo("selected");}?>><?php echo $l->t('QATAR'); ?></option>
   <option value="KUWAIT" <?php if($_['method'] == 'KUWAIT'){echo("selected");}?>><?php echo $l->t('KUWAIT'); ?></option>
+  <option value="TUNISIA" <?php if($_['method'] == 'TUNISIA'){echo("selected");}?>><?php echo $l->t('TUNISIA'); ?></option>
+  <option value="INDONESIA" <?php if($_['method'] == 'INDONESIA'){echo("selected");}?>><?php echo $l->t('INDONESIA'); ?></option>
+  <option value="MOROCCO" <?php if($_['method'] == 'MOROCCO'){echo("selected");}?>><?php echo $l->t('MOROCCO'); ?></option>
   <option value="RUSSIA" <?php if($_['method'] == 'RUSSIA'){echo("selected");}?>><?php echo $l->t('Spiritual Administration of Muslims of Russia'); ?></option>
   <option value="FRANCE" <?php if($_['method'] == 'FRANCE'){echo("selected");}?>><?php echo $l->t('Union of Islamic Organizations of France (UOIF)'); ?></option>
   <option value="SINGAPORE" <?php if($_['method'] == 'SINGAPORE'){echo("selected");}?>><?php echo $l->t('Majlis Ugama Islam Singapura, Singapore'); ?></option>
