@@ -11,6 +11,7 @@ OC.L10N.register(
     "Sunrise" : "Zonsopgang",
     "Sunset" : "Zonsondergang",
     "Timezone:" : "Tijdzone:",
+    "Adjustments" : "Aanpassingen",
     "Settings" : "Instellingen"
 },
 "nplurals=2; plural=(n != 1);");
