@@ -232,6 +232,36 @@ class CalculationService {
 	}
 
 	/**
+	 * setConfigSettings set settingss values in database
+	 * @param string userId
+	 * @param string settings
+	 */
+	public function setConfigSettings(string $userId, string $settings) {
+		$p_settings = explode(":", $settings);
+		if ($p_settings['6'] != "") {
+			$addressInfo = $this->getGeoCode($p_settings['6']);
+			if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
+				$p_settings['0'] = $addressInfo['latitude'];
+				$p_settings['1'] = $addressInfo['longitude'];
+				if (isset($addressInfo['elevation']))
+					$p_settings['3'] = $addressInfo['elevation'];
+				$p_settings['2'] = $this->configService->getUserTimeZone($userId);
+			}
+		}
+		$settings = implode(":", $p_settings);
+		$this->configService->setUserValue($userId, 'settings', $settings);
+	}
+
+	/**
+	 * setConfigAdjustments set adjustments values in database
+	 * @param string userId
+	 * @param string adjustments
+	 */
+	public function setConfigAdjustments(string $userId, string $adjustments) {
+		$this->configService->setUserValue($userId, 'adjustments', $adjustments);
+	}
+
+	/**
 	 * getDayLength Caclulate day length
 	 * @param string sunrise
 	 * @param string sunset
@@ -480,5 +510,29 @@ class CalculationService {
 			$this->logger->warning($url . 'API error : ' . $e, ['app' => Application::APP_ID]);
 			return ['error' => $e->getMessage()];
 		}
+	}
+
+	/**
+	 * get Prayers times from known date
+	 *
+	 * @param string UserId
+	 * @param DateTime Date
+	 * @return array Full paryers times and hijri date
+	 */
+	public function getPrayerTimesFromDate(string $userId, DateTime $Date): array {
+
+		$p_settings = $this->configService->getSettingsValue($userId);
+		$adjustments = $this->configService->getAdjustmentsValue($userId);
+		// Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
+
+		$pt = new PrayerTimes($p_settings['method']); // new PrayerTimes($method, $asrJuristicMethod, $asrShadowFactor);
+
+		$pt->tune($imsak = 0, $fajr = $adjustments['Fajr'], $sunrise = 0, $dhuhr = $adjustments['Dhuhr'], $asr = $adjustments['Asr'], $maghrib = $adjustments['Maghrib'], $sunset = 0, $isha = $adjustments['Isha'], $midnight = 0);
+
+		$times = $pt->getTimes($Date, $p_settings['latitude'], $p_settings['longitude'], $p_settings['elevation'], $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $p_settings['format_12_24']);
+
+		//$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
+
+		return $times;
 	}
 }

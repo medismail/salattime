@@ -90,4 +90,8 @@ class ConfigService {
 		$this->config->setUserValue($userId, Application::APP_ID, 'settings', $str_settings);
 
 	}
+
+	public function getUserTimeZone($userId) {
+		return $this->config->getUserValue($userId, 'core', 'timezone');
+	}
 }

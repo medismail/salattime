@@ -16,5 +16,7 @@ return [
            ['name' => 'page#savesetting', 'url' => 'savesetting', 'verb' => 'GET'],
            ['name' => 'page#saveadjustment', 'url' => 'saveadjustment', 'verb' => 'GET'],
            ['name' => 'widget#getWidgetContent', 'url' => '/widget-content', 'verb' => 'GET'],
+           ['name' => 'notification#addjob',  'url' => '/notification/addjob',   'verb' => 'POST'],
+           ['name' => 'notification#removejob', 'url' => '/notification/removejob', 'verb' => 'POST'],
     ]
 ];
