@@ -31,6 +31,8 @@ OC.L10N.register(
     "Shawwal" : "Şevval",
     "Dhu al-Qadah" : "Zilkade",
     "Dhu al-Hijjah" : "Zilhicce",
+    "Adhen for salat " : "Namaz için ezan",
+    "Please do not delay your salat." : "Lütfen namaza geç kalmayın.",
     "H" : "S",
     "Unknown city" : "İl bilinmiyor",
     "New Moon" : "Yeni ay",
