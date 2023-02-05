@@ -31,6 +31,8 @@ OC.L10N.register(
     "Shawwal" : "Shawwal",
     "Dhu al-Qadah" : "Dhu al-Qadah",
     "Dhu al-Hijjah" : "Dhu al-Hijjah",
+    "Adhen for salat " : "Adhen for salat ",
+    "Please do not delay your salat." : "Please do not delay your salat.",
     "H" : "H",
     "Unknown city" : "Unknown city",
     "New Moon" : "New Moon",
