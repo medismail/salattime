@@ -26,11 +26,15 @@ class HijriDate{
     /** @var IL10N */
     private $l10n;
 
-    public function __construct($time = false, IL10N $l){
+    public function __construct($time = false, IL10N $l = none) {
         if(!$time) $time = time();
         $this->time = $time;
         $this->hijri = $this->GregorianToHijri($time);
-        $this->l10n = $l;
+        if ($l) {
+            $this->l10n = $l;
+        } else {
+            $this->l10n = new IL10N();
+        }
     }
 
     public function get_date(){

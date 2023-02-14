@@ -81,6 +81,7 @@ export default {
 	h2 {
 		font-size: 20px;
 		line-height: 20px;
+		margin-top: 0;
 	}
 	h3 {
 		font-size: 16px;
