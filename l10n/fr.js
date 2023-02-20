@@ -43,6 +43,7 @@ OC.L10N.register(
     "Timezone:" : "Fuseau horaire :",
     "Altitude:" : "Altitude :",
     "Calculation method:" : "Méthode de calcul :",
+    "Muslim World League" : "Ligue Islamique Mondiale",
     "Islamic Society of North America (ISNA)" : "Islamic Society of North America (ISNA)",
     "QATAR" : "QATAR",
     "KUWAIT" : "KOWEÏT",
