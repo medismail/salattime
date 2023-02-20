@@ -28,17 +28,19 @@ class BackgroundJob extends TimedJob {
 		$this->calculationService = $calculationService;
 	}
 
-	protected function run($arguments) {
-		$this->updateSalatTime($arguments['uid']);
+	protected function run() {
+		$this->updateSalatTime();
 	}
 
 	/**
-	 * update salat time
-	 * @param int $uid
+	 * update salat time Adhen
 	 */
-	protected function updateSalatTime($uid) {
-		$this->clearOldNotifications();
-		$this->sendSalatNotifications($uid);
+	protected function updateSalatTime() {
+		$uids = $this->calculationService->getAllUsersNotification()
+		foreach ($uids as $uid)
+			$this->clearOldNotifications($uid);
+			$this->sendSalatNotifications($uid);
+		}
 	}
 
 	/**
@@ -46,9 +48,8 @@ class BackgroundJob extends TimedJob {
 	 * @param int $uid
 	 */
 	protected function sendSalatNotifications($uid) {
-		//$times = $this->calculationService->getPrayerTimes($uid);
-		$times = $this->calculationService->getPrayerTimesFromDate($uid, new \DateTime());
 		$PrayerTime = new \DateTime();
+		$times = $this->calculationService->getPrayerTimesFromDate($uid, $PrayerTime, 1);
 		$salawat = array('Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
 		foreach ($salawat as $salat) {
 			$notification = $this->notificationManager->createNotification();
@@ -58,8 +59,8 @@ class BackgroundJob extends TimedJob {
 					->setDateTime($PrayerTime)
 					->setObject('Adhen', $salat)
 					->setSubject('Adhen for salat');
-					$notification->setUser($uid);
-					$this->notificationManager->notify($notification);
+				$notification->setUser($uid);
+				$this->notificationManager->notify($notification);
 			} catch (\InvalidArgumentException $e) {
 				return;
 			}
@@ -69,7 +70,7 @@ class BackgroundJob extends TimedJob {
 	/**
 	 * Remove old notifications
 	 */
-	protected function clearOldNotifications() {
+	protected function clearOldNotifications($uid) {
 		$salawat = array('Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
 		foreach ($salawat as $salat) {
 			$notification = $this->notificationManager->createNotification();
@@ -77,6 +78,7 @@ class BackgroundJob extends TimedJob {
 				$notification->setApp('salattime')
 					->setSubject('Adhen for salat')
 					->setObject('Adhen', $salat);
+				$notification->setUser($uid);
 			} catch (\InvalidArgumentException $e) {
 				return;
 			}

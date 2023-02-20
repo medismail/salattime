@@ -231,6 +231,14 @@ class CalculationService {
 		return $this->configService->getAdjustmentsValue($userId);
 	}
 
+	public function getUserNotification(string $userId): string {
+		return $this->configService->getUserNotification($userId);
+	}
+
+	public function getAllUsersNotification(): array {
+		return $this->configService->getAllUsersNotification();
+	}
+
 	/**
 	 * setConfigSettings set settingss values in database
 	 * @param string userId
@@ -515,11 +523,12 @@ class CalculationService {
 	/**
 	 * get Prayers times from known date
 	 *
-	 * @param string UserId
-	 * @param DateTime Date
-	 * @return array Full paryers times and hijri date
+	 * @param string userId
+	 * @param DateTime date
+	 * @param DateTime days
+	 * @return array Full paryers times for multidays in specific date
 	 */
-	public function getPrayerTimesFromDate(string $userId, DateTime $Date): array {
+	public function getPrayerTimesFromDate(string $userId, DateTime $date, int $days): array {
 
 		$p_settings = $this->configService->getSettingsValue($userId);
 		$adjustments = $this->configService->getAdjustmentsValue($userId);
@@ -529,9 +538,15 @@ class CalculationService {
 
 		$pt->tune($imsak = 0, $fajr = $adjustments['Fajr'], $sunrise = 0, $dhuhr = $adjustments['Dhuhr'], $asr = $adjustments['Asr'], $maghrib = $adjustments['Maghrib'], $sunset = 0, $isha = $adjustments['Isha'], $midnight = 0);
 
-		$times = $pt->getTimes($Date, $p_settings['latitude'], $p_settings['longitude'], $p_settings['elevation'], $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $p_settings['format_12_24']);
+		$times = $pt->getTimes($date, $p_settings['latitude'], $p_settings['longitude'], $p_settings['elevation'], $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $p_settings['format_12_24']);
 
 		//$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
+
+		if ($days == 1) {
+                	$next = $pt->getNextPrayer($times);
+                	$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
+                	$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
+		}
 
 		return $times;
 	}

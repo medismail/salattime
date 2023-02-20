@@ -1,4 +1,5 @@
 <?php
+script('salattime', 'script');
 script('salattime', 'settings');
 style('salattime', 'style');
 ?>

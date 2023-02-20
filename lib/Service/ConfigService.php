@@ -94,4 +94,20 @@ class ConfigService {
 	public function getUserTimeZone($userId) {
 		return $this->config->getUserValue($userId, 'core', 'timezone');
 	}
+
+	public function setUserNotification($userId) {
+		$this->config->setUserValue($userId, Application::APP_ID, 'notification', 'true');
+	}
+
+	public function unsetUserNotification($userId) {
+		$this->config->setUserValue($userId, Application::APP_ID, 'notification', 'false');
+	}
+
+	public function getUserNotification($userId) {
+		return $this->config->getUserValue($userId, Application::APP_ID, 'notification');
+	}
+
+	public function getAllUsersNotification() {
+		return $this->config->getUsersForUserValue(Application::APP_ID, 'notification', 'true');
+	}
 }

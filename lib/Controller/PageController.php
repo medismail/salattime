@@ -8,16 +8,12 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Controller;
 use OCA\SalatTime\AppInfo\Application;
-use OCP\IConfig;
 use OCP\IURLGenerator;
 use OCA\SalatTime\Tools\CurrentUser;
 use OCA\SalatTime\Service\CalculationService;
 
 class PageController extends Controller {
 	private $userId;
-
-	/** @var \OCP\IConfig */
-	protected $config;
 
 	/** @var string */
 	protected $user;
@@ -29,14 +25,12 @@ class PageController extends Controller {
 	private $calculationService;
 
 	public function __construct($AppName, IRequest $request,
-						IConfig $config,
 						IURLGenerator $urlGenerator,
 						CurrentUser $currentUser,
 						CalculationService $calculationService,
 						$UserId){
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
-		$this->config = $config;
 		$this->user = (string) $currentUser->getUID();
 		$this->urlGenerator = $urlGenerator;
 		$this->calculationService = $calculationService;
@@ -57,7 +51,8 @@ class PageController extends Controller {
 		$times = $this->calculationService->getPrayerTimes($this->userId);
 		$sunmoon = $this->calculationService->getSunMoonCalc($this->userId, $times['DayOffset']);
 		$relative_url = ['rurl' => $this->urlGenerator->imagePath(Application::APP_ID, '')];
-		$parameters = array_merge($times, $sunmoon, $relative_url);
+		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
+		$parameters = array_merge($times, $sunmoon, $relative_url, $notification);
 		return new TemplateResponse(Application::APP_ID, $templateName, $parameters);
 	}
 
@@ -79,7 +74,8 @@ class PageController extends Controller {
 		$templateName = 'prayers';  // will use templates/prayers.php
 		$confSettings = $this->calculationService->getConfigSettings($this->userId);
 		$confAdjustments = $this->calculationService->getConfigAdjustments($this->userId);
-		$parameters = array_merge($confSettings, $confAdjustments);
+		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
+		$parameters = array_merge($confSettings, $confAdjustments, $notification);
 		return new TemplateResponse(Application::APP_ID, $templateName, $parameters);
 	}
 
@@ -92,22 +88,8 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method, string $format_12_24): RedirectResponse {
-		$city = "";
-		if ($address != "") {
-			$city = $address;
-			$addressInfo = $this->calculationService->getGeoCode($address);
-			if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
-				$latitude = $addressInfo['latitude'];
-				$longitude = $addressInfo['longitude'];
-				if (isset($addressInfo['elevation']))
-					$elevation = $addressInfo['elevation'];
-				$cTimezone = $this->config->getUserValue($this->userId, 'core', 'timezone');
-				if ($cTimezone != "")
-					$timezone = $cTimezone;
-			}
-		}
-		$p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation . ':' . $method . ':' . $format_12_24 . ':' . $city;
-		$this->config->setUserValue($this->userId, Application::APP_ID, 'settings', $p_settings);
+		$p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation . ':' . $method . ':' . $format_12_24 . ':' . $address;
+		$this->calculationService->setSettings($this->userId, $p_settings);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);
 	}
@@ -148,7 +130,7 @@ class PageController extends Controller {
 		if ($Isha == "")
 			$Isha = 0;
 		$adjustments = $day . ',' . $Fajr . ',' . $Dhuhr . ',' . $Asr . ',' . $Maghrib . ',' . $Isha;
-		$this->config->setUserValue($this->userId, Application::APP_ID, 'adjustments', $adjustments);
+		$this->calculationService->setAdjustments($this->userId, $adjustments);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);
 	}
