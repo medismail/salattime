@@ -52,8 +52,7 @@ class PageController extends Controller {
 		$sunmoon = $this->calculationService->getSunMoonCalc($this->userId, $times['DayOffset']);
 		$relative_url = ['rurl' => $this->urlGenerator->imagePath(Application::APP_ID, '')];
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
-		$parameters = array_merge($times, $sunmoon, $relative_url, $notification);
-		return new TemplateResponse(Application::APP_ID, $templateName, $parameters);
+		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($times, $sunmoon, $relative_url, $notification));
 	}
 
 	 /**
@@ -63,7 +62,8 @@ class PageController extends Controller {
 	public function settings(): TemplateResponse {
 		$templateName = 'settings';  // will use templates/settings.php
 		$parameters = $this->calculationService->getConfigSettings($this->userId);
-		return new TemplateResponse($this->appName, $templateName, $parameters);
+		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
+		return new TemplateResponse($this->appName, $templateName, array_merge($parameters, $notification));
 	}
 
 	 /**
@@ -75,8 +75,7 @@ class PageController extends Controller {
 		$confSettings = $this->calculationService->getConfigSettings($this->userId);
 		$confAdjustments = $this->calculationService->getConfigAdjustments($this->userId);
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
-		$parameters = array_merge($confSettings, $confAdjustments, $notification);
-		return new TemplateResponse(Application::APP_ID, $templateName, $parameters);
+		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($confSettings, $confAdjustments, $notification));
 	}
 
 	 /**
@@ -102,7 +101,8 @@ class PageController extends Controller {
 	public function adjustments(): TemplateResponse {
 		$templateName = 'adjustments';  // will use templates/adjustments.php
 		$parameters = $this->calculationService->getConfigAdjustments($this->userId);
-		return new TemplateResponse($this->appName, $templateName, $parameters);
+		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
+		return new TemplateResponse($this->appName, $templateName, array_merge($parameters, $notification));
 	}
 
 	 /**
@@ -130,7 +130,7 @@ class PageController extends Controller {
 		if ($Isha == "")
 			$Isha = 0;
 		$adjustments = $day . ',' . $Fajr . ',' . $Dhuhr . ',' . $Asr . ',' . $Maghrib . ',' . $Isha;
-		$this->calculationService->setAdjustments($this->userId, $adjustments);
+		$this->calculationService->setConfigAdjustments($this->userId, $adjustments);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);
 	}
