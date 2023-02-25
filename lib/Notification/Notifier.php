@@ -10,7 +10,7 @@ use OCP\Notification\AlreadyProcessedException;
 use OCP\Notification\IManager;
 use OCP\Notification\INotification;
 use OCP\Notification\INotifier;
-
+use OCA\SalatTime\AppInfo\Application;
 
 class Notifier implements \OCP\Notification\INotifier {
 	protected $factory;
@@ -27,7 +27,7 @@ class Notifier implements \OCP\Notification\INotifier {
 	 * @return string
 	 */
 	public function getID(): string {
-		return 'salattime';
+		return Application::APP_ID;
 	}
 
 	/**
@@ -35,7 +35,7 @@ class Notifier implements \OCP\Notification\INotifier {
 	 * @return string
 	 */
 	public function getName(): string {
-		return $this->factory->get('salattime')->t('Salat Time');
+		return $this->factory->get(Application::APP_ID)->t('Salat Time');
 	}
 
 	/**
@@ -43,13 +43,13 @@ class Notifier implements \OCP\Notification\INotifier {
 	 * @param string $languageCode The code of the language that should be used to prepare the notification
 	 */
 	public function prepare(INotification $notification, string $languageCode): INotification {
-		if ($notification->getApp() !== 'salattime') {
+		if ($notification->getApp() !== Application::APP_ID) {
 			// Not my app => throw
 			throw new \InvalidArgumentException();
 		}
 
 		// Read the language from the notification
-		$l = $this->factory->get('salattime', $languageCode);
+		$l = $this->factory->get(Application::APP_ID, $languageCode);
 
 		switch ($notification->getSubject()) {
 			// Deal with known subjects
@@ -61,7 +61,7 @@ class Notifier implements \OCP\Notification\INotifier {
 				} else {
                         		$notification->setParsedSubject($l->t('Adhen for salat ') . $l->t($notification->getObjectId()) . '.')
                         	        	->setParsedMessage($l->t('Please do not delay your salat.'));
-					$notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath('salattime', 'app.svg')));
+					$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 					return $notification;
 				}
 			default:
