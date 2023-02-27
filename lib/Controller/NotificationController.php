@@ -65,8 +65,8 @@ class NotificationController extends Controller {
 			$notification = $this->notificationManager->createNotification();
 			try {
 				$notification->setApp('salattime')
-					->setSubject('Adhen for salat')
-					->setObject('Adhen', $salat);
+					->setSubject('Adhan for salat')
+					->setObject('Adhan', $salat);
 				$notification->setUser($this->userId);
 			} catch (\InvalidArgumentException $e) {
 				return;

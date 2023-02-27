@@ -33,7 +33,7 @@ class BackgroundJob extends TimedJob {
 	}
 
 	/**
-	 * update salat time Adhen
+	 * update salat time Adhan
 	 */
 	protected function updateSalatTime() {
 		$uids = $this->calculationService->getAllUsersNotification();
@@ -79,8 +79,8 @@ class BackgroundJob extends TimedJob {
 			try {
 				$notification->setApp('salattime')
 					->setDateTime($PrayerTime)
-					->setObject('Adhen', $salat)
-					->setSubject('Adhen for salat');
+					->setObject('Adhan', $salat)
+					->setSubject('Adhan for salat');
 				$notification->setUser($uid);
 				$this->notificationManager->notify($notification);
 			} catch (\InvalidArgumentException $e) {
@@ -99,8 +99,8 @@ class BackgroundJob extends TimedJob {
 			$notification = $this->notificationManager->createNotification();
 			try {
 				$notification->setApp('salattime')
-					->setSubject('Adhen for salat')
-					->setObject('Adhen', $salat);
+					->setSubject('Adhan for salat')
+					->setObject('Adhan', $salat);
 				$notification->setUser($uid);
 			} catch (\InvalidArgumentException $e) {
 				return;

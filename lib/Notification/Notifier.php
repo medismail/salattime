@@ -53,13 +53,13 @@ class Notifier implements \OCP\Notification\INotifier {
 
 		switch ($notification->getSubject()) {
 			// Deal with known subjects
-			case 'Adhen for salat':
+			case 'Adhan for salat':
 				$dateNow = new \DateTime();
 				if ($notification->getDateTime() > $dateNow) {
 					//Not time yet
 					throw new \InvalidArgumentException();
 				} else {
-                        		$notification->setParsedSubject($l->t('Adhen for salat ') . $l->t($notification->getObjectId()) . '.')
+                        		$notification->setParsedSubject($l->t('Adhan for salat ') . $l->t($notification->getObjectId()) . '.')
                         	        	->setParsedMessage($l->t('Please do not delay your salat.'));
 					$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 					return $notification;

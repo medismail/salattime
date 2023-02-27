@@ -2,6 +2,7 @@
  * 5 muslim daily prayer times
  * Hijri date
  * Qibla direction 
+ * Adhan notification
  * and many others useful informations.
 
 ![](img/salattime.png)
