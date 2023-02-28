@@ -49,7 +49,6 @@ OC.L10N.register(
     "No result." : "Brak wyników.",
     "Error" : "Błąd",
     "Give 5 times prayer." : "Podaruj 5 razy modlitwę.",
-    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * and many others useful informations." : "# Czas Salat\n * 5 razy dziennie muzułmańskich modlitw\n * Data Hidżry\n * Kierunek Qibla\n * i wiele innych przydatnych informacji.",
     "Salat time content is unavailable" : "Zawartość czasu Salat jest niedostępna",
     "Day" : "Dzień",
     "Fajr" : "Fajr",
