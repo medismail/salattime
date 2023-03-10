@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "Salat Time" : "heure de prière",
     "Ashura" : "Asura",
     "1st Day of Ramadan" : "Le premier jour du Ramadan",
     "Muharram" : "Mouharram",
