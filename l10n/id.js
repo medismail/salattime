@@ -2,6 +2,7 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "Waktu",
+    "No result." : "Tidak ada hasil.",
     "Error" : "Galat",
     "Day" : "Hari",
     "City" : "Kota",
