@@ -25,7 +25,7 @@ class Method
     const METHOD_RUSSIA = 'RUSSIA'; // 14
     const METHOD_MOONSIGHTING = 'MOONSIGHTING'; // 15
     const METHOD_TUNISIA = 'TUNISIA'; // 16
-    const METHOD_INDONISIA = 'INDONESIA'; // 17
+    const METHOD_INDONESIA = 'INDONESIA'; // 17
     const METHOD_MOROCCO = 'MOROCCO'; // 18
     const METHOD_CUSTOM = 'CUSTOM'; // 99
 
