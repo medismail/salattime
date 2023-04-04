@@ -7,6 +7,8 @@ OC.L10N.register(
     "City" : "Thành phố",
     "Next" : "Tiếp theo",
     "after" : "sau khi",
+    "Sunrise" : "Bình minh",
+    "Sunset" : "Hoàng hôn",
     "Timezone:" : "Múi giờ:",
     "Settings" : "Cài đặt"
 },
