@@ -88,7 +88,7 @@ class PageController extends Controller {
 	 */
 	public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method, string $format_12_24): RedirectResponse {
 		$p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation . ':' . $method . ':' . $format_12_24 . ':' . $address;
-		$this->calculationService->setSettings($this->userId, $p_settings);
+		$this->calculationService->setConfigSettings($this->userId, $p_settings);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);
 	}
