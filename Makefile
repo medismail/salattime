@@ -161,6 +161,10 @@ appstore:
 	--exclude="../$(app_name)/src" \
 	../$(app_name)
 
+.PHONY: fixcode
+fixcode:
+	.tools/coding-standard/vendor/bin/php-cs-fixer fix lib
+
 .PHONY: test
 test: composer
 	$(CURDIR)/vendor/phpunit/phpunit/phpunit -c phpunit.xml

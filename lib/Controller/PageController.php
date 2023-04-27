@@ -1,4 +1,5 @@
 <?php
+
 namespace OCA\SalatTime\Controller;
 
 require_once __DIR__ . '/../Service/CalculationService.php';
@@ -28,7 +29,7 @@ class PageController extends Controller {
 						IURLGenerator $urlGenerator,
 						CurrentUser $currentUser,
 						CalculationService $calculationService,
-						$UserId){
+						$UserId) {
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->user = (string) $currentUser->getUID();
@@ -56,9 +57,9 @@ class PageController extends Controller {
 	}
 
 	 /**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
+	  * @NoAdminRequired
+	  * @NoCSRFRequired
+	  */
 	public function settings(): TemplateResponse {
 		$templateName = 'settings';  // will use templates/settings.php
 		$parameters = $this->calculationService->getConfigSettings($this->userId);
@@ -67,9 +68,9 @@ class PageController extends Controller {
 	}
 
 	 /**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
+	  * @NoAdminRequired
+	  * @NoCSRFRequired
+	  */
 	public function prayertime(): TemplateResponse {
 		$templateName = 'prayers';  // will use templates/prayers.php
 		$confSettings = $this->calculationService->getConfigSettings($this->userId);
@@ -79,13 +80,13 @@ class PageController extends Controller {
 	}
 
 	 /**
-	 * @param float $latitude
-	 * @param float $longitude
-	 * @param string $timezone
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
+	  * @param float $latitude
+	  * @param float $longitude
+	  * @param string $timezone
+	  *
+	  * @NoAdminRequired
+	  * @NoCSRFRequired
+	  */
 	public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method, string $format_12_24): RedirectResponse {
 		$p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation . ':' . $method . ':' . $format_12_24 . ':' . $address;
 		$this->calculationService->setConfigSettings($this->userId, $p_settings);
@@ -95,9 +96,9 @@ class PageController extends Controller {
 
 
 	 /**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
+	  * @NoAdminRequired
+	  * @NoCSRFRequired
+	  */
 	public function adjustments(): TemplateResponse {
 		$templateName = 'adjustments';  // will use templates/adjustments.php
 		$parameters = $this->calculationService->getConfigAdjustments($this->userId);
@@ -106,29 +107,35 @@ class PageController extends Controller {
 	}
 
 	 /**
-	 * @param int $day
-	 * @param int $Fajr
-	 * @param int $Dhuhr
-	 * @param int $Asr
-	 * @param int $Maghrib
-	 * @param int $Isha
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
+	  * @param int $day
+	  * @param int $Fajr
+	  * @param int $Dhuhr
+	  * @param int $Asr
+	  * @param int $Maghrib
+	  * @param int $Isha
+	  *
+	  * @NoAdminRequired
+	  * @NoCSRFRequired
+	  */
 	public function saveadjustment(int $day, int $Fajr, int $Dhuhr, int $Asr, int $Maghrib, int $Isha): RedirectResponse {
-		if ($day == "")
+		if ($day == "") {
 			$day = 0;
-		if ($Fajr == "")
+		}
+		if ($Fajr == "") {
 			$Fajr = 0;
-		if ($Dhuhr == "")
+		}
+		if ($Dhuhr == "") {
 			$Dhuhr = 0;
-		if ($Asr == "")
+		}
+		if ($Asr == "") {
 			$Asr = 0;
-		if ($Maghrib == "")
+		}
+		if ($Maghrib == "") {
 			$Maghrib = 0;
-		if ($Isha == "")
+		}
+		if ($Isha == "") {
 			$Isha = 0;
+		}
 		$adjustments = $day . ',' . $Fajr . ',' . $Dhuhr . ',' . $Asr . ',' . $Maghrib . ',' . $Isha;
 		$this->calculationService->setConfigAdjustments($this->userId, $adjustments);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');

@@ -1,4 +1,5 @@
 <?php
+
 namespace OCA\SalatTime\Controller;
 
 use OCA\SalatTime\Notification\BackgroundJob;
@@ -9,11 +10,10 @@ use OCA\SalatTime\Service\ConfigService;
 use OCP\IRequest;
 
 class NotificationController extends Controller {
-
 	private IJobList $jobList;
 
-        /** @var IManager */
-        private IManager $notificationManager;
+	/** @var IManager */
+	private IManager $notificationManager;
 
 	/** @var ConfigService */
 	private ConfigService $config;
@@ -52,8 +52,9 @@ class NotificationController extends Controller {
 	public function removeJob() {
 		$this->config->unsetUserNotification($this->userId);
 		$this->clearOldNotifications();
-		if (empty($this->config->getAllUsersNotification()))
+		if (empty($this->config->getAllUsersNotification())) {
 			$this->jobList->remove(BackgroundJob::class, null);
+		}
 	}
 
 	/**

@@ -6,7 +6,6 @@ require_once __DIR__ . '/../Service/CalculationService.php';
 
 use OCA\SalatTime\Service\CalculationService;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 

@@ -4,12 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\SalatTime\Notification;
 
-use OCP\IURLGenerator;
-use OCP\L10N\IFactory;
-use OCP\Notification\AlreadyProcessedException;
-use OCP\Notification\IManager;
 use OCP\Notification\INotification;
-use OCP\Notification\INotifier;
 use OCA\SalatTime\AppInfo\Application;
 
 class Notifier implements \OCP\Notification\INotifier {
@@ -59,15 +54,15 @@ class Notifier implements \OCP\Notification\INotifier {
 					//Not time yet
 					throw new \InvalidArgumentException();
 				} else {
-                        		$notification->setParsedSubject($l->t('Adhan for salat ') . $l->t($notification->getObjectId()) . '.')
-                        	        	->setParsedMessage($l->t('Please do not delay your salat.'));
+					$notification->setParsedSubject($l->t('Adhan for salat ') . $l->t($notification->getObjectId()) . '.')
+							->setParsedMessage($l->t('Please do not delay your salat.'));
 					$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 					return $notification;
 				}
+				// no break
 			default:
 				// Unknown subject => Unknown notification => throw
 				throw new \InvalidArgumentException();
 		}
 	}
-
 }

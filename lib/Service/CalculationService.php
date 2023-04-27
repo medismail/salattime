@@ -1,4 +1,5 @@
 <?php
+
 namespace OCA\SalatTime\Service;
 
 require_once __DIR__ . '/../IslamicNetwork/PrayerTimes/PrayerTimes.php';
@@ -16,7 +17,6 @@ use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
 use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
 use OCA\SalatTime\IslamicNetwork\SunMoonCalc\SunCalc;
 use OCA\SalatTime\IslamicNetwork\QiblaDirection\Calculation;
-use OCA\SalatTime\Service\ConfigService;
 use OCA\SalatTime\Tools\Helper;
 use OCA\SalatTime\AppInfo\Application;
 use OCP\Accounts\IAccountManager;
@@ -31,6 +31,35 @@ use DateTime;
 use DateTimezone;
 
 class CalculationService {
+	/** @var IMSAK name */
+	public const IMSAK = PrayerTimes::IMSAK;
+
+	/** @var FAJR name */
+	public const FAJR = PrayerTimes::FAJR;
+
+	/** @var SUNRISE name */
+	public const SUNRISE = PrayerTimes::SUNRISE;
+
+	/** @var ZHUHR name */
+	public const ZHUHR = PrayerTimes::ZHUHR;
+
+	/** @var ASR name */
+	public const ASR = PrayerTimes::ASR;
+
+	/** @var SUNSET name */
+	public const SUNSET = PrayerTimes::SUNSET;
+
+	/** @var MAGHRIB name */
+	public const MAGHRIB = PrayerTimes::MAGHRIB;
+
+	/** @var ISHA name */
+	public const ISHA = PrayerTimes::ISHA;
+
+	/** @var MOONRISE name */
+	public const MOONRISE = PrayerTimes::MOONRISE;
+
+	/** @var MOONSET name */
+	public const MOONSET = PrayerTimes::MOONSET;
 
 	/** @var ConfigService */
 	private $configService;
@@ -61,7 +90,6 @@ class CalculationService {
 					   ICacheFactory $cacheFactory,
 					   IL10N $l
 				   ) {
-
 		$this->configService = $configService;
 		$this->accountManager = $accountManager;
 		$this->userManager = $userManager;
@@ -78,7 +106,6 @@ class CalculationService {
 	 * @return array Full paryers times and hijri date
 	 */
 	public function getPrayerTimes(string $userId): array {
-
 		$p_settings = $this->configService->getSettingsValue($userId);
 		$adjustments = $this->configService->getAdjustmentsValue($userId);
 		// Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
@@ -93,7 +120,7 @@ class CalculationService {
 		$times['DayOffset'] = 0;
 		$date = new DateTime('', new DateTimezone($p_settings['timezone']));
 		$curtime = strtotime($date->format('d-m-Y H:i:s'));
-		if (($next[PrayerTimes::SALAT] == PrayerTimes::FAJR)&&($date->format('H') > 12)) {
+		if (($next[PrayerTimes::SALAT] == PrayerTimes::FAJR) && ($date->format('H') > 12)) {
 			$nextday = new DateTime('today +1 day', new DateTimezone($p_settings['timezone']));
 			$times = $pt->getTimes($nextday, $p_settings['latitude'], $p_settings['longitude'], $p_settings['elevation'], $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $p_settings['format_12_24']);
 			$next = $pt->getNextPrayerFromDate($date, $times, PrayerTimes::FAJR);
@@ -103,18 +130,21 @@ class CalculationService {
 		}
 
 		$hijri = new HijriDate($curtime, $this->l10n);
-		if ($adjustments['day'] != "")
+		if ($adjustments['day'] != "") {
 			$hijri->tune($adjustments['day']);
+		}
 
 		$times['Hijri'] = $hijri->get_day_name() . ' ' . $hijri->get_day() . ' ' . $hijri->get_month_name() . ' ' . $hijri->get_year() . $this->l10n->t('H');
 		$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
 		$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
 		$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
 		$times['SpecialDay'] = implode(" ", $hijri->get_day_special_name());
-		if (date('N',$curtime) == 5)
+		if (date('N', $curtime) == 5) {
 			$times['Jumaa'] = "Juma'a";
-		if ($hijri->get_month() != 9) //Ramadhane
+		}
+		if ($hijri->get_month() != 9) { //Ramadhane
 			$times[PrayerTimes::IMSAK] = "";
+		}
 		if ($p_settings['city'] != "") {
 			$times['City'] = $p_settings['city'];
 		} else {
@@ -135,45 +165,47 @@ class CalculationService {
 	 * @param string UserId
 	 * @return array sun and moons informations
 	 */
-	public function getSunMoonCalc(string $userId, int $dayoffset=0): array {
+	public function getSunMoonCalc(string $userId, int $dayoffset = 0): array {
 		$p_settings = $this->configService->getSettingsValue($userId);
-		if (!$p_settings['elevation'])
+		if (!$p_settings['elevation']) {
 			$p_settings['elevation'] = 0.0;
-		if ($p_settings['format_12_24'] == PrayerTimes::TIME_FORMAT_12H)
+		}
+		if ($p_settings['format_12_24'] == PrayerTimes::TIME_FORMAT_12H) {
 			$textFormat_12_24 = 'g:i a';
-		else
+		} else {
 			$textFormat_12_24 = 'G:i';
+		}
 
 		$udtz = new DateTimezone($p_settings['timezone']);
 		$date = new DateTime('', $udtz);
 		if (Helper::pythonInstalled()) {
 			$mphase = [
-				    0 => $this->l10n->t('New Moon'),
-				    1 => $this->l10n->t('Waxing Crescent Moon'),
-				    2 => $this->l10n->t('Waxing Crescent Moon'),
-				    3 => $this->l10n->t('Waxing Crescent Moon'),
-				    4 => $this->l10n->t('First Quarter Moon'),
-				    5 => $this->l10n->t('Waxing Gibbous Moon'),
-				    6 => $this->l10n->t('Waxing Gibbous Moon'),
-				    7 => $this->l10n->t('Waxing Gibbous Moon'),
-				    8 => $this->l10n->t('Full Moon'),
-				    9 => $this->l10n->t('Waning Gibbous Moon'),
-				    10 => $this->l10n->t('Waning Gibbous Moon'),
-				    11 => $this->l10n->t('Waning Gibbous Moon'),
-				    12 => $this->l10n->t('Third Quarter Moon'),
-				    13 => $this->l10n->t('Waning Crescent Moon'),
-				    14 => $this->l10n->t('Waning Crescent Moon'),
-				    15 => $this->l10n->t('Waning Crescent Moon'),
-				    16 => $this->l10n->t('New Moon')
-				  ];
+				0 => $this->l10n->t('New Moon'),
+				1 => $this->l10n->t('Waxing Crescent Moon'),
+				2 => $this->l10n->t('Waxing Crescent Moon'),
+				3 => $this->l10n->t('Waxing Crescent Moon'),
+				4 => $this->l10n->t('First Quarter Moon'),
+				5 => $this->l10n->t('Waxing Gibbous Moon'),
+				6 => $this->l10n->t('Waxing Gibbous Moon'),
+				7 => $this->l10n->t('Waxing Gibbous Moon'),
+				8 => $this->l10n->t('Full Moon'),
+				9 => $this->l10n->t('Waning Gibbous Moon'),
+				10 => $this->l10n->t('Waning Gibbous Moon'),
+				11 => $this->l10n->t('Waning Gibbous Moon'),
+				12 => $this->l10n->t('Third Quarter Moon'),
+				13 => $this->l10n->t('Waning Crescent Moon'),
+				14 => $this->l10n->t('Waning Crescent Moon'),
+				15 => $this->l10n->t('Waning Crescent Moon'),
+				16 => $this->l10n->t('New Moon')
+			];
 			$output = null;
 			$retval = null;
-			exec( 'python3 ' . __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date)+$dayoffset, $output, $retval);
+			exec('python3 ' . __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date) + $dayoffset, $output, $retval);
 			$sunMoonTimes['Sunrise'] = $this->timeConversion($output[1], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Sunset'] = $this->timeConversion($output[2], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonrise'] = $this->timeConversion($output[3], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonset'] = $this->timeConversion($output[4], $udtz, $textFormat_12_24);
-			$sunMoonTimes['MoonPhase'] = $mphase[(int)($output[5]*10/225)];
+			$sunMoonTimes['MoonPhase'] = $mphase[(int)($output[5] * 10 / 225)];
 			$sunMoonTimes['MoonPhaseAngle'] = $output[5];
 			$sunMoonTimes['IlluminatedFraction'] = $output[6];
 			$sunMoonTimes['SunAzimuth'] = $output[7];
@@ -181,22 +213,25 @@ class CalculationService {
 			$sunMoonTimes['MoonAzimuth'] = $output[9];
 			$sunMoonTimes['MoonAltitude'] = $output[10];
 		} else {
-			if ($dayoffset)
+			if ($dayoffset) {
 				$date = new DateTime('today +1 day', $udtz);
+			}
 			$sc = new SunCalc($date, $p_settings['latitude'], $p_settings['longitude']);
 			//$sunTimes = $sc->getSunTimes();
 			$moonTimes = $sc->getMoonTimes();
-			if ($moonTimes['moonrise'])
+			if ($moonTimes['moonrise']) {
 				$sunMoonTimes['Moonrise'] = $moonTimes['moonrise']->format($textFormat_12_24);
-			else
+			} else {
 				$sunMoonTimes['Moonrise'] = "";
-			if ($moonTimes['moonset'])
+			}
+			if ($moonTimes['moonset']) {
 				$sunMoonTimes['Moonset'] = $moonTimes['moonset']->format($textFormat_12_24);
-			else
+			} else {
 				$sunMoonTimes['Moonset'] = "";
+			}
 			$moonIl = $sc->getMoonIllumination();
-			$sunMoonTimes['MoonPhase'] = number_format($moonIl['phase']*100, 1);
-			$sunMoonTimes['IlluminatedFraction'] = number_format($moonIl['fraction']*100, 1);
+			$sunMoonTimes['MoonPhase'] = number_format($moonIl['phase'] * 100, 1);
+			$sunMoonTimes['IlluminatedFraction'] = number_format($moonIl['fraction'] * 100, 1);
 		}
 		$sunMoonTimes['QiblaDirection'] = Calculation::get($p_settings['latitude'], $p_settings['longitude']);
 		return $sunMoonTimes;
@@ -251,8 +286,9 @@ class CalculationService {
 			if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
 				$p_settings['0'] = $addressInfo['latitude'];
 				$p_settings['1'] = $addressInfo['longitude'];
-				if (isset($addressInfo['elevation']))
+				if (isset($addressInfo['elevation'])) {
 					$p_settings['3'] = $addressInfo['elevation'];
+				}
 				$p_settings['2'] = $this->configService->getUserTimeZone($userId);
 			}
 		}
@@ -275,7 +311,7 @@ class CalculationService {
 	 * @param string sunset
 	 * @return string of php time
 	 */
-	private function getDayLength(string $sunrise, string $sunset): string	{
+	private function getDayLength(string $sunrise, string $sunset): string {
 		$daylength = strtotime($sunset) - strtotime($sunrise);
 		$minutes = $this->twoDigitsFormat((int)(($daylength) / 60) % 60);
 		$hours = $this->twoDigitsFormat((int)(($daylength) / 3600));
@@ -294,8 +330,9 @@ class CalculationService {
 		$ret = "";
 		if ($time) {
 			$date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $time, new DateTimezone('UTC'));
-			if ($date)
+			if ($date) {
 				$ret = $date->setTimezone($timezone)->format($format);
+			}
 		}
 		return $ret;
 	}
@@ -307,7 +344,7 @@ class CalculationService {
 	 * @return string of two digits format
 	 */
 	private function twoDigitsFormat(int $num): string {
-		return ($num <10) ? '0'. $num : $num;
+		return ($num < 10) ? '0'. $num : $num;
 	}
 
 	/**
@@ -336,8 +373,8 @@ class CalculationService {
 	public function getNameFromGeo(string $lat, string $lon): string {
 		$city_name = null;
 		$opts = array(
-			'http'=>array(
-				'method'=>"GET",
+			'http' => array(
+				'method' => "GET",
 				'header' =>
 					"User-agent: NextcloudWeather\r\n".
 					"Accept: */*\r\n".
@@ -353,7 +390,7 @@ class CalculationService {
 				$city_name = $city_detail['city_name']['names']['name:en'];
 				if (isset($city_detail['city_name']['addresstags']['state'])) {
 					$city_name = $city_name . ", " . $city_detail['city_name']['addresstags']['state'];
-				} else if (isset($city_info['address']['state'])) {
+				} elseif (isset($city_info['address']['state'])) {
 					$city_name = $city_name . ", " . $city_info['address']['state'];
 				}
 			}
@@ -361,13 +398,13 @@ class CalculationService {
 		if (!$city_name) {
 			if (isset($city_info['address']['suburb'])) {
 				$city_name = $city_info['address']['suburb'];
-			} else if (isset($city_info['address']['city_district'])) {
+			} elseif (isset($city_info['address']['city_district'])) {
 				$city_name = $city_info['address']['city_district'];
-			} else if (isset($city_info['address']['town'])) {
+			} elseif (isset($city_info['address']['town'])) {
 				$city_name = $city_info['address']['town'];
-			} else if (isset($city_info['address']['village'])) {
+			} elseif (isset($city_info['address']['village'])) {
 				$city_name = $city_info['address']['village'];
-			} else if (isset($city_info['address']['city'])) {
+			} elseif (isset($city_info['address']['city'])) {
 				$city_name = $city_info['address']['city'];
 			}
 			if (isset($city_info['address']['county'])) {
@@ -376,7 +413,7 @@ class CalculationService {
 				} else {
 					$city_name = $city_info['address']['county'];
 				}
-			} else if (isset($city_info['address']['state'])) {
+			} elseif (isset($city_info['address']['state'])) {
 				if ($city_name) {
 					$city_name = $city_name . ", " . $city_info['address']['state'];
 				} else {
@@ -529,7 +566,6 @@ class CalculationService {
 	 * @return array Full paryers times for multidays in specific date
 	 */
 	public function getPrayerTimesFromDate(string $userId, DateTime $date, int $days): array {
-
 		$p_settings = $this->configService->getSettingsValue($userId);
 		$adjustments = $this->configService->getAdjustmentsValue($userId);
 		// Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
@@ -543,9 +579,9 @@ class CalculationService {
 		//$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
 
 		if ($days == 1) {
-                	$next = $pt->getNextPrayer($times);
-                	$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
-                	$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
+			$next = $pt->getNextPrayer($times);
+			$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
+			$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
 		}
 
 		return $times;

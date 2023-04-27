@@ -32,7 +32,6 @@ use OCP\Util;
 use OCA\SalatTime\AppInfo\Application;
 
 class SalatTimeWidget implements IWidget {
-
 	/** @var IL10N */
 	private $l10n;
 	/**

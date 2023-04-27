@@ -1,14 +1,14 @@
 <?php
+
 namespace OCA\SalatTime\Service;
 
 use \OCP\IConfig;
 use OCA\SalatTime\AppInfo\Application;
 
 class ConfigService {
-
 	private $config;
 
-	public function __construct(IConfig $config){
+	public function __construct(IConfig $config) {
 		$this->config = $config;
 	}
 
@@ -17,21 +17,24 @@ class ConfigService {
 	}
 
 	public function setUserValue($userId, $key, $value) {
-    		$this->config->setUserValue($userId, Application::APP_ID, $key, $value);
+		$this->config->setUserValue($userId, Application::APP_ID, $key, $value);
 	}
 
 	public function getSettingsValue($userId) {
 		$p_settings = explode(":", $this->config->getUserValue($userId, Application::APP_ID, 'settings'));
 		if (count($p_settings) > 2) {
 			$ret['latitude'] = $p_settings['0'];
-			if ($ret['latitude'] == "")
+			if ($ret['latitude'] == "") {
 				$ret['latitude'] = 21.3890824;
+			}
 			$ret['longitude'] = $p_settings['1'];
-			if ($ret['longitude'] == "")
+			if ($ret['longitude'] == "") {
 				$ret['longitude'] = 39.8579118;
+			}
 			$ret['timezone'] = $p_settings['2'];
-			if ($ret['timezone'] == "")
+			if ($ret['timezone'] == "") {
 				$ret['timezone'] = '+0300';
+			}
 			if (isset($p_settings['3']) && ($p_settings['3'] != "")) {
 				$ret['elevation'] = $p_settings['3'];
 			} else {
@@ -45,12 +48,12 @@ class ConfigService {
 			if (isset($p_settings['5']) && ($p_settings['5'] != "")) {
 				$ret['format_12_24'] = $p_settings['5'];
 			} else {
-				$ret['format_12_24']  = '12h';
+				$ret['format_12_24'] = '12h';
 			}
 			if (isset($p_settings['6']) && ($p_settings['6'] != "")) {
 				$ret['city'] = $p_settings['6'];
 			} else {
-				$ret['city']  = '';
+				$ret['city'] = '';
 			}
 		} else {
 			$ret['latitude'] = 21.3890824;
@@ -58,8 +61,8 @@ class ConfigService {
 			$ret['timezone'] = '+0300';
 			$ret['elevation'] = null;
 			$ret['method'] = 'MWL';
-			$ret['format_12_24']  = '12h';
-			$ret['city']  = 'Makkah';
+			$ret['format_12_24'] = '12h';
+			$ret['city'] = 'Makkah';
 		}
 		return $ret;
 	}
@@ -88,7 +91,6 @@ class ConfigService {
 		$p_settings = $this->getSettingsValue($userId);
 		$str_settings = $p_settings['latitude'] . ':' . $p_settings['longitude'] . ':' . $p_settings['timezone'] . ':' . $p_settings['elevation'] . ':' . $p_settings['method'] . ':' . $p_settings['format_12_24'] . ':' . $city;
 		$this->config->setUserValue($userId, Application::APP_ID, 'settings', $str_settings);
-
 	}
 
 	public function getUserTimeZone($userId) {

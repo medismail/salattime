@@ -23,7 +23,7 @@ class Application extends App implements IBootstrap {
 		 * Controllers
 		 */
 
-		$container->registerService('Config', function($c) {
+		$container->registerService('Config', function ($c) {
 			return $c->query('ServerContainer')->getConfig();
 		});
 	}
