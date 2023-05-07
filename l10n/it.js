@@ -10,6 +10,7 @@ OC.L10N.register(
     "after" : "dopo",
     "Sunrise" : "Alba",
     "Sunset" : "Tramonto",
+    "Altitude" : "Altitudine",
     "Timezone:" : "Fuso orario:",
     "Settings" : "Impostazioni"
 },
