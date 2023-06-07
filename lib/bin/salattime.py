@@ -52,7 +52,7 @@ def main(args):
     curhour = int(str(time).split('T')[1].split(':')[0])
     dayoffset = 0
     if timezone > 12:
-        dayoffset = -1
+        dayoffset = 1
         timezone = timezone-25
     midhour = int(-timezone)
     if timezone > 0:

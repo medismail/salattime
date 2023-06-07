@@ -290,6 +290,7 @@ class CalculationService {
 					$p_settings['3'] = $addressInfo['elevation'];
 				}
 				$p_settings['2'] = $this->configService->getUserTimeZone($userId);
+				$p_settings['6'] = $addressInfo['city'];
 			}
 		}
 		$settings = implode(":", $p_settings);
@@ -463,17 +464,13 @@ class CalculationService {
 	public function getGeoCode(string $address): array {
 		$addressInfo = $this->searchForAddress($address);
 		if (isset($addressInfo['display_name']) && isset($addressInfo['lat']) && isset($addressInfo['lon'])) {
-			/*$formattedAddress = $this->formatOsmAddress($addressInfo);
-			$this->config->setUserValue($this->userId, Application::APP_ID, 'address', $formattedAddress);
-			$this->config->setUserValue($this->userId, Application::APP_ID, 'lat', strval($addressInfo['lat']));
-			$this->config->setUserValue($this->userId, Application::APP_ID, 'lon', strval($addressInfo['lon']));*/
-			// get and store altitude
+			// get altitude
 			$altitude = $this->getAltitude(floatval($addressInfo['lat']), floatval($addressInfo['lon']));
-			//$this->config->setUserValue($this->userId, Application::APP_ID, 'altitude', strval($altitude));
 			return [
 				'latitude' => $addressInfo['lat'],
 				'longitude' => $addressInfo['lon'],
 				'elevation' => $altitude,
+				'city' => $addressInfo['display_name'],
 			];
 		} else {
 			return ['success' => false];
