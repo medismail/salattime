@@ -2,6 +2,7 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "Aeg",
+    "No result." : "Vasteid ei leitud.",
     "Error" : "Viga",
     "Day" : "Päev",
     "City" : "Linn",

@@ -1,5 +1,6 @@
 { "translations": {
     "Time" : "Aeg",
+    "No result." : "Vasteid ei leitud.",
     "Error" : "Viga",
     "Day" : "Päev",
     "City" : "Linn",
