@@ -2,6 +2,7 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "Hora",
+    "No result." : "Sin resultados.",
     "Error" : "Error",
     "Day" : "Día",
     "City" : "Ciudad",

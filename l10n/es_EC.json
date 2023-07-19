@@ -1,5 +1,6 @@
 { "translations": {
     "Time" : "Hora",
+    "No result." : "Sin resultados.",
     "Error" : "Error",
     "Day" : "Día",
     "City" : "Ciudad",
