@@ -7,6 +7,8 @@ OC.L10N.register(
     "1st Day of Ramadan" : "Ramadán 1. napja",
     "Arafa" : "Arafa",
     "Ramadhan" : "Ramadán",
+    "New Moon" : "Újhold",
+    "Full Moon" : "Telihold",
     "Moonrise" : "Holdkelte",
     "Moonset" : "Holdnyugta",
     "Salat" : "Szalát",
