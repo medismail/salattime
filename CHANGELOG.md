@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0
+### Added
+Add the next new moon date to the main page
+
 ## 0.3.2
 ### Fixed
 - Fix Moon/Sun Rise/Set after Isha wrong values
