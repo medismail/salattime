@@ -16,7 +16,7 @@ sys.dont_write_bytecode = True
 
 import re
 import astronomy
-from astronomy import Body, Direction, SearchRiseSet, Refraction, Equator, Horizon
+from astronomy import Body, Direction, SearchRiseSet, Refraction, Equator, Horizon, SearchMoonPhase
 
 
 def ParseArgs(args):
@@ -112,6 +112,9 @@ def main(args):
         #print('{:<8} position Altitude: {:8.2f}'.format(body.name, hor.altitude))
         print('{:0.2f}'.format(hor.azimuth))
         print('{:0.2f}'.format(hor.altitude))
+
+    newmoon = SearchMoonPhase(0, time, 40)
+    print(newmoon)
 
     return 0
 

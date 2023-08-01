@@ -81,6 +81,7 @@ if (isset($_['MoonPhase']))
     echo $l->t('Moon Phase'), ": &emsp; ", $_['MoonPhase'], '<br>';
 if (isset($_['MoonPhaseAngle'])) {
     echo $l->t('Moon\'s ecliptic phase angle'), ": ", $_['MoonPhaseAngle'], " ", $l->t('degrees'), '<br>';
+    echo $l->t('Next new moon'), ": &emsp; ", $_['NewMoon'], '<br>';
     echo $l->t('Sun Position'), " ", $l->t('Azimuth'), ": ", $_['SunAzimuth'], ", ", $l->t('Altitude'), ": ", $_['SunAltitude'], '<br>';
     echo $l->t('Moon Position'), " ", $l->t('Azimuth'), ": ", $_['MoonAzimuth'], ", ", $l->t('Altitude'), ": ", $_['MoonAltitude'], '<br>';
 }

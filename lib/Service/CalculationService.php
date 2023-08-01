@@ -212,6 +212,7 @@ class CalculationService {
 			$sunMoonTimes['SunAltitude'] = $output[8];
 			$sunMoonTimes['MoonAzimuth'] = $output[9];
 			$sunMoonTimes['MoonAltitude'] = $output[10];
+			$sunMoonTimes['NewMoon'] = $this->timeConversion($output[11], $udtz, 'Y-m-d ' . $textFormat_12_24);
 		} else {
 			if ($dayoffset) {
 				$date = new DateTime('today +1 day', $udtz);
