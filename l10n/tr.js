@@ -72,6 +72,7 @@ OC.L10N.register(
     "Moon Phase" : "Ay evresi",
     "Moon's ecliptic phase angle" : "Ay tutulma evresi açısı",
     "degrees" : "derece",
+    "Next new moon" : "Sonraki yeni ay",
     "Sun Position" : "Güneş konumu",
     "Azimuth" : "Azimut",
     "Altitude" : "Yükseklik",

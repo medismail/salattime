@@ -72,6 +72,7 @@ OC.L10N.register(
     "Moon Phase" : "Fáze měsíce",
     "Moon's ecliptic phase angle" : "Moon's ecliptic phase angle",
     "degrees" : "stupně",
+    "Next new moon" : "Příští novoluní",
     "Sun Position" : "Sun Position",
     "Azimuth" : "Azimuth",
     "Altitude" : "Nadmořská výška",

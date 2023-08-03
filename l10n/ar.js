@@ -72,6 +72,7 @@ OC.L10N.register(
     "Moon Phase" : "مرحلة القمر",
     "Moon's ecliptic phase angle" : "زاوية طور مسير الشمس للقمر",
     "degrees" : "درجة",
+    "Next new moon" : "الهلال القادم",
     "Sun Position" : "موضع الشمس",
     "Azimuth" : "السمت",
     "Altitude" : "الارتفاع",
