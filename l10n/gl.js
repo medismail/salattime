@@ -6,7 +6,7 @@ OC.L10N.register(
     "Mawlid al-Nabi" : "Mawlid do profeta",
     "Lailat-ul-Miraj" : "Noite do viaxe nocturno",
     "Lailat-ul-Bara'at" : "Noite do perdón",
-    "1st Day of Ramadan" : "1º día do Ramadán",
+    "1st Day of Ramadan" : "1.º día do Ramadán",
     "Lailat-ul-Qadr" : "Noite do destino",
     "Eid-ul-Fitr" : "Eid-ul-Fitr",
     "Hajj" : "Peregrinación á Meca",
