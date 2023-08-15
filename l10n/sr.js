@@ -72,6 +72,7 @@ OC.L10N.register(
     "Moon Phase" : "Месечева мена",
     "Moon's ecliptic phase angle" : "Месечев еклиптички фазни угао",
     "degrees" : "степени",
+    "Next new moon" : "Наредни млад месец",
     "Sun Position" : "Позиција сунца",
     "Azimuth" : "Азимут",
     "Altitude" : "Надморска висина",
