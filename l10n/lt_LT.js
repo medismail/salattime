@@ -1,6 +1,14 @@
 OC.L10N.register(
     "salattime",
     {
+    "New Moon" : "Jaunatis (Naujas mėnulis)",
+    "Waxing Crescent Moon" : "Jaunatis (Pilnėjantis pusmėnulis)",
+    "First Quarter Moon" : "Priešpilnis (Pirmo ketvirčio mėnulis)",
+    "Waxing Gibbous Moon" : "Priešpilnis (Pilnėjantis kuprotas mėnulis)",
+    "Full Moon" : "Pilnatis (Pilnas mėnulis)",
+    "Waning Gibbous Moon" : "Pilnatis (Dylantis kuprotas mėnulis)",
+    "Third Quarter Moon" : "Delčia (Paskutinio ketvirčio mėnulis)",
+    "Waning Crescent Moon" : "Delčia (Dylantis mėnulis)",
     "Time" : "Laikas",
     "No result." : "Nėra rezultatų.",
     "Error" : "Klaida",
