@@ -11,6 +11,7 @@ OC.L10N.register(
     "Sunrise" : "Východ slnka",
     "Sunset" : "Západ slnka",
     "Altitude" : "Nadmorská výška",
+    "Location address:" : "Adresa miesta:",
     "Timezone:" : "Časové pásmo:",
     "Settings" : "Nastavenia"
 },
