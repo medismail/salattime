@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "New Moon" : "Nov",
     "Time" : "Čas",
     "No result." : "Žiadny výsledok.",
     "Error" : "Chyba",
