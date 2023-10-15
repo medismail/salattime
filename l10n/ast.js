@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "No result." : "Nun hai nengún resultáu.",
     "Error" : "Error",
     "Today is" : "Güei ye",
     "City" : "Ciudá",
