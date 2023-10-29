@@ -10,6 +10,7 @@ OC.L10N.register(
     "after" : "na",
     "Sunrise" : "Zonsopgang",
     "Sunset" : "Zonsondergang",
+    "Altitude" : "Hoogte",
     "Timezone:" : "Tijdzone:",
     "Adjustments" : "Aanpassingen",
     "Settings" : "Instellingen"
