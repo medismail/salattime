@@ -72,6 +72,7 @@ OC.L10N.register(
     "Moon Phase" : "Mond-Phase",
     "Moon's ecliptic phase angle" : "Phasenwinkel der Ekliptik des Mondes",
     "degrees" : "Grad",
+    "Next new moon" : "Nächster Neumond",
     "Sun Position" : "Position der Sonne",
     "Azimuth" : "Azimut",
     "Altitude" : "Höhe",
