@@ -5,6 +5,7 @@ OC.L10N.register(
     "Error" : "Error",
     "Today is" : "Güei ye",
     "City" : "Ciudá",
+    "Next" : "Siguiente",
     "Sun Position" : "Posición del sol",
     "Altitude" : "Altitú",
     "Manual settings:" : "Configuración manual:",
