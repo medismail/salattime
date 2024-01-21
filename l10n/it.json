@@ -14,8 +14,8 @@
     "Ramadhan" : "Ramadhan",
     "Shawwal" : "Shawwal",
     "H" : "H",
-    "Moonrise" : "Moonrise",
-    "Moonset" : "Moonset",
+    "Moonrise" : "Alba lunare",
+    "Moonset" : "Tramonto lunare",
     "DayLength" : "Durata del giorno",
     "Salat" : "Salat",
     "Time" : "Ora",
@@ -37,13 +37,13 @@
     "degrees" : "degrees",
     "Azimuth" : "Azimuth",
     "Altitude" : "Altitudine",
-    "Latitude:" : "Latitude:",
-    "Longitude:" : "Longitude:",
+    "Latitude:" : "Latitudine:",
+    "Longitude:" : "Longitudine:",
     "Timezone:" : "Fuso orario:",
-    "Altitude:" : "Altitude:",
+    "Altitude:" : "Altitudine:",
     "QATAR" : "QATAR",
     "KUWAIT" : "KUWAIT",
-    "Adjustments" : "Adjustments",
+    "Adjustments" : "Regolazioni",
     "Settings" : "Impostazioni"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
