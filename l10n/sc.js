@@ -11,6 +11,6 @@ OC.L10N.register(
     "Sunrise" : "Arbèschida",
     "Sunset" : "Iscurigadòrgiu",
     "Timezone:" : "Fusu oràriu:",
-    "Settings" : "Impostatziones"
+    "Settings" : "Cunfiguratzione"
 },
 "nplurals=2; plural=(n != 1);");
