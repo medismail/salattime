@@ -78,7 +78,7 @@ foreach($daterange as $date1){
    $hijri = new HijriDate($curtime, $l);
    if ($_['day'] != "")
        $hijri->tune($_['day']);
-   echo "<tr><td scope=\"row\">", $hijri->get_year(), "-", $hijri->get_month(), "-", $hijri->get_day(), "</td>";
+   echo "<tr><td scope=\"row\">", $hijri->get_day_name(), " ", $hijri->get_year(), "-", $hijri->get_month(), "-", $hijri->get_day(), "</td>";
    if ( $hijri->get_month() == 9)
        echo "<td>", $times['Imsak'], "</td>";
    echo "<td>", $times['Fajr'], "</td>
