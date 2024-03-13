@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+### Added
+- Add Day name in Prayers page
+### Changed
+- Update js libs
+
 ## 0.4.0
 ### Added
 Add the next new moon date to the main page

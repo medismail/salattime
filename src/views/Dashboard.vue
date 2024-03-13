@@ -5,26 +5,25 @@
 			class="markdown-content">
 			{{ content }}
 		</VueMarkdown>
-		<EmptyContent
-			v-else
-			:icon="emptyContentIcon">
-			<template #desc>
-				{{ emptyContentMessage }}
+		<NcEmptyContent v-else
+			:description="emptyContentMessage">
+			<template #icon>
+				<CloseIcon />
 			</template>
-		</EmptyContent>
+		</NcEmptyContent>
 	</div>
 </template>
 
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-import EmptyContent from '@nextcloud/vue/dist/Components/EmptyContent'
+import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js'
 import VueMarkdown from 'vue-markdown'
 export default {
 	name: 'Dashboard',
 	components: {
 		// DashboardWidget,
-		EmptyContent,
+		NcEmptyContent,
 		VueMarkdown,
 	},
 	props: {
