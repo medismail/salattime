@@ -1,22 +1,73 @@
-#salat {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 90%;
+/* Header styles */
+#sheader {
+    background-color: #6b4423; /* Brown */
+    text-align: center;
+    padding: 12px;
+    animation: headerFadeIn 1s ease-in-out;
+    border-radius: 10px;
 }
 
-#salat td, #salat th {
-  border: 1px solid #ddd;
-  padding: 6px;
+#sheader h2 {
+    font-size: 36px; /* Larger font size */
+    color: #fff;
+    margin: 0;
+    animation: headerZoomIn 1s ease-in-out;
 }
 
-#salat tr:nth-child(even) {
+/* Body section styles */
+#day-info {
+    background-color: #fff; /* White background */
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s ease-in-out;
+}
+
+#day-info h2 {
+    font-size: 24px; /* Larger font size */
+    color: #5e9647; /* Green */
+    animation: textColorChange 1s ease-in-out;
+}
+
+#day-info p {
+    font-size: 18px; /* Larger font size */
+    color: #6b4423; /* Brown */
+    margin-top: 10px;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffcc; /* Yellow background */
+    animation: tableFadeIn 1s ease-in-out;
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 90%;
+}
+
+table, th, td {
+    /* border: 1px solid #ccc; */
+    border: 1px solid #ddd;
+    padding: 6px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+table tr:nth-child(even) {
  color: black;
  background-color: #f2f2f2;
 }
 
-#salat tr:hover {background-color: #ddd;}
+table tr:hover {background-color: #ddd;}
 
-#salat th {
+table th {
   padding-top: 6px;
   padding-bottom: 6px;
   text-align: left;
@@ -24,11 +75,81 @@
   color: white;
 }
 
+
+/* Keyframe animations */
+@keyframes headerFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes headerZoomIn {
+    from {
+        transform: scale(0.8);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes textColorChange {
+    from {
+        color: #5e9647; /* Start with green text */
+    }
+    to {
+        color: #3366cc; /* Transition to blue text */
+    }
+}
+
+@keyframes tableFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Moon and Sun Section */
+#moon-sun {
+    background-color: #b5d6e6; /* Light blue background */
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s ease-in-out;
+}
+
+#moon-sun h2 {
+    font-size: 24px; /* Larger font size */
+    color: #3366cc; /* Blue */
+}
+
+#moon-sun p {
+    font-size: 18px; /* Larger font size */
+    color: #333; /* Dark gray text */
+    margin-top: 10px;
+}
+
 #infos {
   margin-top: 20px;
 }
 
 #compass {
+  margin-inline: auto;
   position: relative;
   width: 240px;
   height: 240px;
@@ -43,3 +164,4 @@
     margin-left: 20px;
   }
 }
+
