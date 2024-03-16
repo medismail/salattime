@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Ni zadetkov",
     "Error" : "Napaka",
     "Day" : "Dan",
-    "City" : "Mesto",
     "Next" : "Naslednji",
     "after" : "po",
     "Day length" : "Dolžina dneva",

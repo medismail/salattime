@@ -4,7 +4,6 @@ OC.L10N.register(
     "Time" : "Tid",
     "Error" : "Feil",
     "Day" : "Dag",
-    "City" : "Stad",
     "Next" : "Neste",
     "after" : "etter",
     "Sunrise" : "Soloppgang",

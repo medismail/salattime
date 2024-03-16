@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Vasteid ei leitud.",
     "Error" : "Viga",
     "Day" : "Päev",
-    "City" : "Linn",
     "Next" : "Järgmine",
     "after" : "pärast",
     "Sunrise" : "Päikesetõus",

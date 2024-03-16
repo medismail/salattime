@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Ei tulosta.",
     "Error" : "Virhe",
     "Day" : "Päivä",
-    "City" : "Kaupunki",
     "Next" : "Seuraava",
     "after" : "jälkeen",
     "Sunrise" : "Auringonnousu",

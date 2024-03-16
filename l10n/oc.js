@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Cap de resultat.",
     "Error" : "Error",
     "Day" : "Jorn",
-    "City" : "Vila",
     "Next" : "Seguent",
     "after" : "aprèp",
     "Settings" : "Paramètres"

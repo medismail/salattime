@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Tidak ada hasil.",
     "Error" : "Galat",
     "Day" : "Hari",
-    "City" : "Kota",
     "Next" : "Berikutnya",
     "after" : "setelah",
     "Sunrise" : "Matahari Terbit",

@@ -12,7 +12,6 @@ OC.L10N.register(
     "Error" : "Σφάλμα",
     "Day" : "Ημέρα",
     "Today is" : "Σήμερα είναι",
-    "City" : "Πόλη",
     "Next" : "Επόμενο",
     "after" : "μετά",
     "Sunrise" : "Ανατολή",

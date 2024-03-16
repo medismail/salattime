@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Perunu resultadu.",
     "Error" : "Errore",
     "Day" : "Die",
-    "City" : "Tzitade",
     "Next" : "Imbeniente",
     "after" : "a pustis",
     "Sunrise" : "Arbèschida",

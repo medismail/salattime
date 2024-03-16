@@ -7,7 +7,6 @@ OC.L10N.register(
     "No result." : "Žiadny výsledok.",
     "Error" : "Chyba",
     "Day" : "Deň",
-    "City" : "Mesto",
     "Next" : "Ďalšie",
     "after" : "po",
     "Sunrise" : "Východ slnka",

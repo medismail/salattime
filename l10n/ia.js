@@ -4,7 +4,6 @@ OC.L10N.register(
     "Time" : "Tempore",
     "Error" : "Error",
     "Day" : "Die",
-    "City" : "Citate",
     "Next" : "Sequente",
     "after" : "post",
     "Settings" : "Configurationes"

@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Нет результатов",
     "Error" : "Ошибка",
     "Day" : "День",
-    "City" : "Город",
     "Next" : "Далее",
     "after" : "после",
     "Sunrise" : "Рассвет",

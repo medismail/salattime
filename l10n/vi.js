@@ -4,7 +4,6 @@ OC.L10N.register(
     "Time" : "Thời gian",
     "Error" : "Lỗi",
     "Day" : "Ngày",
-    "City" : "Thành phố",
     "Next" : "Tiếp theo",
     "after" : "sau khi",
     "Sunrise" : "Bình minh",

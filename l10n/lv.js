@@ -4,7 +4,6 @@ OC.L10N.register(
     "Time" : "Laiks",
     "Error" : "Kļūda",
     "Day" : "Diena",
-    "City" : "Pilsēta",
     "Next" : "Nākamā",
     "after" : "pēc",
     "Sunrise" : "Saullēkts",
