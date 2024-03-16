@@ -5,7 +5,7 @@
     </section>
     <section id="day-info">
         <h2>Location</h2>
-        <p>City:  &emsp;<span id="city"><?php echo $_['City']; ?></span></p>
+        <p><?php echo $l->t('City'); ?>:  &emsp;<span id="city"><?php echo $_['City']; ?></span></p>
         <br>
         <?php if ($_['SpecialDay']) echo "<p>", $l->t('Today is'), ": &emsp; <b>", $_['SpecialDay'], '</b></p><br>'; ?>
         <!-- Prayer Times Table -->
