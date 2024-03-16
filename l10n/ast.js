@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Nun hai nengún resultáu.",
     "Error" : "Error",
     "Today is" : "Güei ye",
-    "City" : "Ciudá",
     "Next" : "Siguiente",
     "Sun Position" : "Posición del sol",
     "Altitude" : "Altitú",

@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "無結果。",
     "Error" : "錯誤",
     "Day" : "日",
-    "City" : "城市",
     "Next" : "下一步",
     "after" : "之後",
     "Sunrise" : "日出時間",

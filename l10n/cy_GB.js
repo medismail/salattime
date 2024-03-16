@@ -4,7 +4,6 @@ OC.L10N.register(
     "Time" : "Amser",
     "Error" : "Gwall",
     "Day" : "Diwrnod",
-    "City" : "Dinas",
     "Next" : "Nesaf",
     "after" : "wedi",
     "Settings" : "Gosodiadau"

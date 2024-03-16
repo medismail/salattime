@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "Nema rezultata.",
     "Error" : "Pogreška",
     "Day" : "Dan",
-    "City" : "Grad",
     "Next" : "Dalje",
     "after" : "nakon",
     "Sunrise" : "Izlazak sunca",

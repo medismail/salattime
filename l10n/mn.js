@@ -4,7 +4,6 @@ OC.L10N.register(
     "Time" : "Цаг",
     "Error" : "Алдаа",
     "Day" : "Өдөр",
-    "City" : "Хот",
     "Next" : "дараагийх",
     "after" : "дараа",
     "Settings" : "Тохиргоо"

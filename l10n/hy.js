@@ -4,7 +4,6 @@ OC.L10N.register(
     "Time" : "Ժամ",
     "Error" : "Սխալ",
     "Day" : "Օր",
-    "City" : "Քաղաք",
     "Next" : "Հաջորդ",
     "after" : "հետո",
     "Settings" : "կարգավորումներ"

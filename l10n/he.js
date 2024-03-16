@@ -5,7 +5,6 @@ OC.L10N.register(
     "No result." : "אין תוצאות.",
     "Error" : "שגיאה",
     "Day" : "יום",
-    "City" : "עיר",
     "Next" : "הבא",
     "after" : "לאחר",
     "Sunrise" : "זריחה",

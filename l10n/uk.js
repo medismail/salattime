@@ -6,7 +6,6 @@ OC.L10N.register(
     "Error" : "Помилка",
     "Day" : "День",
     "Today is" : "Сьогодні",
-    "City" : "Місто",
     "Next" : "Далі",
     "after" : "після",
     "Sunrise" : "Світанок",

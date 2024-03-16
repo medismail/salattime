@@ -4,7 +4,6 @@ OC.L10N.register(
     "Time" : "Kohë",
     "Error" : "Gabim",
     "Day" : "Ditë",
-    "City" : "Qytet",
     "Next" : "Tjetër",
     "after" : "pas",
     "Sunrise" : "Lindja e diellit",
