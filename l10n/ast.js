@@ -4,6 +4,7 @@ OC.L10N.register(
     "Time" : "Data",
     "No result." : "Nun hai nengún resultáu.",
     "Error" : "Error",
+    "City" : "Ciudá",
     "Today is" : "Güei ye",
     "Next" : "Siguiente",
     "Sun Position" : "Posición del sol",
