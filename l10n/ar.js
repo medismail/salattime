@@ -59,6 +59,7 @@ OC.L10N.register(
     "Asr" : "العصر",
     "Maghrib" : "المغرب",
     "Isha" : "العشاء",
+    "City" : "المدينة",
     "Today is" : "اليوم هو",
     "Next" : "التالي",
     "after" : "بعد",

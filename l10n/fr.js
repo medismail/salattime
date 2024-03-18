@@ -59,6 +59,7 @@ OC.L10N.register(
     "Asr" : "Après-midi",
     "Maghrib" : "Coucher du soleil",
     "Isha" : "Nuit",
+    "City" : "Ville",
     "Today is" : "Aujourd'hui nous sommes le",
     "Next" : "Suivante",
     "after" : "après ",

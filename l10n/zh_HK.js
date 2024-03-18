@@ -59,6 +59,7 @@ OC.L10N.register(
     "Asr" : "Asr",
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
+    "City" : "城市",
     "Today is" : "Today is",
     "Next" : "下一",
     "after" : "之後",
