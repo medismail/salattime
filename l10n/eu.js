@@ -57,6 +57,7 @@ OC.L10N.register(
     "Asr" : "Asr",
     "Maghrib" : "Magreb",
     "Isha" : "Isha",
+    "City" : "Hiria",
     "Today is" : "Gaur hau da",
     "Next" : "Hurrengoa",
     "after" : "gero",

@@ -59,6 +59,7 @@ OC.L10N.register(
     "Asr" : "İkindi",
     "Maghrib" : "Akşam",
     "Isha" : "Yatsı",
+    "City" : "İl",
     "Today is" : "Bugün",
     "Next" : "Sonraki",
     "after" : "şundan sonra",
