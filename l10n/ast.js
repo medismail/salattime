@@ -7,6 +7,8 @@ OC.L10N.register(
     "City" : "Ciudá",
     "Today is" : "Güei ye",
     "Next" : "Siguiente",
+    "Sunrise" : "Aséu",
+    "Sunset" : "Tapecer",
     "Sun Position" : "Posición del sol",
     "Altitude" : "Altitú",
     "Manual settings:" : "Configuración manual:",
