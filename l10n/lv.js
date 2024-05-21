@@ -2,6 +2,7 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "Laiks",
+    "No result." : "Nav iznākuma.",
     "Error" : "Kļūda",
     "Day" : "Diena",
     "Next" : "Nākamā",
