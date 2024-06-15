@@ -7,6 +7,8 @@ OC.L10N.register(
     "Day" : "Lá",
     "Next" : "Ar aghaidh",
     "after" : "tar éis",
+    "Sunrise" : "Éirí na gréine",
+    "Sunset" : "Luí na gréine",
     "Settings" : "Socruithe"
 },
 "nplurals=5; plural=(n==1 ? 0 : n==2 ? 1 : n<7 ? 2 : n<11 ? 3 : 4);");
