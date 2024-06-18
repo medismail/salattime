@@ -59,6 +59,7 @@ OC.L10N.register(
     "Asr" : "Tarde",
     "Maghrib" : "anoitecer",
     "Isha" : "Noite",
+    "City" : "Cidade",
     "Today is" : "Hoxe é",
     "Next" : "Seguinte",
     "after" : "após",
