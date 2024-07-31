@@ -2,6 +2,7 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "Thời gian",
+    "No result." : "Không có kết quả",
     "Error" : "Lỗi",
     "Day" : "Ngày",
     "Next" : "Tiếp theo",
