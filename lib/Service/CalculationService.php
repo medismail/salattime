@@ -514,7 +514,7 @@ class CalculationService {
 		try {
 			$options = [
 				'headers' => [
-					'User-Agent' => 'NextcloudSalattime/' . $this->version . ' nextcloud.com'
+					'User-Agent' => 'NextcloudSalattime/' . Helper::getVersion() . ' nextcloud.com'
 				],
 			];
 
@@ -550,7 +550,8 @@ class CalculationService {
 				return $json;
 			}
 		} catch (\Exception $e) {
-			$this->logger->warning($url . 'API error : ' . $e, ['app' => Application::APP_ID]);
+			$logger = \OC::$server->getLogger();
+			$logger->warning($url . 'API error : ' . $e, ['app' => Application::APP_ID]);
 			return ['error' => $e->getMessage()];
 		}
 	}

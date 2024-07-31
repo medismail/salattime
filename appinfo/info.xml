@@ -10,7 +10,7 @@
  * Qibla direction
  * Adhan notification
  * and many others useful informations.]]></description>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <licence>agpl</licence>
     <author mail="imejri@hotmail.com" >Mohamed</author>
     <website>https://github.com/medismail/salattime</website>
@@ -19,7 +19,7 @@
     <bugs>https://github.com/medismail/salattime/issues</bugs>
     <screenshot>https://raw.githubusercontent.com/medismail/salattime/main/img/salattime.png</screenshot>
     <dependencies>
-        <nextcloud min-version="24" max-version="27"/>
+        <nextcloud min-version="24" max-version="29"/>
     </dependencies>
     <navigations>
         <navigation>

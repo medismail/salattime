@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+### Added
+- Add New main page style and layout
+- Support for Nextcloud 28 and 29
+### Fixed
+- User-Agent error
+- Getgeo logger error
+
 ## 0.5.0
 ### Added
 - Add Day name in Prayers page

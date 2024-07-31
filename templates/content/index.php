@@ -26,7 +26,7 @@
                 </tr>
                 <?php if (isset($_['Jumaa']))  echo "
                 <tr>
-                   <td scope=\"row\">", $l->t('Juma\'a:'), "</td>
+                   <td scope=\"row\">", $l->t('Juma\'a'), "</td>
                    <td>", $_['Dhuhr'], "</td>
                 </tr>"; ?>
                 <tr<?php echo $gback['Dhuhr']; ?>>

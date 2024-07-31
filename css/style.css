@@ -3,32 +3,32 @@
     background-color: #6b4423; /* Brown */
     text-align: center;
     padding: 12px;
-    animation: headerFadeIn 1s ease-in-out;
+    animation: headerFadeIn 2s ease-in-out;
     border-radius: 10px;
 }
 
 #sheader h2 {
-    font-size: 36px; /* Larger font size */
+    font-size: 24px; /* Larger font size */
     color: #fff;
     margin: 0;
-    animation: headerZoomIn 1s ease-in-out;
+    animation: headerZoomIn 2s ease-in-out;
 }
 
 /* Body section styles */
 #day-info {
     background-color: #fff; /* White background */
-    border: 1px solid #ccc;
+    /*border: 1px solid #ccc; */
     padding: 20px;
     margin: 20px auto;
     max-width: 600px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 1s ease-in-out;
+    animation: fadeIn 2s ease-in-out;
 }
 
 #day-info h2 {
     font-size: 24px; /* Larger font size */
     color: #5e9647; /* Green */
-    animation: textColorChange 1s ease-in-out;
+    animation: textColorChange 2s ease-in-out;
 }
 
 #day-info p {
@@ -43,7 +43,7 @@ table {
     border-collapse: collapse;
     margin-top: 20px;
     background-color: #ffffcc; /* Yellow background */
-    animation: tableFadeIn 1s ease-in-out;
+    animation: tableFadeIn 2s ease-in-out;
     font-family: Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     width: 90%;
@@ -125,12 +125,12 @@ table th {
 /* Moon and Sun Section */
 #moon-sun {
     background-color: #b5d6e6; /* Light blue background */
-    border: 1px solid #ccc;
+    /*border: 1px solid #ccc;*/
     padding: 20px;
     margin: 20px auto;
     max-width: 600px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 1s ease-in-out;
+    animation: fadeIn 2s ease-in-out;
 }
 
 #moon-sun h2 {
@@ -156,7 +156,7 @@ table th {
   background: url(../img/pusula.png) no-repeat;
 }
 
-@media screen and (min-width: 480px) {
+@media screen and (min-width: 640px) {
   #main-content-div {
     display: flex;
   }
@@ -165,3 +165,30 @@ table th {
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  #moon-sun {
+    background-color: #5e7f8f;
+  }
+  #day-info {
+    background-color: #333333;
+  }
+  #day-info p {
+    color: #c1793d;
+  }
+  table {
+    background-color: inherit;
+  }
+}
+
+.app-navigation-entry {
+    display: block;
+    width: 100%;
+    line-height: 44px;
+    align-content: center;
+    padding: 0 12px 0 14px;
+    border-radius: var(--border-radius-pill);
+    color: var(--color-main-text);
+    text-decoration: none;
+}
+
+.app-navigation-entry:hover {background-color: var(--color-background-hover);} {

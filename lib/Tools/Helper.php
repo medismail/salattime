@@ -3,6 +3,8 @@
 namespace OCA\SalatTime\Tools;
 
 class Helper {
+	public const APP_ID = 'salattime';
+
 	public static function debug($msg) {
 		if (is_array($msg)) {
 			$msg = implode(",", $msg);
@@ -57,10 +59,10 @@ class Helper {
 	}
 
 	public static function getAppPath(): string {
-		return \OC::$server->getAppManager()->getAppPath('salattime');
+		return \OC::$server->getAppManager()->getAppPath(self::APP_ID);
 	}
 
 	public static function getVersion(): array {
-		return \OC_Util::getVersion();
+		return \OC::$server->getAppManager()->getAppVersion(self::APP_ID);
 	}
 }
