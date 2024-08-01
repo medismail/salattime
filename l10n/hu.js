@@ -58,7 +58,6 @@ OC.L10N.register(
     "Today is" : "Ma",
     "Next" : "Következő",
     "after" : "után",
-    "Juma'a:" : "Juma'a:",
     "Day length" : "Nap hossza",
     "Imsak" : "Imsak",
     "Sunrise" : "Napkelte",

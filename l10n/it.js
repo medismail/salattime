@@ -31,7 +31,6 @@ OC.L10N.register(
     "Isha" : "Isha",
     "Next" : "Successivo",
     "after" : "dopo",
-    "Juma'a:" : "Juma'a:",
     "Imsak" : "Imsak",
     "Sunrise" : "Alba",
     "Sunset" : "Tramonto",

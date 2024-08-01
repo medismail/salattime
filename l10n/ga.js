@@ -63,7 +63,6 @@ OC.L10N.register(
     "Today is" : "Tá lá atá inniu ann",
     "Next" : "Ar aghaidh",
     "after" : "tar éis",
-    "Juma'a:" : "Juma'a:",
     "Day length" : "Fad lae",
     "Imsak" : "Imsak",
     "Sunrise" : "Éirí na gréine",

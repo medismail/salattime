@@ -32,7 +32,6 @@ OC.L10N.register(
     "City" : "Ciudá",
     "Today is" : "Güei ye",
     "Next" : "Siguiente",
-    "Juma'a:" : "Juma'a:",
     "Sunrise" : "Aséu",
     "Sunset" : "Tapecer",
     "Moon Phase" : "Fas llunar",

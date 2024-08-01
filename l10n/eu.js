@@ -61,7 +61,6 @@ OC.L10N.register(
     "Today is" : "Gaur hau da",
     "Next" : "Hurrengoa",
     "after" : "gero",
-    "Juma'a:" : "Juma'a:",
     "Day length" : "Egunaren iraupena",
     "Imsak" : "Imsak",
     "Sunrise" : "Egunsentia",
