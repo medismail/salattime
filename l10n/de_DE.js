@@ -63,6 +63,7 @@ OC.L10N.register(
     "Today is" : "Heute ist",
     "Next" : "Nächste",
     "after" : "nach",
+    "Juma'a" : "Juma'a",
     "Day length" : "Tageslänge",
     "Imsak" : "Imsak",
     "Sunrise" : "Sonnenaufgang",

@@ -63,6 +63,7 @@ OC.L10N.register(
     "Today is" : "اليوم هو",
     "Next" : "التالي",
     "after" : "بعد",
+    "Juma'a" : "صلاة الجمعة",
     "Day length" : "طول النهار",
     "Imsak" : "الإمساك",
     "Sunrise" : "شروق الشمس",
