@@ -63,6 +63,7 @@ OC.L10N.register(
     "Today is" : "Данас је",
     "Next" : "Следећа",
     "after" : "након",
+    "Juma'a" : "Џумаа",
     "Day length" : "Дужина обданице",
     "Imsak" : "Имсак",
     "Sunrise" : "Излазак сунца",
