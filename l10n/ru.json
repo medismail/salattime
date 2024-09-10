@@ -1,4 +1,5 @@
 { "translations": {
+    "New Moon" : "Новолуние",
     "Time" : "Время",
     "No result." : "Нет результатов",
     "Error" : "Ошибка",
@@ -7,6 +8,7 @@
     "after" : "после",
     "Sunrise" : "Рассвет",
     "Sunset" : "Закат",
+    "Next new moon" : "В следующее новолуние",
     "Altitude" : "Высота",
     "Timezone:" : "Часовой пояс:",
     "Settings" : "Настройки"

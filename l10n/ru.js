@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "New Moon" : "Новолуние",
     "Time" : "Время",
     "No result." : "Нет результатов",
     "Error" : "Ошибка",
@@ -9,6 +10,7 @@ OC.L10N.register(
     "after" : "после",
     "Sunrise" : "Рассвет",
     "Sunset" : "Закат",
+    "Next new moon" : "В следующее новолуние",
     "Altitude" : "Высота",
     "Timezone:" : "Часовой пояс:",
     "Settings" : "Настройки"
