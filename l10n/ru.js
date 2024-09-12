@@ -12,6 +12,8 @@ OC.L10N.register(
     "Sunset" : "Закат",
     "Next new moon" : "В следующее новолуние",
     "Altitude" : "Высота",
+    "Click for manual settings" : "Нажмите для ручных настроек",
+    "Manual settings:" : "Ручные настройки:",
     "Timezone:" : "Часовой пояс:",
     "Settings" : "Настройки"
 },
