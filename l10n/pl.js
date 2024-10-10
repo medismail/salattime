@@ -48,7 +48,6 @@ OC.L10N.register(
     "Time" : "Czas",
     "No result." : "Brak wyników.",
     "Error" : "Błąd",
-    "Give 5 times prayer." : "Podaruj 5 razy modlitwę.",
     "Salat time content is unavailable" : "Zawartość czasu Salat jest niedostępna",
     "Day" : "Dzień",
     "Fajr" : "Fajr",

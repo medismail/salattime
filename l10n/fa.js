@@ -50,7 +50,6 @@ OC.L10N.register(
     "Time" : "زمان",
     "No result." : "بدون نتیجه.",
     "Error" : "خطا",
-    "Give 5 times prayer." : "۵ بار نماز بگزار.",
     "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * and many others useful informations." : "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * and many others useful informations.",
     "Salat time content is unavailable" : "محتوای اوقات شرعی در دسترس نیست",
     "Day" : "روز",

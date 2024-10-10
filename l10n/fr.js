@@ -50,7 +50,6 @@ OC.L10N.register(
     "Time" : "Heure",
     "No result." : "Aucun résultat.",
     "Error" : "Erreur",
-    "Give 5 times prayer." : "Faites les 5 prières quotidiennes.",
     "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * and many others useful informations." : "# Heures de prière\n * 5 horaires de prière musulmans quotidiens\n * Date Hijri\n * Direction de la Qibla\n * Notification d'Adhan\n * et bien d'autres informations utiles.",
     "Salat time content is unavailable" : "Contenu des heures de prière indisponible",
     "Day" : "Jour",

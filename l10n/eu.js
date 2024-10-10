@@ -49,7 +49,6 @@ OC.L10N.register(
     "Time" : "Noiz",
     "No result." : "Emaitzarik ez.",
     "Error" : "Errorea",
-    "Give 5 times prayer." : "Eman 5 otoitz ordu",
     "Salat time content is unavailable" : "Salat orduko edukia ez dago erabilgarri",
     "Day" : "Eguna",
     "Fajr" : "Fajr",

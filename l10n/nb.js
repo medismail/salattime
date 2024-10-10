@@ -50,7 +50,6 @@ OC.L10N.register(
     "Time" : "Tid",
     "No result." : "Ingen resultat.",
     "Error" : "Feil",
-    "Give 5 times prayer." : "Gi 5 ganger bønn.",
     "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * and many others useful informations." : "# Salat-tid\n * 5 muslimske daglige bønnetider\n * Hijri-dato\n * Qibla-retning\n * Adhan-varsel\n * og mange andre nyttige opplysninger.",
     "Salat time content is unavailable" : "Salattid-innhold er utilgjengelig",
     "Day" : "Dag",

@@ -48,7 +48,6 @@ OC.L10N.register(
     "Time" : "Idő",
     "No result." : "Nincs találat.",
     "Error" : "Hiba",
-    "Give 5 times prayer." : "Imádkozz ötször.",
     "Day" : "Nap",
     "Fajr" : "Fajr",
     "Dhuhr" : "Dhuhr",
