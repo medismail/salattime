@@ -50,6 +50,7 @@ OC.L10N.register(
     "Time" : "Saat",
     "No result." : "Herhangi bir sonuç yok.",
     "Error" : "Hata",
+    "Show 5 times prayer." : "Beş vakit namazı görüntüle.",
     "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * and many others useful informations." : "# Namaz saati\n * Müslümanlar için 5 vakit namaz saatleri\n * Hicri tarih\n * Kıble yönü\n * Ezan hatırlatma\n * ve başka pek çok kullanışlı bilgi.",
     "Salat time content is unavailable" : "Namaz zamanı içeriği kullanılamıyor",
     "Day" : "Gün",

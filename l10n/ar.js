@@ -50,6 +50,7 @@ OC.L10N.register(
     "Time" : "إلى وقت",
     "No result." : "لا يوجد نتيجة",
     "Error" : "خطأ",
+    "Show 5 times prayer." : "عرض أوقات الصلوات الـ 5.",
     "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * and many others useful informations." : "# مواقيت الصلاة \n\n* مواقيت الصلاة الـ 5 \n* التاريخ الهجري \n* اتجاه القبلة \n* تنبيه بالأذان \n* والعديد من المعلومات المفيدة الأخرى.",
     "Salat time content is unavailable" : "محتويات وقت الصلاة غير متوفرة",
     "Day" : "اليوم",
