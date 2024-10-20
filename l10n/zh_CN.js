@@ -1,6 +1,8 @@
 OC.L10N.register(
     "salattime",
     {
+    "Salat Time" : "礼拜时间",
+    "Ashura" : "阿舒拉节",
     "Time" : "时间",
     "No result." : "无结果",
     "Error" : "错误",
