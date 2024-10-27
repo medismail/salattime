@@ -50,6 +50,7 @@ OC.L10N.register(
     "Time" : "Zeit",
     "No result." : "Kein Ergebnis.",
     "Error" : "Fehler",
+    "Show 5 times prayer." : "Fünf mal Gebet anzeigen.",
     "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * and many others useful informations." : "# Gebetszeit\n * 5 muslimische tägliche Gebetszeiten\n * Hijri-Datum\n * Qibla-Richtung\n * Adhan-Benachrichtigung\n * und viele andere nützliche Informationen.",
     "Salat time content is unavailable" : "Gebetszeit-Inhalt ist nicht verfügbar",
     "Day" : "Tag",
