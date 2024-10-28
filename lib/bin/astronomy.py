@@ -2,7 +2,7 @@
 #
 #    MIT License
 #
-#    Copyright (c) 2019-2022 Don Cross <cosinekitty@gmail.com>
+#    Copyright (c) 2019-2024 Don Cross <cosinekitty@gmail.com>
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a copy
 #    of this software and associated documentation files (the "Software"), to deal
@@ -36,14 +36,26 @@ import datetime
 import enum
 import re
 import abc
+from typing import Any, List, Tuple, Optional, Union, Callable, Dict
 
-def _cbrt(x):
-    if x < 0.0:
-        return -((-x) ** (1.0 / 3.0))
-    return x ** (1.0 / 3.0)
+def _cbrt(x: float) -> float:
+    '''Returns the cube root of x.'''
+    y = (x ** (1.0 / 3.0)) if (x >= 0.0) else -((-x) ** (1.0 / 3.0))
+    # mypy knows that the exponentiation operator '**' can return
+    # complex values in some cases. It doesn't realize that can't
+    # happen here. To prevent type errors, explicitly check the type.
+    if isinstance(y, float):
+        return y
+    raise InternalError()
+
+def _cdiv(numer: int, denom: int) -> int:
+    '''Divide negative numbers the same way C does: rounding toward zero, not down.'''
+    sign = -1 if (numer * denom) < 0 else +1
+    return sign * (abs(numer) // abs(denom))
 
 KM_PER_AU = 1.4959787069098932e+8   #<const> The number of kilometers per astronomical unit.
 C_AUDAY   = 173.1446326846693       #<const> The speed of light expressed in astronomical units per day.
+AU_PER_LY = 63241.07708807546       #<const> The number of astronomical units in one light-year.
 
 # Jupiter radius data are nominal values obtained from:
 # https://www.iau.org/static/resolutions/IAU2015_English.pdf
@@ -60,13 +72,11 @@ EUROPA_RADIUS_KM   = 1560.8     #<const> The mean radius of Jupiter's moon Europ
 GANYMEDE_RADIUS_KM = 2631.2     #<const> The mean radius of Jupiter's moon Ganymede, expressed in kilometers.
 CALLISTO_RADIUS_KM = 2410.3     #<const> The mean radius of Jupiter's moon Callisto, expressed in kilometers.
 
-_CalcMoonCount = 0
-
 _RAD2HOUR  =  3.819718634205488         # 12/pi = factor to convert radians to sidereal hours
 _HOUR2RAD  =  0.2617993877991494365     # pi/12 = factor to convert sidereal hours to radians
 _DAYS_PER_TROPICAL_YEAR = 365.24217
 _PI2 = 2.0 * math.pi
-_EPOCH = datetime.datetime(2000, 1, 1, 12)
+_EPOCH = datetime.datetime(2000, 1, 1, 12, tzinfo = datetime.timezone.utc)
 _ASEC360 = 1296000.0
 _ASEC2RAD = 4.848136811095359935899141e-6
 _ARC = 3600.0 * 180.0 / math.pi     # arcseconds per radian
@@ -91,9 +101,10 @@ _EARTH_ATMOSPHERE_KM = 88.0         # effective atmosphere thickness for lunar e
 _EARTH_ECLIPSE_RADIUS_KM = _EARTH_MEAN_RADIUS_KM + _EARTH_ATMOSPHERE_KM
 
 _MOON_EQUATORIAL_RADIUS_KM = 1738.1
+_MOON_EQUATORIAL_RADIUS_AU = (_MOON_EQUATORIAL_RADIUS_KM / KM_PER_AU)
 _MOON_MEAN_RADIUS_KM       = 1737.4
 _MOON_POLAR_RADIUS_KM      = 1736.0
-_MOON_EQUATORIAL_RADIUS_AU = (_MOON_EQUATORIAL_RADIUS_KM / KM_PER_AU)
+_MOON_POLAR_RADIUS_AU      = (_MOON_POLAR_RADIUS_KM / KM_PER_AU)
 
 _ASEC180 = 180.0 * 60.0 * 60.0
 _AU_PER_PARSEC = _ASEC180 / math.pi
@@ -125,338 +136,28 @@ _PLUTO_GM   = 0.2188699765425970e-11
 _MOON_GM = _EARTH_GM / _EARTH_MOON_MASS_RATIO
 
 
-def MassProduct(body):
-    """Returns the product of mass and universal gravitational constant of a Solar System body.
-
-    For problems involving the gravitational interactions of Solar System bodies,
-    it is helpful to know the product GM, where G = the universal gravitational constant
-    and M = the mass of the body. In practice, GM is known to a higher precision than
-    either G or M alone, and thus using the product results in the most accurate results.
-    This function returns the product GM in the units au^3/day^2.
-    The values come from page 10 of a
-    [JPL memorandum regarding the DE405/LE405 ephemeris](https://web.archive.org/web/20120220062549/http://iau-comm4.jpl.nasa.gov/de405iom/de405iom.pdf).
-
-    Parameters
-    ----------
-    body : Body
-        The body for which to find the GM product.
-        Allowed to be the Sun, Moon, EMB (Earth/Moon Barycenter), or any planet.
-        Any other value will cause an exception to be thrown.
-
-    Returns
-    -------
-    float
-        The mass product of the given body in au^3/day^2.
-    """
-    if body == Body.Sun:      return _SUN_GM
-    if body == Body.Mercury:  return _MERCURY_GM
-    if body == Body.Venus:    return _VENUS_GM
-    if body == Body.Earth:    return _EARTH_GM
-    if body == Body.Moon:     return _MOON_GM
-    if body == Body.EMB:      return _EARTH_GM + _MOON_GM
-    if body == Body.Mars:     return _MARS_GM
-    if body == Body.Jupiter:  return _JUPITER_GM
-    if body == Body.Saturn:   return _SATURN_GM
-    if body == Body.Uranus:   return _URANUS_GM
-    if body == Body.Neptune:  return _NEPTUNE_GM
-    if body == Body.Pluto:    return _PLUTO_GM
-    raise InvalidBodyError()
-
 @enum.unique
 class _PrecessDir(enum.Enum):
     From2000 = 0
     Into2000 = 1
 
-def _LongitudeOffset(diff):
-    offset = diff
+def _LongitudeOffset(diff: float) -> float:
+    offset: float = diff
     while offset <= -180.0:
         offset += 360.0
     while offset > 180.0:
         offset -= 360.0
     return offset
 
-def _NormalizeLongitude(lon):
+def _NormalizeLongitude(lon: float) -> float:
     while lon < 0.0:
         lon += 360.0
     while lon >= 360.0:
         lon -= 360.0
     return lon
 
-class Vector:
-    """A Cartesian vector with 3 space coordinates and 1 time coordinate.
 
-    The vector's space coordinates are measured in astronomical units (AU).
-    The coordinate system varies and depends on context.
-    The vector also includes a time stamp.
-
-    Attributes
-    ----------
-    x : float
-        The x-coordinate of the vector, measured in AU.
-    y : float
-        The y-coordinate of the vector, measured in AU.
-    z : float
-        The z-coordinate of the vector, measured in AU.
-    t : Time
-        The date and time at which the coordinate is valid.
-    """
-    def __init__(self, x, y, z, t):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.t = t
-
-    def __repr__(self):
-        return 'Vector({}, {}, {}, {})'.format(self.x, self.y, self.z, repr(self.t))
-
-    def Length(self):
-        """Returns the length of the vector in AU."""
-        # It would be nice to use math.hypot() here,
-        # but before Python 3.8, it only accepts 2 arguments.
-        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
-
-    def __add__(self, other):
-        return Vector(self.x + other.x, self.y + other.y, self.z + other.z, self.t)
-
-    def __sub__(self, other):
-        return Vector(self.x - other.x, self.y - other.y, self.z - other.z, self.t)
-
-    def format(self, coord_format):
-        """Returns a custom format string representation of the vector."""
-        layout = '({:' + coord_format + '}, {:' + coord_format + '}, {:' + coord_format + '}, {})'
-        return layout.format(self.x, self.y, self.z, str(self.t))
-
-class StateVector:
-    """A combination of a position vector, a velocity vector, and a time.
-
-    The position (x, y, z) is measured in astronomical units (AU).
-    The velocity (vx, vy, vz) is measured in AU/day.
-    The coordinate system varies and depends on context.
-    The state vector also includes a time stamp.
-
-    Attributes
-    ----------
-    x : float
-        The x-coordinate of the position, measured in AU.
-    y : float
-        The y-coordinate of the position, measured in AU.
-    z : float
-        The z-coordinate of the position, measured in AU.
-    vx : float
-        The x-component of the velocity, measured in AU/day.
-    vy : float
-        The y-component of the velocity, measured in AU/day.
-    vz : float
-        The z-component of the velocity, measured in AU/day.
-    t : Time
-        The date and time at which the position and velocity vectors are valid.
-    """
-    def __init__(self, x, y, z, vx, vy, vz, t):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.vx = vx
-        self.vy = vy
-        self.vz = vz
-        self.t = t
-
-    def __repr__(self):
-        return 'StateVector(x={}, y={}, z={}, vx={}, vy={}, vz={}, t={})'.format(
-            self.x, self.y, self.z,
-            self.vx, self.vy, self.vz,
-            repr(self.t))
-
-    def __add__(self, other):
-        return StateVector(
-            self.x  + other.x,
-            self.y  + other.y,
-            self.z  + other.z,
-            self.vx + other.vx,
-            self.vy + other.vy,
-            self.vz + other.vz,
-            self.t
-        )
-
-    def __sub__(self, other):
-        return StateVector(
-            self.x  - other.x,
-            self.y  - other.y,
-            self.z  - other.z,
-            self.vx - other.vx,
-            self.vy - other.vy,
-            self.vz - other.vz,
-            self.t
-        )
-
-@enum.unique
-class Body(enum.Enum):
-    """The celestial bodies supported by Astronomy Engine calculations.
-
-    Values
-    ------
-    Invalid: An unknown, invalid, or undefined celestial body.
-    Mercury: The planet Mercury.
-    Venus: The planet Venus.
-    Earth: The planet Earth.
-    Mars: The planet Mars.
-    Jupiter: The planet Jupiter.
-    Saturn: The planet Saturn.
-    Uranus: The planet Uranus.
-    Neptune: The planet Neptune.
-    Pluto: The planet Pluto.
-    Sun: The Sun.
-    Moon: The Earth's moon.
-    EMB: The Earth/Moon Barycenter.
-    SSB: The Solar System Barycenter.
-    """
-    Invalid = -1
-    Mercury = 0
-    Venus = 1
-    Earth = 2
-    Mars = 3
-    Jupiter = 4
-    Saturn = 5
-    Uranus = 6
-    Neptune = 7
-    Pluto = 8
-    Sun = 9
-    Moon = 10
-    EMB = 11
-    SSB = 12
-
-def BodyCode(name):
-    """Finds the Body enumeration value, given the name of a body.
-
-    Parameters
-    ----------
-    name: str
-        The common English name of a supported celestial body.
-
-    Returns
-    -------
-    Body
-        If `name` is a valid body name, returns the enumeration
-        value associated with that body.
-        Otherwise, returns `Body.Invalid`.
-
-    Example
-    -------
-
-    >>> astronomy.BodyCode('Mars')
-    <Body.Mars: 3>
-
-    """
-    if name not in Body.__members__:
-        return Body.Invalid
-    return Body[name]
-
-def _IsSuperiorPlanet(body):
-    return body in [Body.Mars, Body.Jupiter, Body.Saturn, Body.Uranus, Body.Neptune, Body.Pluto]
-
-_PlanetOrbitalPeriod = [
-    87.969,
-    224.701,
-    _EARTH_ORBITAL_PERIOD,
-    686.980,
-    4332.589,
-    10759.22,
-    30685.4,
-    _NEPTUNE_ORBITAL_PERIOD,
-    90560.0
-]
-
-class Error(Exception):
-    """Indicates an error in an astronomical calculation."""
-    def __init__(self, message):
-        Exception.__init__(self, message)
-
-class DateTimeFormatError(Error):
-    """The syntax of a UTC date/time string was not valid, or it contains invalid values."""
-    def __init__(self, text):
-        Error.__init__(self, 'The date/time string is not valid: "{}"'.format(text))
-
-class EarthNotAllowedError(Error):
-    """The Earth is not allowed as the celestial body in this calculation."""
-    def __init__(self):
-        Error.__init__(self, 'The Earth is not allowed as the body.')
-
-class InvalidBodyError(Error):
-    """The celestial body is not allowed for this calculation."""
-    def __init__(self):
-        Error.__init__(self, 'Invalid astronomical body.')
-
-class BadVectorError(Error):
-    """A vector magnitude is too small to have a direction in space."""
-    def __init__(self):
-        Error.__init__(self, 'Vector is too small to have a direction.')
-
-class InternalError(Error):
-    """An internal error occured that should be reported as a bug.
-
-    Indicates an unexpected and unrecoverable condition occurred.
-    If you encounter this error using Astronomy Engine, it would be very
-    helpful to report it at the [Issues](https://github.com/cosinekitty/astronomy/issues)
-    page on GitHub. Please include a copy of the stack trace, along with a description
-    of how to reproduce the error. This will help improve the quality of
-    Astronomy Engine for everyone! (Thank you in advance from the author.)
-    """
-    def __init__(self):
-        Error.__init__(self, 'Internal error - please report issue, including stack trace, at https://github.com/cosinekitty/astronomy/issues')
-
-class NoConvergeError(Error):
-    """A numeric solver did not converge.
-
-    Indicates that there was a failure of a numeric solver to converge.
-    If you encounter this error using Astronomy Engine, it would be very
-    helpful to report it at the [Issues](https://github.com/cosinekitty/astronomy/issues)
-    page on GitHub. Please include a copy of the stack trace, along with a description
-    of how to reproduce the error. This will help improve the quality of
-    Astronomy Engine for everyone! (Thank you in advance from the author.)
-    """
-    def __init__(self):
-        Error.__init__(self, 'Numeric solver did not converge - please report issue at https://github.com/cosinekitty/astronomy/issues')
-
-def _SynodicPeriod(body):
-    if body == Body.Earth:
-        raise EarthNotAllowedError()
-    if body.value < 0 or body.value >= len(_PlanetOrbitalPeriod):
-        raise InvalidBodyError()
-    if body == Body.Moon:
-        return _MEAN_SYNODIC_MONTH
-    return abs(_EARTH_ORBITAL_PERIOD / (_EARTH_ORBITAL_PERIOD/_PlanetOrbitalPeriod[body.value] - 1.0))
-
-def AngleBetween(a, b):
-    """Calculates the angle in degrees between two vectors.
-
-    Given a pair of vectors, this function returns the angle in degrees
-    between the two vectors in 3D space.
-    The angle is measured in the plane that contains both vectors.
-
-    Parameters
-    ----------
-    a : Vector
-        The first of a pair of vectors between which to measure an angle.
-    b : Vector
-        The second of a pair of vectors between which to measure an angle.
-
-    Returns
-    -------
-    float
-        The angle between the two vectors expressed in degrees.
-        The value is in the range [0, 180].
-    """
-    r = a.Length() * b.Length()
-    if r < 1.0e-8:
-        return BadVectorError()
-    dot = (a.x*b.x + a.y*b.y + a.z*b.z) / r
-    if dot <= -1.0:
-        return 180.0
-    if dot >= +1.0:
-        return 0.0
-    return math.degrees(math.acos(dot))
-
-
-def DeltaT_EspenakMeeus(ut):
+def DeltaT_EspenakMeeus(ut: float) -> float:
     """The default Delta T function used by Astronomy Engine.
 
     Espenak and Meeus use a series of piecewise polynomials to
@@ -560,10 +261,10 @@ def DeltaT_EspenakMeeus(ut):
 _DeltaT = DeltaT_EspenakMeeus
 
 
-def _TerrestrialTime(ut):
+def _TerrestrialTime(ut: float) -> float:
     return ut + _DeltaT(ut) / 86400.0
 
-def _UniversalTime(tt):
+def _UniversalTime(tt: float) -> float:
     # This is the inverse function of _TerrestrialTime.
     # This is an iterative numerical solver, but because
     # the relationship between UT and TT is almost perfectly linear,
@@ -577,7 +278,7 @@ def _UniversalTime(tt):
             return ut
         dt += err
 
-_TimeRegex = re.compile(r'^([0-9]{1,4})-([0-9]{2})-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2}(\.[0-9]+)?))?Z)?$')
+_TimeRegex = re.compile(r'^([\+\-]?[0-9]+)-([0-9]{2})-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2}(\.[0-9]+)?))?Z)?$')
 
 class Time:
     """Represents a date and time used for performing astronomy calculations.
@@ -623,23 +324,23 @@ class Time:
         such as the orbits of planets around the Sun, or the Moon around the Earth.
         Historically, Terrestrial Time has also been known by the term *Ephemeris Time* (ET).
     """
-    def __init__(self, ut, tt = None):
+    def __init__(self, ut : Union[float, str], tt: Optional[float] = None):
         if isinstance(ut, str):
             # Undocumented hack, to make repr(time) reversible.
             other = Time.Parse(ut)
-            self.ut = other.ut
-            self.tt = other.tt
+            self.ut: float = other.ut
+            self.tt: float = other.tt
         else:
             self.ut = ut
             if tt is None:
                 self.tt = _TerrestrialTime(ut)
             else:
                 self.tt = tt
-        self._et = None     # lazy-cache for earth tilt
-        self._st = None     # lazy-cache for sidereal time
+        self._et: Optional[_e_tilt] = None     # lazy-cache for earth tilt
+        self._st: Optional[float] = None       # lazy-cache for sidereal time
 
     @staticmethod
-    def FromTerrestrialTime(tt):
+    def FromTerrestrialTime(tt: float) -> "Time":
         """Creates a #Time object from a Terrestrial Time day value.
 
         Parameters
@@ -654,7 +355,7 @@ class Time:
         return Time(_UniversalTime(tt), tt)
 
     @staticmethod
-    def Parse(text):
+    def Parse(text: str) -> "Time":
         """Creates a #Time object from a string of the form 'yyyy-mm-ddThh:mm:ss.sssZ'
 
         Parses a UTC date and time from a string and returns a #Time object.
@@ -699,13 +400,13 @@ class Time:
         return Time.Make(year, month, day, hour, minute, second)
 
     @staticmethod
-    def Make(year, month, day, hour, minute, second):
+    def Make(year: int, month: int, day: int, hour: int, minute: int, second: float) -> "Time":
         """Creates a #Time object from a UTC calendar date and time.
 
         Parameters
         ----------
         year : int
-            The UTC 4-digit year value, e.g. 2019.
+            The UTC year value, e.g. 2019.
         month : int
             The UTC month in the range 1..12.
         day : int
@@ -721,14 +422,22 @@ class Time:
         -------
         Time
         """
-        micro = round(math.fmod(second, 1.0) * 1000000)
-        second = math.floor(second - micro/1000000)
-        d = datetime.datetime(year, month, day, hour, minute, second, micro)
-        ut = (d - _EPOCH).total_seconds() / 86400
+        # This formula is adapted from NOVAS C 3.1 function julian_date().
+        y = int(year)
+        m = int(month)
+        d = int(day)
+        f = (14 - m) // 12
+        y2000 = (
+            (d - 365972956)
+            + _cdiv(1461 * (y + 1000000 - f), 4)
+            + _cdiv(367 * (m - 2 + f*12), 12)
+            - _cdiv(3 * _cdiv(y + 1000100 - f, 100), 4)
+        )
+        ut = (y2000 - 0.5) + (hour / 24.0) + (minute / 1440.0) + (second / 86400.0)
         return Time(ut)
 
     @staticmethod
-    def Now():
+    def Now() -> "Time":
         """Returns the computer's current date and time in the form of a #Time object.
 
         Uses the computer's system clock to find the current UTC date and time.
@@ -740,10 +449,10 @@ class Time:
         -------
         Time
         """
-        ut = (datetime.datetime.utcnow() - _EPOCH).total_seconds() / 86400.0
+        ut = (datetime.datetime.now(datetime.timezone.utc) - _EPOCH).total_seconds() / 86400.0
         return Time(ut)
 
-    def AddDays(self, days):
+    def AddDays(self, days: float) -> "Time":
         """Calculates the sum or difference of a #Time with a specified real-valued number of days.
 
         Sometimes we need to adjust a given #Time value by a certain amount of time.
@@ -770,15 +479,54 @@ class Time:
         """
         return Time(self.ut + days)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Time(\'' + str(self) + '\')'
 
-    def __str__(self):
-        millis = round(self.ut * 86400000.0)
-        n = _EPOCH + datetime.timedelta(milliseconds=millis)
-        return '{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}Z'.format(n.year, n.month, n.day, n.hour, n.minute, n.second, math.floor(n.microsecond / 1000))
+    def __str__(self) -> str:
+        (year, month, day, hour, minute, second) = self.Calendar()
+        millis = max(0, min(59999, int(math.floor(1000.0 * second))))
+        if year < 0:
+            text = '-{:06d}'.format(-year)
+        elif year <= 9999:
+            text = '{:04d}'.format(year)
+        else:
+            text = '+{:06d}'.format(year)
+        text += '-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}Z'.format(month, day, hour, minute, millis // 1000, millis % 1000)
+        return text
 
-    def Utc(self):
+    def Calendar(self) -> Tuple[int, int, int, int, int, float]:
+        """Returns a tuple of the form (year, month, day, hour, minute, second).
+
+        This is a convenience method for converting a `Time` value into
+        its Gregorian calendar date/time representation.
+        Unlike the built-in `datetime` class, this method can represent
+        dates over a nearly 2 million year range: the years -999999 to +999999.
+        """
+        # Adapted from the NOVAS C 3.1 function cal_date().
+        # [Don Cross - 2023-02-25] Fixed to handle a much wider range of years.
+        djd = self.ut + 2451545.5
+        jd = int(math.floor(djd))
+        x = 24.0 * math.fmod(djd, 1.0)
+        if x < 0.0:
+            x += 24.0
+        hour = int(x)
+        x = 60.0 * math.fmod(x, 1.0)
+        minute = int(x)
+        second = 60.0 * math.fmod(x, 1.0)
+        c = 2500
+        k = jd + (68569 + c*146097)
+        n = _cdiv(4*k, 146097)
+        k = k - _cdiv(146097*n + 3, 4)
+        m = _cdiv(4000*(k+1), 1461001)
+        k = k - _cdiv(1461 * m, 4) + 31
+        month = _cdiv(80 * k, 2447)
+        day = k - _cdiv(2447 * month, 80)
+        k = _cdiv(month, 11)
+        month = month + 2 - 12 * k
+        year = 100 * (n - 49) + m + k - c*400
+        return (year, month, day, hour, minute, second)
+
+    def Utc(self) -> datetime.datetime:
         """Returns the UTC date and time as a `datetime` object.
 
         Uses the standard [`datetime`](https://docs.python.org/3/library/datetime.html) class
@@ -790,7 +538,7 @@ class Time:
         """
         return _EPOCH + datetime.timedelta(days=self.ut)
 
-    def _etilt(self):
+    def _etilt(self) -> "_e_tilt":
         # Calculates precession and nutation of the Earth's axis.
         # The calculations are very expensive, so lazy-evaluate and cache
         # the result inside this Time object.
@@ -798,23 +546,445 @@ class Time:
             self._et = _e_tilt(self)
         return self._et
 
-    def __lt__(self, other):
+    def __lt__(self, other: "Time") -> bool:
         return self.tt < other.tt
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Time):
+            return NotImplemented
         return self.tt == other.tt
 
-    def __le__(self, other):
+    def __le__(self, other: "Time") -> bool:
         return self.tt <= other.tt
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
+        if not isinstance(other, Time):
+            return NotImplemented
         return self.tt != other.tt
 
-    def __gt__(self, other):
+    def __gt__(self, other: "Time") -> bool:
         return self.tt > other.tt
 
-    def __ge__(self, other):
+    def __ge__(self, other: "Time") -> bool:
         return self.tt >= other.tt
+
+
+class Vector:
+    """A Cartesian vector with 3 space coordinates and 1 time coordinate.
+
+    The vector's space coordinates are measured in astronomical units (AU).
+    The coordinate system varies and depends on context.
+    The vector also includes a time stamp.
+
+    Attributes
+    ----------
+    x : float
+        The x-coordinate of the vector, measured in AU.
+    y : float
+        The y-coordinate of the vector, measured in AU.
+    z : float
+        The z-coordinate of the vector, measured in AU.
+    t : Time
+        The date and time at which the coordinate is valid.
+    """
+    def __init__(self, x: float, y: float, z: float, t: Time) -> None:
+        self.x = x
+        self.y = y
+        self.z = z
+        self.t = t
+
+    def __repr__(self) -> str:
+        return 'Vector({}, {}, {}, {})'.format(self.x, self.y, self.z, repr(self.t))
+
+    def Length(self) -> float:
+        """Returns the length of the vector in AU."""
+        # It would be nice to use math.hypot() here,
+        # but before Python 3.8, it only accepts 2 arguments.
+        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
+
+    def __add__(self, other: "Vector") -> "Vector":
+        return Vector(self.x + other.x, self.y + other.y, self.z + other.z, self.t)
+
+    def __sub__(self, other: "Vector") -> "Vector":
+        return Vector(self.x - other.x, self.y - other.y, self.z - other.z, self.t)
+
+    def __neg__(self) -> "Vector":
+        return Vector(-self.x, -self.y, -self.z, self.t)
+
+    def __truediv__(self, scalar: float) -> "Vector":
+        return Vector(self.x/scalar, self.y/scalar, self.z/scalar, self.t)
+
+    def format(self, coord_format: str) -> str:
+        """Returns a custom format string representation of the vector."""
+        layout = '({:' + coord_format + '}, {:' + coord_format + '}, {:' + coord_format + '}, {})'
+        return layout.format(self.x, self.y, self.z, str(self.t))
+
+class StateVector:
+    """A combination of a position vector, a velocity vector, and a time.
+
+    The position (x, y, z) is measured in astronomical units (AU).
+    The velocity (vx, vy, vz) is measured in AU/day.
+    The coordinate system varies and depends on context.
+    The state vector also includes a time stamp.
+
+    Attributes
+    ----------
+    x : float
+        The x-coordinate of the position, measured in AU.
+    y : float
+        The y-coordinate of the position, measured in AU.
+    z : float
+        The z-coordinate of the position, measured in AU.
+    vx : float
+        The x-component of the velocity, measured in AU/day.
+    vy : float
+        The y-component of the velocity, measured in AU/day.
+    vz : float
+        The z-component of the velocity, measured in AU/day.
+    t : Time
+        The date and time at which the position and velocity vectors are valid.
+    """
+    def __init__(self, x: float, y: float, z: float, vx: float, vy: float, vz: float, t: Time) -> None:
+        self.x = x
+        self.y = y
+        self.z = z
+        self.vx = vx
+        self.vy = vy
+        self.vz = vz
+        self.t = t
+
+    def __repr__(self) -> str:
+        return 'StateVector(x={}, y={}, z={}, vx={}, vy={}, vz={}, t={})'.format(
+            self.x, self.y, self.z,
+            self.vx, self.vy, self.vz,
+            repr(self.t))
+
+    def __add__(self, other: "StateVector") -> "StateVector":
+        return StateVector(
+            self.x  + other.x,
+            self.y  + other.y,
+            self.z  + other.z,
+            self.vx + other.vx,
+            self.vy + other.vy,
+            self.vz + other.vz,
+            self.t
+        )
+
+    def __sub__(self, other: "StateVector") -> "StateVector":
+        return StateVector(
+            self.x  - other.x,
+            self.y  - other.y,
+            self.z  - other.z,
+            self.vx - other.vx,
+            self.vy - other.vy,
+            self.vz - other.vz,
+            self.t
+        )
+
+    def Position(self) -> Vector:
+        """Extracts a position vector from this state vector."""
+        return Vector(self.x, self.y, self.z, self.t)
+
+    def Velocity(self) -> Vector:
+        """Extracts a velocity vector from this state vector."""
+        return Vector(self.vx, self.vy, self.vz, self.t)
+
+@enum.unique
+class Body(enum.Enum):
+    """The celestial bodies supported by Astronomy Engine calculations.
+
+    Values
+    ------
+    Invalid: An unknown, invalid, or undefined celestial body.
+    Mercury: The planet Mercury.
+    Venus: The planet Venus.
+    Earth: The planet Earth.
+    Mars: The planet Mars.
+    Jupiter: The planet Jupiter.
+    Saturn: The planet Saturn.
+    Uranus: The planet Uranus.
+    Neptune: The planet Neptune.
+    Pluto: The planet Pluto.
+    Sun: The Sun.
+    Moon: The Earth's moon.
+    EMB: The Earth/Moon Barycenter.
+    SSB: The Solar System Barycenter.
+    Star1: User-defined star 1.
+    Star2: User-defined star 2.
+    Star3: User-defined star 3.
+    Star4: User-defined star 4.
+    Star5: User-defined star 5.
+    Star6: User-defined star 6.
+    Star7: User-defined star 7.
+    Star8: User-defined star 8.
+    """
+    Invalid = -1
+    Mercury = 0
+    Venus = 1
+    Earth = 2
+    Mars = 3
+    Jupiter = 4
+    Saturn = 5
+    Uranus = 6
+    Neptune = 7
+    Pluto = 8
+    Sun = 9
+    Moon = 10
+    EMB = 11
+    SSB = 12
+    Star1 = 101
+    Star2 = 102
+    Star3 = 103
+    Star4 = 104
+    Star5 = 105
+    Star6 = 106
+    Star7 = 107
+    Star8 = 108
+
+
+def MassProduct(body: Body) -> float:
+    """Returns the product of mass and universal gravitational constant of a Solar System body.
+
+    For problems involving the gravitational interactions of Solar System bodies,
+    it is helpful to know the product GM, where G = the universal gravitational constant
+    and M = the mass of the body. In practice, GM is known to a higher precision than
+    either G or M alone, and thus using the product results in the most accurate results.
+    This function returns the product GM in the units au^3/day^2.
+    The values come from page 10 of a
+    [JPL memorandum regarding the DE405/LE405 ephemeris](https://web.archive.org/web/20120220062549/http://iau-comm4.jpl.nasa.gov/de405iom/de405iom.pdf).
+
+    Parameters
+    ----------
+    body : Body
+        The body for which to find the GM product.
+        Allowed to be the Sun, Moon, EMB (Earth/Moon Barycenter), or any planet.
+        Any other value will cause an exception to be thrown.
+
+    Returns
+    -------
+    float
+        The mass product of the given body in au^3/day^2.
+    """
+    if body == Body.Sun:      return _SUN_GM
+    if body == Body.Mercury:  return _MERCURY_GM
+    if body == Body.Venus:    return _VENUS_GM
+    if body == Body.Earth:    return _EARTH_GM
+    if body == Body.Moon:     return _MOON_GM
+    if body == Body.EMB:      return _EARTH_GM + _MOON_GM
+    if body == Body.Mars:     return _MARS_GM
+    if body == Body.Jupiter:  return _JUPITER_GM
+    if body == Body.Saturn:   return _SATURN_GM
+    if body == Body.Uranus:   return _URANUS_GM
+    if body == Body.Neptune:  return _NEPTUNE_GM
+    if body == Body.Pluto:    return _PLUTO_GM
+    raise InvalidBodyError(body)
+
+
+class _StarDef:
+    def __init__(self) -> None:
+        self.ra = 0.0
+        self.dec = 0.0
+        self.dist = 0.0     # signals that the star has not yet been defined
+
+_StarTable:List[_StarDef] = [_StarDef() for _ in range(8)]
+
+def _GetStar(body: Body) -> Optional[_StarDef]:
+    if Body.Star1.value <= body.value <= Body.Star8.value:
+        return _StarTable[int(body.value - Body.Star1.value)]
+    return None
+
+def _UserDefinedStar(body: Body) -> Optional[_StarDef]:
+    star = _GetStar(body)
+    if star and (star.dist > 0.0):
+        return star
+    return None
+
+def DefineStar(body: Body, ra: float, dec: float, distanceLightYears: float) -> None:
+    """Assign equatorial coordinates to a user-defined star.
+
+    Some Astronomy Engine functions allow their `body` parameter to
+    be a user-defined fixed point in the sky, loosely called a "star".
+    This function assigns a right ascension, declination, and distance
+    to one of the eight user-defined stars `Body.Star1`..`Body.Star8`.
+
+    Stars are not valid until defined. Once defined, they retain their
+    definition until re-defined by another call to `DefineStar`.
+
+    Parameters
+    ----------
+    body: Body
+        One of the eight user-defined star identifiers: `Body.Star1`, `Body.Star2`, ..., `Body.Star8`.
+    ra: float
+        The right ascension to be assigned to the star, expressed in J2000 equatorial coordinates (EQJ).
+        The value is in units of sidereal hours, and must be within the half-open range [0, 24).
+    dec: float
+        The declination to be assigned to the star, expressed in J2000 equatorial coordinates (EQJ).
+        The value is in units of degrees north (positive) or south (negative) of the J2000 equator,
+        and must be within the closed range [-90, +90].
+    distanceLightYears: float
+        The distance between the star and the Sun, expressed in light-years.
+        This value is used to calculate the tiny parallax shift as seen by an observer on Earth.
+        If you don't know the distance to the star, using a large value like 1000 will generally work well.
+        The minimum allowed distance is 1 light-year, which is required to provide certain internal optimizations.
+    """
+    star = _GetStar(body)
+    if star is None:
+        raise InvalidBodyError(body)
+    if not (0.0 <= ra < 24.0):
+        raise Error('Invalid right ascension: {}'.format(ra))
+    if not (-90.0 <= dec <= +90.0):
+        raise Error('Invalid declination: {}'.format(dec))
+    star.ra = ra
+    star.dec = dec
+    star.dist = distanceLightYears * AU_PER_LY
+
+def BodyCode(name: str) -> Body:
+    """Finds the Body enumeration value, given the name of a body.
+
+    Parameters
+    ----------
+    name: str
+        The common English name of a supported celestial body.
+
+    Returns
+    -------
+    Body
+        If `name` is a valid body name, returns the enumeration
+        value associated with that body.
+        Otherwise, returns `Body.Invalid`.
+
+    Example
+    -------
+
+    >>> astronomy.BodyCode('Mars')
+    <Body.Mars: 3>
+
+    """
+    if name not in Body.__members__:
+        return Body.Invalid
+    return Body[name]
+
+def _IsSuperiorPlanet(body: Body) -> bool:
+    return body in [Body.Mars, Body.Jupiter, Body.Saturn, Body.Uranus, Body.Neptune, Body.Pluto]
+
+_PlanetOrbitalPeriod:List[float] = [
+    87.969,
+    224.701,
+    _EARTH_ORBITAL_PERIOD,
+    686.980,
+    4332.589,
+    10759.22,
+    30685.4,
+    _NEPTUNE_ORBITAL_PERIOD,
+    90560.0
+]
+
+class Error(Exception):
+    """Indicates an error in an astronomical calculation."""
+    def __init__(self, message: str) -> None:
+        Exception.__init__(self, message)
+
+class DateTimeFormatError(Error):
+    """The syntax of a UTC date/time string was not valid, or it contains invalid values."""
+    def __init__(self, text: str) -> None:
+        Error.__init__(self, 'The date/time string is not valid: "{}"'.format(text))
+
+class EarthNotAllowedError(Error):
+    """The Earth is not allowed as the celestial body in this calculation."""
+    def __init__(self) -> None:
+        Error.__init__(self, 'The Earth is not allowed as the body.')
+
+class InvalidBodyError(Error):
+    """The celestial body is not allowed for this calculation."""
+    def __init__(self, body: Body) -> None:
+        Error.__init__(self, 'This body is not valid, or is not supported for this calculation: {}'.format(body))
+
+class BadVectorError(Error):
+    """A vector magnitude is too small to have a direction in space."""
+    def __init__(self) -> None:
+        Error.__init__(self, 'Vector is too small to have a direction.')
+
+class InternalError(Error):
+    """An internal error occured that should be reported as a bug.
+
+    Indicates an unexpected and unrecoverable condition occurred.
+    If you encounter this error using Astronomy Engine, it would be very
+    helpful to report it at the [Issues](https://github.com/cosinekitty/astronomy/issues)
+    page on GitHub. Please include a copy of the stack trace, along with a description
+    of how to reproduce the error. This will help improve the quality of
+    Astronomy Engine for everyone! (Thank you in advance from the author.)
+    """
+    def __init__(self) -> None:
+        Error.__init__(self, 'Internal error - please report issue, including stack trace, at https://github.com/cosinekitty/astronomy/issues')
+
+class NoConvergeError(Error):
+    """A numeric solver did not converge.
+
+    Indicates that there was a failure of a numeric solver to converge.
+    If you encounter this error using Astronomy Engine, it would be very
+    helpful to report it at the [Issues](https://github.com/cosinekitty/astronomy/issues)
+    page on GitHub. Please include a copy of the stack trace, along with a description
+    of how to reproduce the error. This will help improve the quality of
+    Astronomy Engine for everyone! (Thank you in advance from the author.)
+    """
+    def __init__(self) -> None:
+        Error.__init__(self, 'Numeric solver did not converge - please report issue at https://github.com/cosinekitty/astronomy/issues')
+
+def PlanetOrbitalPeriod(body: Body) -> float:
+    """Returns the average number of days it takes for a planet to orbit the Sun.
+
+    Parameters
+    ----------
+    body : Body
+        One of the planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, or Pluto.
+
+    Returns
+    -------
+    float
+        The mean orbital period of the body in days.
+    """
+    if isinstance(body, Body) and (0 <= body.value < len(_PlanetOrbitalPeriod)):
+        return _PlanetOrbitalPeriod[int(body.value)]
+    raise InvalidBodyError(body)
+
+def _SynodicPeriod(body: Body) -> float:
+    if body == Body.Earth:
+        raise EarthNotAllowedError()
+    if body.value < 0 or body.value >= len(_PlanetOrbitalPeriod):
+        raise InvalidBodyError(body)
+    if body == Body.Moon:
+        return _MEAN_SYNODIC_MONTH
+    return abs(_EARTH_ORBITAL_PERIOD / (_EARTH_ORBITAL_PERIOD/_PlanetOrbitalPeriod[int(body.value)] - 1.0))
+
+def AngleBetween(a: Vector, b: Vector) -> float:
+    """Calculates the angle in degrees between two vectors.
+
+    Given a pair of vectors, this function returns the angle in degrees
+    between the two vectors in 3D space.
+    The angle is measured in the plane that contains both vectors.
+
+    Parameters
+    ----------
+    a : Vector
+        The first of a pair of vectors between which to measure an angle.
+    b : Vector
+        The second of a pair of vectors between which to measure an angle.
+
+    Returns
+    -------
+    float
+        The angle between the two vectors expressed in degrees.
+        The value is in the range [0, 180].
+    """
+    r: float = a.Length() * b.Length()
+    if r < 1.0e-8:
+        raise BadVectorError()
+    dot: float = (a.x*b.x + a.y*b.y + a.z*b.z) / r
+    if dot <= -1.0:
+        return 180.0
+    if dot >= +1.0:
+        return 0.0
+    return math.degrees(math.acos(dot))
 
 
 class Observer:
@@ -829,15 +999,15 @@ class Observer:
     height : float
         Elevation above sea level in meters.
     """
-    def __init__(self, latitude, longitude, height=0.0):
+    def __init__(self, latitude: float, longitude: float, height: float = 0.0) -> None:
         self.latitude = latitude
         self.longitude = longitude
         self.height = height
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Observer(latitude={}, longitude={}, height={})'.format(self.latitude, self.longitude, self.height)
 
-    def __str__(self):
+    def __str__(self) -> str:
         text = '('
         text += 'S' if (self.latitude < 0) else 'N'
         text += '{:0.8f}, '.format(abs(self.latitude))
@@ -856,10 +1026,10 @@ class RotationMatrix:
     rot : float[3][3]
         A normalized 3x3 rotation matrix.
     """
-    def __init__(self, rot):
+    def __init__(self, rot: List[List[float]]) -> None:
         self.rot = rot
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'RotationMatrix({})'.format(self.rot)
 
 class Spherical:
@@ -874,45 +1044,38 @@ class Spherical:
     dist : float
         Distance in AU.
     """
-    def __init__(self, lat, lon, dist):
+    def __init__(self, lat: float, lon: float, dist: float) -> None:
         self.lat = lat
         self.lon = lon
         self.dist = dist
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Spherical(lat={}, lon={}, dist={})'.format(self.lat, self.lon, self.dist)
 
 class _iau2000b:
-    def __init__(self, time):
+    def __init__(self, time: Time) -> None:
         t = time.tt / 36525.0
-        el  = math.fmod((485868.249036 + t*1717915923.2178), _ASEC360) * _ASEC2RAD
         elp = math.fmod((1287104.79305 + t*129596581.0481),  _ASEC360) * _ASEC2RAD
         f   = math.fmod((335779.526232 + t*1739527262.8478), _ASEC360) * _ASEC2RAD
         d   = math.fmod((1072260.70369 + t*1602961601.2090), _ASEC360) * _ASEC2RAD
         om  = math.fmod((450160.398036 - t*6962890.5431),    _ASEC360) * _ASEC2RAD
-        dp = 0
-        de = 0
-
 
         sarg = math.sin(om)
         carg = math.cos(om)
-        dp += (-172064161.0 - 174666.0*t)*sarg + 33386.0*carg
-        de += (92052331.0 + 9086.0*t)*carg + 15377.0*sarg
+        dp = (-172064161.0 - 174666.0*t)*sarg + 33386.0*carg
+        de = (92052331.0 + 9086.0*t)*carg + 15377.0*sarg
 
-
-        arg = 2.0*f - 2.0*d + 2.0*om
+        arg = 2.0*(f - d + om)
         sarg = math.sin(arg)
         carg = math.cos(arg)
         dp += (-13170906.0 - 1675.0*t)*sarg - 13696.0*carg
         de += (5730336.0 - 3015.0*t)*carg - 4587.0*sarg
 
-
-        arg = 2.0*f + 2.0*om
+        arg = 2.0*(f + om)
         sarg = math.sin(arg)
         carg = math.cos(arg)
         dp += (-2276413.0 - 234.0*t)*sarg + 2796.0*carg
         de += (978459.0 - 485.0*t)*carg + 1374.0*sarg
-
 
         arg = 2.0*om
         sarg = math.sin(arg)
@@ -920,519 +1083,15 @@ class _iau2000b:
         dp += (2074554.0 + 207.0*t)*sarg - 698.0*carg
         de += (-897492.0 + 470.0*t)*carg - 291.0*sarg
 
-
         sarg = math.sin(elp)
         carg = math.cos(elp)
         dp += (1475877.0 - 3633.0*t)*sarg + 11817.0*carg
         de += (73871.0 - 184.0*t)*carg - 1924.0*sarg
 
-
-        arg = elp + 2.0*f - 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-516821.0 + 1226.0*t)*sarg - 524.0*carg
-        de += (224386.0 - 677.0*t)*carg - 174.0*sarg
-
-
-        sarg = math.sin(el)
-        carg = math.cos(el)
-        dp += (711159.0 + 73.0*t)*sarg - 872.0*carg
-        de += (-6750.0)*carg + 358.0*sarg
-
-
-        arg = 2.0*f + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-387298.0 - 367.0*t)*sarg + 380.0*carg
-        de += (200728.0 + 18.0*t)*carg + 318.0*sarg
-
-
-        arg = el + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-301461.0 - 36.0*t)*sarg + 816.0*carg
-        de += (129025.0 - 63.0*t)*carg + 367.0*sarg
-
-
-        arg = -elp + 2.0*f - 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (215829.0 - 494.0*t)*sarg + 111.0*carg
-        de += (-95929.0 + 299.0*t)*carg + 132.0*sarg
-
-
-        arg = 2.0*f - 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (128227.0 + 137.0*t)*sarg + 181.0*carg
-        de += (-68982.0 - 9.0*t)*carg + 39.0*sarg
-
-
-        arg = -el + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (123457.0 + 11.0*t)*sarg + 19.0*carg
-        de += (-53311.0 + 32.0*t)*carg - 4.0*sarg
-
-
-        arg = -el + 2.0*d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (156994.0 + 10.0*t)*sarg - 168.0*carg
-        de += (-1235.0)*carg + 82.0*sarg
-
-
-        arg = el + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (63110.0 + 63.0*t)*sarg + 27.0*carg
-        de += (-33228.0)*carg - 9.0*sarg
-
-
-        arg = -el + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-57976.0 - 63.0*t)*sarg - 189.0*carg
-        de += (31429.0)*carg - 75.0*sarg
-
-
-        arg = -el + 2.0*f + 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-59641.0 - 11.0*t)*sarg + 149.0*carg
-        de += (25543.0 - 11.0*t)*carg + 66.0*sarg
-
-
-        arg = el + 2.0*f + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-51613.0 - 42.0*t)*sarg + 129.0*carg
-        de += (26366.0)*carg + 78.0*sarg
-
-
-        arg = -2.0*el + 2.0*f + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (45893.0 + 50.0*t)*sarg + 31.0*carg
-        de += (-24236.0 - 10.0*t)*carg + 20.0*sarg
-
-
-        arg = 2.0*d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (63384.0 + 11.0*t)*sarg - 150.0*carg
-        de += (-1220.0)*carg + 29.0*sarg
-
-
-        arg = 2.0*f + 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-38571.0 - 1.0*t)*sarg + 158.0*carg
-        de += (16452.0 - 11.0*t)*carg + 68.0*sarg
-
-
-        arg = -2.0*elp + 2.0*f - 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (32481.0)*sarg
-        de += (-13870.0)*carg
-
-
-        arg = -2.0*el + 2.0*d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-47722.0)*sarg - 18.0*carg
-        de += (477.0)*carg - 25.0*sarg
-
-
-        arg = 2.0*el + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-31046.0 - 1.0*t)*sarg + 131.0*carg
-        de += (13238.0 - 11.0*t)*carg + 59.0*sarg
-
-
-        arg = el + 2.0*f - 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (28593.0)*sarg - carg
-        de += (-12338.0 + 10.0*t)*carg - 3.0*sarg
-
-
-        arg = -el + 2.0*f + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (20441.0 + 21.0*t)*sarg + 10.0*carg
-        de += (-10758.0)*carg - 3.0*sarg
-
-
-        arg = 2.0*el
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (29243.0)*sarg - 74.0*carg
-        de += (-609.0)*carg + 13.0*sarg
-
-
-        arg = 2.0*f
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (25887.0)*sarg - 66.0*carg
-        de += (-550.0)*carg + 11.0*sarg
-
-
-        arg = elp + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-14053.0 - 25.0*t)*sarg + 79.0*carg
-        de += (8551.0 - 2.0*t)*carg - 45.0*sarg
-
-
-        arg = -el + 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (15164.0 + 10.0*t)*sarg + 11.0*carg
-        de += (-8001.0)*carg - sarg
-
-
-        arg = 2.0*elp + 2.0*f - 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-15794.0 + 72.0*t)*sarg - 16.0*carg
-        de += (6850.0 - 42.0*t)*carg - 5.0*sarg
-
-
-        arg = -2.0*f + 2.0*d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (21783.0)*sarg + 13.0*carg
-        de += (-167.0)*carg + 13.0*sarg
-
-
-        arg = el - 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-12873.0 - 10.0*t)*sarg - 37.0*carg
-        de += (6953.0)*carg - 14.0*sarg
-
-
-        arg = -elp + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-12654.0 + 11.0*t)*sarg + 63.0*carg
-        de += (6415.0)*carg + 26.0*sarg
-
-
-        arg = -el + 2.0*f + 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-10204.0)*sarg + 25.0*carg
-        de += (5222.0)*carg + 15.0*sarg
-
-
-        arg = 2.0*elp
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (16707.0 - 85.0*t)*sarg - 10.0*carg
-        de += (168.0 - 1.0*t)*carg + 10.0*sarg
-
-
-        arg = el + 2.0*f + 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-7691.0)*sarg + 44.0*carg
-        de += (3268.0)*carg + 19.0*sarg
-
-
-        arg = -2.0*el + 2.0*f
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-11024.0)*sarg - 14.0*carg
-        de += (104.0)*carg + 2.0*sarg
-
-
-        arg = elp + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (7566.0 - 21.0*t)*sarg - 11.0*carg
-        de += (-3250.0)*carg - 5.0*sarg
-
-
-        arg = 2.0*f + 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-6637.0 - 11.0*t)*sarg + 25.0*carg
-        de += (3353.0)*carg + 14.0*sarg
-
-
-        arg = -elp + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-7141.0 + 21.0*t)*sarg + 8.0*carg
-        de += (3070.0)*carg + 4.0*sarg
-
-
-        arg = 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-6302.0 - 11.0*t)*sarg + 2.0*carg
-        de += (3272.0)*carg + 4.0*sarg
-
-
-        arg = el + 2.0*f - 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (5800.0 + 10.0*t)*sarg + 2.0*carg
-        de += (-3045.0)*carg - sarg
-
-
-        arg = 2.0*el + 2.0*f - 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (6443.0)*sarg - 7.0*carg
-        de += (-2768.0)*carg - 4.0*sarg
-
-
-        arg = -2.0*el + 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-5774.0 - 11.0*t)*sarg - 15.0*carg
-        de += (3041.0)*carg - 5.0*sarg
-
-
-        arg = 2.0*el + 2.0*f + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-5350.0)*sarg + 21.0*carg
-        de += (2695.0)*carg + 12.0*sarg
-
-
-        arg = -elp + 2.0*f - 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-4752.0 - 11.0*t)*sarg - 3.0*carg
-        de += (2719.0)*carg - 3.0*sarg
-
-
-        arg = -2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-4940.0 - 11.0*t)*sarg - 21.0*carg
-        de += (2720.0)*carg - 9.0*sarg
-
-
-        arg = -el - elp + 2.0*d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (7350.0)*sarg - 8.0*carg
-        de += (-51.0)*carg + 4.0*sarg
-
-
-        arg = 2.0*el - 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (4065.0)*sarg + 6.0*carg
-        de += (-2206.0)*carg + sarg
-
-
-        arg = el + 2.0*d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (6579.0)*sarg - 24.0*carg
-        de += (-199.0)*carg + 2.0*sarg
-
-
-        arg = elp + 2.0*f - 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (3579.0)*sarg + 5.0*carg
-        de += (-1900.0)*carg + sarg
-
-
-        arg = el - elp
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (4725.0)*sarg - 6.0*carg
-        de += (-41.0)*carg + 3.0*sarg
-
-
-        arg = -2.0*el + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-3075.0)*sarg - 2.0*carg
-        de += (1313.0)*carg - sarg
-
-
-        arg = 3.0*el + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-2904.0)*sarg + 15.0*carg
-        de += (1233.0)*carg + 7.0*sarg
-
-
-        arg = -elp + 2.0*d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (4348.0)*sarg - 10.0*carg
-        de += (-81.0)*carg + 2.0*sarg
-
-
-        arg = el - elp + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-2878.0)*sarg + 8.0*carg
-        de += (1232.0)*carg + 4.0*sarg
-
-
-        sarg = math.sin(d)
-        carg = math.cos(d)
-        dp += (-4230.0)*sarg + 5.0*carg
-        de += (-20.0)*carg - 2.0*sarg
-
-
-        arg = -el - elp + 2.0*f + 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-2819.0)*sarg + 7.0*carg
-        de += (1207.0)*carg + 3.0*sarg
-
-
-        arg = -el + 2.0*f
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-4056.0)*sarg + 5.0*carg
-        de += (40.0)*carg - 2.0*sarg
-
-
-        arg = -elp + 2.0*f + 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-2647.0)*sarg + 11.0*carg
-        de += (1129.0)*carg + 5.0*sarg
-
-
-        arg = -2.0*el + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-2294.0)*sarg - 10.0*carg
-        de += (1266.0)*carg - 4.0*sarg
-
-
-        arg = el + elp + 2.0*f + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (2481.0)*sarg - 7.0*carg
-        de += (-1062.0)*carg - 3.0*sarg
-
-
-        arg = 2.0*el + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (2179.0)*sarg - 2.0*carg
-        de += (-1129.0)*carg - 2.0*sarg
-
-
-        arg = -el + elp + d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (3276.0)*sarg + carg
-        de += (-9.0)*carg
-
-
-        arg = el + elp
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-3389.0)*sarg + 5.0*carg
-        de += (35.0)*carg - 2.0*sarg
-
-
-        arg = el + 2.0*f
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (3339.0)*sarg - 13.0*carg
-        de += (-107.0)*carg + sarg
-
-
-        arg = -el + 2.0*f - 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-1987.0)*sarg - 6.0*carg
-        de += (1073.0)*carg - 2.0*sarg
-
-
-        arg = el + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-1981.0)*sarg
-        de += (854.0)*carg
-
-
-        arg = -el + d
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (4026.0)*sarg - 353.0*carg
-        de += (-553.0)*carg - 139.0*sarg
-
-
-        arg = 2.0*f + d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (1660.0)*sarg - 5.0*carg
-        de += (-710.0)*carg - 2.0*sarg
-
-
-        arg = -el + 2.0*f + 4.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-1521.0)*sarg + 9.0*carg
-        de += (647.0)*carg + 4.0*sarg
-
-
-        arg = -el + elp + d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (1314.0)*sarg
-        de += (-700.0)*carg
-
-
-        arg = -2.0*elp + 2.0*f - 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-1283.0)*sarg
-        de += (672.0)*carg
-
-
-        arg = el + 2.0*f + 2.0*d + om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (-1331.0)*sarg + 8.0*carg
-        de += (663.0)*carg + 4.0*sarg
-
-
-        arg = -2.0*el + 2.0*f + 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (1383.0)*sarg - 2.0*carg
-        de += (-594.0)*carg - 2.0*sarg
-
-
-        arg = -el + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (1405.0)*sarg + 4.0*carg
-        de += (-610.0)*carg + 2.0*sarg
-
-
-        arg = el + elp + 2.0*f - 2.0*d + 2.0*om
-        sarg = math.sin(arg)
-        carg = math.cos(arg)
-        dp += (1290.0)*sarg
-        de += (-556.0)*carg
-
-
         self.dpsi = -0.000135 + (dp * 1.0e-7)
         self.deps = +0.000388 + (de * 1.0e-7)
 
-def _mean_obliq(tt):
+def _mean_obliq(tt: float) -> float:
     t = tt / 36525
     asec = (
         (((( -  0.0000000434   * t
@@ -1444,7 +1103,7 @@ def _mean_obliq(tt):
     return asec / 3600.0
 
 class _e_tilt:
-    def __init__(self, time):
+    def __init__(self, time: Time) -> None:
         e = _iau2000b(time)
         self.dpsi = e.dpsi
         self.deps = e.deps
@@ -1453,17 +1112,20 @@ class _e_tilt:
         self.tt = time.tt
         self.ee = e.dpsi * math.cos(math.radians(self.mobl)) / 15.0
 
-def _ecl2equ_vec(time, ecl):
-    obl = math.radians(_mean_obliq(time.tt))
-    cos_obl = math.cos(obl)
-    sin_obl = math.sin(obl)
+def _obl_ecl2equ_vec(obl_deg: float, ecl: List[float]) -> List[float]:
+    obl_rad = math.radians(obl_deg)
+    cos_obl = math.cos(obl_rad)
+    sin_obl = math.sin(obl_rad)
     return [
         ecl[0],
         ecl[1]*cos_obl - ecl[2]*sin_obl,
         ecl[1]*sin_obl + ecl[2]*cos_obl
     ]
 
-def _precession_rot(time, direction):
+def _ecl2equ_vec(time: Time, ecl: List[float]) -> List[float]:
+    return _obl_ecl2equ_vec(_mean_obliq(time.tt), ecl)
+
+def _precession_rot(time: Time, direction: _PrecessDir) -> RotationMatrix:
     eps0 = 84381.406
     t = time.tt / 36525
 
@@ -1526,20 +1188,67 @@ def _precession_rot(time, direction):
 
     raise Error('Inalid precession direction')
 
-def _rotate(rot, vec):
+def _rotate(rot: RotationMatrix, vec: List[float]) -> List[float]:
     return [
         rot.rot[0][0]*vec[0] + rot.rot[1][0]*vec[1] + rot.rot[2][0]*vec[2],
         rot.rot[0][1]*vec[0] + rot.rot[1][1]*vec[1] + rot.rot[2][1]*vec[2],
         rot.rot[0][2]*vec[0] + rot.rot[1][2]*vec[1] + rot.rot[2][2]*vec[2]
     ]
 
-def _precession(pos, time, direction):
+def _precession(pos: List[float], time: Time, direction: _PrecessDir) -> List[float]:
     r = _precession_rot(time, direction)
     return _rotate(r, pos)
 
-def _precession_posvel(state, time, direction):
+def _precession_posvel(state: StateVector, time: Time, direction: _PrecessDir) -> StateVector:
     r = _precession_rot(time, direction)
     return RotateState(r, state)
+
+
+class _TerseVector:
+    '''A 3D vector that is not attached to a time. Used privately inside this module for conciseness.'''
+
+    def __init__(self, x: float, y: float, z: float) -> None:
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def clone(self) -> "_TerseVector":
+        '''Create a copy of this vector.'''
+        return _TerseVector(self.x, self.y, self.z)
+
+    @staticmethod
+    def zero() -> "_TerseVector":
+        '''Return a zero vector.'''
+        return _TerseVector(0.0, 0.0, 0.0)
+
+    def ToAstroVector(self, time: Time) -> "Vector":
+        '''Convert _TerseVector object to Vector object.'''
+        return Vector(self.x, self.y, self.z, time)
+
+    def quadrature(self) -> float:
+        '''Return magnitude squared of this vector.'''
+        return self.x**2 + self.y**2 + self.z**2
+
+    def mean(self, other: "_TerseVector") -> "_TerseVector":
+        '''Return the average of this vector and another vector.'''
+        return _TerseVector((self.x + other.x)/2.0, (self.y + other.y)/2.0, (self.z + other.z)/2.0)
+
+    def __add__(self, other: "_TerseVector") -> "_TerseVector":
+        return _TerseVector(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other: "_TerseVector") -> "_TerseVector":
+        return _TerseVector(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __mul__(self, scalar: float) -> "_TerseVector":
+        return _TerseVector(scalar * self.x, scalar * self.y, scalar * self.z)
+
+    def __rmul__(self, scalar: float) -> "_TerseVector":
+        return _TerseVector(scalar * self.x, scalar * self.y, scalar * self.z)
+
+    def __truediv__(self, scalar: float) -> "_TerseVector":
+        return _TerseVector(self.x / scalar, self.y / scalar, self.z / scalar)
+
+
 
 class Equatorial:
     """Equatorial angular coordinates
@@ -1563,17 +1272,17 @@ class Equatorial:
         y = direction of the June solstice,
         z = north.
     """
-    def __init__(self, ra, dec, dist, vec):
+    def __init__(self, ra: float, dec: float, dist: float, vec: Vector) -> None:
         self.ra = ra
         self.dec = dec
         self.dist = dist
         self.vec = vec
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Equatorial(ra={}, dec={}, dist={}, vec={})'.format(self.ra, self.dec, self.dist, repr(self.vec))
 
 
-def _vector2radec(pos, time):
+def _vector2radec(pos: List[float], time: Time) -> Equatorial:
     xyproj = pos[0]*pos[0] + pos[1]*pos[1]
     dist = math.sqrt(xyproj + pos[2]*pos[2])
     if xyproj == 0.0:
@@ -1594,7 +1303,7 @@ def _vector2radec(pos, time):
     return Equatorial(ra, dec, dist, vec)
 
 
-def _nutation_rot(time, direction):
+def _nutation_rot(time: Time, direction: _PrecessDir) -> RotationMatrix:
     tilt = time._etilt()
     oblm = math.radians(tilt.mobl)
     oblt = math.radians(tilt.tobl)
@@ -1634,15 +1343,15 @@ def _nutation_rot(time, direction):
 
     raise Error('Invalid nutation direction')
 
-def _nutation(pos, time, direction):
+def _nutation(pos: List[float], time: Time, direction: _PrecessDir) -> List[float]:
     r = _nutation_rot(time, direction)
     return _rotate(r, pos)
 
-def _nutation_posvel(state, time, direction):
+def _nutation_posvel(state: StateVector, time: Time, direction: _PrecessDir) -> StateVector:
     r = _nutation_rot(time, direction)
     return RotateState(r, state)
 
-def _era(time):        # Earth Rotation Angle
+def _era(time: Time) -> float:        # Earth Rotation Angle
     thet1 = 0.7790572732640 + 0.00273781191135448 * time.ut
     thet3 = math.fmod(time.ut, 1.0)
     theta = 360.0 * math.fmod((thet1 + thet3), 1.0)
@@ -1650,7 +1359,7 @@ def _era(time):        # Earth Rotation Angle
         theta += 360.0
     return theta
 
-def SiderealTime(time):
+def SiderealTime(time: Time) -> float:
     """Calculates Greenwich Apparent Sidereal Time (GAST).
 
     Given a date and time, this function calculates the rotation of the
@@ -1672,7 +1381,7 @@ def SiderealTime(time):
     ----------
     time : Time
         The date and time for which to find GAST.
-        As an optimization, this function caches the sideral time value in `time`,
+        As an optimization, this function caches the sidereal time value in `time`,
         unless it has already been cached, in which case the cached value is reused.
 
     Returns
@@ -1697,7 +1406,7 @@ def SiderealTime(time):
     # return sidereal hours in the half-open range [0, 24).
     return time._st
 
-def _inverse_terra(ovec, st):
+def _inverse_terra(ovec: List[float], st: float) -> Observer:
     # Convert from AU to kilometers
     x = ovec[0] * KM_PER_AU
     y = ovec[1] * KM_PER_AU
@@ -1725,7 +1434,12 @@ def _inverse_terra(ovec, st):
         # Numerically solve for exact latitude, using Newton's Method.
         # Start with initial latitude estimate, based on a spherical Earth.
         lat = math.atan2(z, p)
+        count = 0
+        distanceAu = max(1.0, math.sqrt(ovec[0]**2 + ovec[1]**2 + ovec[2]**2))
         while True:
+            count += 1
+            if count > 10:
+                raise NoConvergeError()
             # Calculate the error function W(lat).
             # We try to find the root of W, meaning where the error is 0.
             cos = math.cos(lat)
@@ -1736,7 +1450,7 @@ def _inverse_terra(ovec, st):
             radicand = cos2 + _EARTH_FLATTENING_SQUARED*sin2
             denom = math.sqrt(radicand)
             W = (factor*sin*cos)/denom - z*cos + p*sin
-            if abs(W) < 1.0e-12:
+            if abs(W) < distanceAu * 2.0e-8:
                 # The error is now negligible
                 break
             # Error is still too large. Find the next estimate.
@@ -1754,7 +1468,7 @@ def _inverse_terra(ovec, st):
             height_km = p/cos - adjust
     return Observer(lat_deg, lon_deg, 1000*height_km)
 
-def _terra_posvel(observer, st):
+def _terra_posvel(observer: Observer, st: float) -> List[float]:
     phi = math.radians(observer.latitude)
     sinphi = math.sin(phi)
     cosphi = math.cos(phi)
@@ -1775,17 +1489,17 @@ def _terra_posvel(observer, st):
         0.0
     ]
 
-def _terra(observer, st):
+def _terra(observer: Observer, st: float) -> List[float]:
     return _terra_posvel(observer, st)[0:3]
 
-def _geo_pos(time, observer):
+def _geo_pos(time: Time, observer: Observer) -> List[float]:
     gast = SiderealTime(time)
     pos1 = _terra(observer, gast)
     pos2 = _nutation(pos1, time, _PrecessDir.Into2000)
     outpos = _precession(pos2, time, _PrecessDir.Into2000)
     return outpos
 
-def _spin(angle, pos1):
+def _spin(angle: float, pos1: List[float]) -> List[float]:
     angr = math.radians(angle)
     cosang = math.cos(angr)
     sinang = math.sin(angr)
@@ -1798,35 +1512,32 @@ def _spin(angle, pos1):
 #----------------------------------------------------------------------------
 # BEGIN CalcMoon
 
-def _Array1(xmin, xmax):
+def _Array1(xmin: int, xmax: int) -> Dict[int, complex]:
     return dict((key, 0j) for key in range(xmin, 1+xmax))
 
-def _Array2(xmin, xmax, ymin, ymax):
+def _Array2(xmin: int, xmax: int, ymin: int, ymax: int) -> Dict[int, Dict[int, complex]]:
     return dict((key, _Array1(ymin, ymax)) for key in range(xmin, 1+xmax))
 
 class _moonpos:
-    def __init__(self, lon, lat, dist):
+    def __init__(self, lon: float, lat: float, dist: float) -> None:
         self.geo_eclip_lon = lon
         self.geo_eclip_lat = lat
         self.distance_au = dist
 
-def _CalcMoon(time):
-    global _CalcMoonCount
-    _CalcMoonCount += 1
-
+def _CalcMoon(time: Time) -> _moonpos:
     T = time.tt / 36525
     ex = _Array2(-6, 6, 1, 4)
 
-    def Sine(phi):
+    def Sine(phi: float) -> float:
         return math.sin(_PI2 * phi)
 
-    def Frac(x):
+    def Frac(x: float) -> float:
         return x - math.floor(x)
 
     T2 = T*T
-    DLAM = 0
-    DS = 0
-    GAM1C = 0
+    DLAM = 0.0
+    DS = 0.0
+    GAM1C = 0.0
     SINPI = 3422.7000
     S1 = Sine(0.19833+0.05611*T)
     S2 = Sine(0.27869+0.04508*T)
@@ -2565,20 +2276,21 @@ def _CalcMoon(time):
     DS    += -0.04 * z.imag
 
 
-    def ADDN(coeffn, p, q, r, s):
+    def ADDN(coeffn: float, p: int, q: int, r: int, s: int) -> float:
         return coeffn * (ex[p][1] * ex[q][2] * ex[r][3] * ex[s][4]).imag
 
-    N = 0
-    N += ADDN(-526.069, 0, 0,1,-2)
-    N += ADDN(  -3.352, 0, 0,1,-4)
-    N += ADDN( +44.297,+1, 0,1,-2)
-    N += ADDN(  -6.000,+1, 0,1,-4)
-    N += ADDN( +20.599,-1, 0,1, 0)
-    N += ADDN( -30.598,-1, 0,1,-2)
-    N += ADDN( -24.649,-2, 0,1, 0)
-    N += ADDN(  -2.000,-2, 0,1,-2)
-    N += ADDN( -22.571, 0,+1,1,-2)
-    N += ADDN( +10.985, 0,-1,1,-2)
+    N = (
+        ADDN(-526.069, 0, 0,1,-2) +
+        ADDN(  -3.352, 0, 0,1,-4) +
+        ADDN( +44.297,+1, 0,1,-2) +
+        ADDN(  -6.000,+1, 0,1,-4) +
+        ADDN( +20.599,-1, 0,1, 0) +
+        ADDN( -30.598,-1, 0,1,-2) +
+        ADDN( -24.649,-2, 0,1, 0) +
+        ADDN(  -2.000,-2, 0,1,-2) +
+        ADDN( -22.571, 0,+1,1,-2) +
+        ADDN( +10.985, 0,-1,1,-2)
+    )
 
     DLAM += (
         +0.82*Sine(0.7736  -62.5512*T)+0.31*Sine(0.0466 -125.1025*T)
@@ -2596,7 +2308,7 @@ def _CalcMoon(time):
         (_ARC * _EARTH_EQUATORIAL_RADIUS_AU) / (0.999953253 * SINPI)
     )
 
-def GeoMoon(time):
+def GeoMoon(time: Time) -> Vector:
     """Calculates equatorial geocentric position of the Moon at a given time.
 
     Given a time of observation, calculates the Moon's position as a vector.
@@ -2639,13 +2351,17 @@ def GeoMoon(time):
     return Vector(mpos2[0], mpos2[1], mpos2[2], time)
 
 
-def EclipticGeoMoon(time):
+def EclipticGeoMoon(time: Time) -> Spherical:
     """Calculates spherical ecliptic geocentric position of the Moon.
 
     Given a time of observation, calculates the Moon's geocentric position
     in ecliptic spherical coordinates. Provides the ecliptic latitude and
     longitude in degrees, and the geocentric distance in astronomical units (AU).
-    The ecliptic longitude is measured relative to the equinox of date.
+
+    The ecliptic angles are measured in "ECT": relative to the true ecliptic plane and
+    equatorial plane at the specified time. This means the Earth's equator
+    is corrected for precession and nutation, and the plane of the Earth's
+    orbit is corrected for gradual obliquity drift.
 
     This algorithm is based on the Nautical Almanac Office's *Improved Lunar Ephemeris* of 1954,
     which in turn derives from E. W. Brown's lunar theories from the early twentieth century.
@@ -2653,7 +2369,7 @@ def EclipticGeoMoon(time):
     [Astronomy on the Personal Computer](https://www.springer.com/us/book/9783540672210)
     by Montenbruck and Pfleger.
 
-    To calculate an equatorial J2000 vector instead, use #GeoMoon.
+    To calculate a J2000 mean equator vector instead, use #GeoMoon.
 
     Parameters
     ----------
@@ -2665,15 +2381,35 @@ def EclipticGeoMoon(time):
     Spherical
         The Moon's position as a distance, ecliptic latitude, and ecliptic longitude.
     """
+
+    # Find ecliptic coordinates of the Moon in mean equinox of date (ECM).
     moon = _CalcMoon(time)
-    return Spherical(
-        math.degrees(moon.geo_eclip_lat),
-        math.degrees(moon.geo_eclip_lon),
-        moon.distance_au
-    )
+
+    # Convert spherical coordinates to a vector.
+    dist_cos_lat = moon.distance_au * math.cos(moon.geo_eclip_lat)
+    ecm = [
+        dist_cos_lat * math.cos(moon.geo_eclip_lon),
+        dist_cos_lat * math.sin(moon.geo_eclip_lon),
+        moon.distance_au * math.sin(moon.geo_eclip_lat)
+    ]
+
+    # Obtain true and mean obliquity angles for the given time.
+    # This serves to pre-calculate the nutation also, and cache it in `time`.
+    et = _e_tilt(time)
+
+    # Convert ecliptic coordinates to equatorial coordinates, both in mean equinox of date.
+    eqm = _obl_ecl2equ_vec(et.mobl, ecm)
+
+    # Add nutation to convert ECM to true equatorial coordinates of date (EQD).
+    eqd = _nutation(eqm, time, _PrecessDir.From2000)
+
+    # Convert back to ecliptic, this time in true equinox of date (ECT).
+    eclip = _RotateEquatorialToEcliptic(eqd, math.radians(et.tobl), time)
+
+    return Spherical(eclip.elat, eclip.elon, moon.distance_au)
 
 
-def GeoMoonState(time):
+def GeoMoonState(time: Time) -> StateVector:
     """Calculates equatorial geocentric position and velocity of the Moon at a given time.
 
     Given a time of observation, calculates the Moon's position and velocity vectors.
@@ -2715,7 +2451,7 @@ def GeoMoonState(time):
     )
 
 
-def GeoEmbState(time):
+def GeoEmbState(time: Time) -> StateVector:
     """Calculates the geocentric position and velocity of the Earth/Moon barycenter.
 
     Given a time of observation, calculates the geocentric position and velocity vectors
@@ -2741,665 +2477,664 @@ def GeoEmbState(time):
 #----------------------------------------------------------------------------
 # BEGIN VSOP
 
-_vsop = [
-    # Mercury
-    [
-  [
-    [
-      [4.40250710144, 0.00000000000, 0.00000000000],
-      [0.40989414977, 1.48302034195, 26087.90314157420],
-      [0.05046294200, 4.47785489551, 52175.80628314840],
-      [0.00855346844, 1.16520322459, 78263.70942472259],
-      [0.00165590362, 4.11969163423, 104351.61256629678],
-      [0.00034561897, 0.77930768443, 130439.51570787099],
-      [0.00007583476, 3.71348404924, 156527.41884944518]
-    ],
-    [
-      [26087.90313685529, 0.00000000000, 0.00000000000],
-      [0.01131199811, 6.21874197797, 26087.90314157420],
-      [0.00292242298, 3.04449355541, 52175.80628314840],
-      [0.00075775081, 6.08568821653, 78263.70942472259],
-      [0.00019676525, 2.80965111777, 104351.61256629678]
-    ]
-  ],
-  [
-    [
-      [0.11737528961, 1.98357498767, 26087.90314157420],
-      [0.02388076996, 5.03738959686, 52175.80628314840],
-      [0.01222839532, 3.14159265359, 0.00000000000],
-      [0.00543251810, 1.79644363964, 78263.70942472259],
-      [0.00129778770, 4.83232503958, 104351.61256629678],
-      [0.00031866927, 1.58088495658, 130439.51570787099],
-      [0.00007963301, 4.60972126127, 156527.41884944518]
-    ],
-    [
-      [0.00274646065, 3.95008450011, 26087.90314157420],
-      [0.00099737713, 3.14159265359, 0.00000000000]
-    ]
-  ],
-  [
-    [
-      [0.39528271651, 0.00000000000, 0.00000000000],
-      [0.07834131818, 6.19233722598, 26087.90314157420],
-      [0.00795525558, 2.95989690104, 52175.80628314840],
-      [0.00121281764, 6.01064153797, 78263.70942472259],
-      [0.00021921969, 2.77820093972, 104351.61256629678],
-      [0.00004354065, 5.82894543774, 130439.51570787099]
-    ],
-    [
-      [0.00217347740, 4.65617158665, 26087.90314157420],
-      [0.00044141826, 1.42385544001, 52175.80628314840]
-    ]
-  ]
-],
+class _vsop_series_t:
+    def __init__(self, termList: List[Tuple[float, float, float]]) -> None:
+        self.termList = termList
 
-    # Venus
-    [
-  [
-    [
-      [3.17614666774, 0.00000000000, 0.00000000000],
-      [0.01353968419, 5.59313319619, 10213.28554621100],
-      [0.00089891645, 5.30650047764, 20426.57109242200],
-      [0.00005477194, 4.41630661466, 7860.41939243920],
-      [0.00003455741, 2.69964447820, 11790.62908865880],
-      [0.00002372061, 2.99377542079, 3930.20969621960],
-      [0.00001317168, 5.18668228402, 26.29831979980],
-      [0.00001664146, 4.25018630147, 1577.34354244780],
-      [0.00001438387, 4.15745084182, 9683.59458111640],
-      [0.00001200521, 6.15357116043, 30639.85663863300]
-    ],
-    [
-      [10213.28554621638, 0.00000000000, 0.00000000000],
-      [0.00095617813, 2.46406511110, 10213.28554621100],
-      [0.00007787201, 0.62478482220, 20426.57109242200]
-    ]
-  ],
-  [
-    [
-      [0.05923638472, 0.26702775812, 10213.28554621100],
-      [0.00040107978, 1.14737178112, 20426.57109242200],
-      [0.00032814918, 3.14159265359, 0.00000000000]
-    ],
-    [
-      [0.00287821243, 1.88964962838, 10213.28554621100]
-    ]
-  ],
-  [
-    [
-      [0.72334820891, 0.00000000000, 0.00000000000],
-      [0.00489824182, 4.02151831717, 10213.28554621100],
-      [0.00001658058, 4.90206728031, 20426.57109242200],
-      [0.00001378043, 1.12846591367, 11790.62908865880],
-      [0.00001632096, 2.84548795207, 7860.41939243920],
-      [0.00000498395, 2.58682193892, 9683.59458111640],
-      [0.00000221985, 2.01346696541, 19367.18916223280],
-      [0.00000237454, 2.55136053886, 15720.83878487840]
-    ],
-    [
-      [0.00034551041, 0.89198706276, 10213.28554621100]
-    ]
-  ]
-],
+class _vsop_formula_t:
+    def __init__(self, seriesList: List[_vsop_series_t]) -> None:
+        self.seriesList = seriesList
 
-    # Earth
-    [
-  [
-    [
-      [1.75347045673, 0.00000000000, 0.00000000000],
-      [0.03341656453, 4.66925680415, 6283.07584999140],
-      [0.00034894275, 4.62610242189, 12566.15169998280],
-      [0.00003417572, 2.82886579754, 3.52311834900],
-      [0.00003497056, 2.74411783405, 5753.38488489680],
-      [0.00003135899, 3.62767041756, 77713.77146812050],
-      [0.00002676218, 4.41808345438, 7860.41939243920],
-      [0.00002342691, 6.13516214446, 3930.20969621960],
-      [0.00001273165, 2.03709657878, 529.69096509460],
-      [0.00001324294, 0.74246341673, 11506.76976979360],
-      [0.00000901854, 2.04505446477, 26.29831979980],
-      [0.00001199167, 1.10962946234, 1577.34354244780],
-      [0.00000857223, 3.50849152283, 398.14900340820],
-      [0.00000779786, 1.17882681962, 5223.69391980220],
-      [0.00000990250, 5.23268072088, 5884.92684658320],
-      [0.00000753141, 2.53339052847, 5507.55323866740],
-      [0.00000505267, 4.58292599973, 18849.22754997420],
-      [0.00000492392, 4.20505711826, 775.52261132400],
-      [0.00000356672, 2.91954114478, 0.06731030280],
-      [0.00000284125, 1.89869240932, 796.29800681640],
-      [0.00000242879, 0.34481445893, 5486.77784317500],
-      [0.00000317087, 5.84901948512, 11790.62908865880],
-      [0.00000271112, 0.31486255375, 10977.07880469900],
-      [0.00000206217, 4.80646631478, 2544.31441988340],
-      [0.00000205478, 1.86953770281, 5573.14280143310],
-      [0.00000202318, 2.45767790232, 6069.77675455340],
-      [0.00000126225, 1.08295459501, 20.77539549240],
-      [0.00000155516, 0.83306084617, 213.29909543800]
-    ],
-    [
-      [6283.07584999140, 0.00000000000, 0.00000000000],
-      [0.00206058863, 2.67823455808, 6283.07584999140],
-      [0.00004303419, 2.63512233481, 12566.15169998280]
-    ],
-    [
-      [0.00008721859, 1.07253635559, 6283.07584999140]
-    ]
-  ],
-  [
-    [
-    ],
-    [
-      [0.00227777722, 3.41376620530, 6283.07584999140],
-      [0.00003805678, 3.37063423795, 12566.15169998280]
-    ]
-  ],
-  [
-    [
-      [1.00013988784, 0.00000000000, 0.00000000000],
-      [0.01670699632, 3.09846350258, 6283.07584999140],
-      [0.00013956024, 3.05524609456, 12566.15169998280],
-      [0.00003083720, 5.19846674381, 77713.77146812050],
-      [0.00001628463, 1.17387558054, 5753.38488489680],
-      [0.00001575572, 2.84685214877, 7860.41939243920],
-      [0.00000924799, 5.45292236722, 11506.76976979360],
-      [0.00000542439, 4.56409151453, 3930.20969621960],
-      [0.00000472110, 3.66100022149, 5884.92684658320],
-      [0.00000085831, 1.27079125277, 161000.68573767410],
-      [0.00000057056, 2.01374292245, 83996.84731811189],
-      [0.00000055736, 5.24159799170, 71430.69561812909],
-      [0.00000174844, 3.01193636733, 18849.22754997420],
-      [0.00000243181, 4.27349530790, 11790.62908865880]
-    ],
-    [
-      [0.00103018607, 1.10748968172, 6283.07584999140],
-      [0.00001721238, 1.06442300386, 12566.15169998280]
-    ],
-    [
-      [0.00004359385, 5.78455133808, 6283.07584999140]
-    ]
-  ]
-],
+class _vsop_model_t:
+    def __init__(self, lon: _vsop_formula_t, lat: _vsop_formula_t, rad: _vsop_formula_t) -> None:
+        self.lon = lon
+        self.lat = lat
+        self.rad = rad
 
-    # Mars
-    [
-  [
-    [
-      [6.20347711581, 0.00000000000, 0.00000000000],
-      [0.18656368093, 5.05037100270, 3340.61242669980],
-      [0.01108216816, 5.40099836344, 6681.22485339960],
-      [0.00091798406, 5.75478744667, 10021.83728009940],
-      [0.00027744987, 5.97049513147, 3.52311834900],
-      [0.00010610235, 2.93958560338, 2281.23049651060],
-      [0.00012315897, 0.84956094002, 2810.92146160520],
-      [0.00008926784, 4.15697846427, 0.01725365220],
-      [0.00008715691, 6.11005153139, 13362.44970679920],
-      [0.00006797556, 0.36462229657, 398.14900340820],
-      [0.00007774872, 3.33968761376, 5621.84292321040],
-      [0.00003575078, 1.66186505710, 2544.31441988340],
-      [0.00004161108, 0.22814971327, 2942.46342329160],
-      [0.00003075252, 0.85696614132, 191.44826611160],
-      [0.00002628117, 0.64806124465, 3337.08930835080],
-      [0.00002937546, 6.07893711402, 0.06731030280],
-      [0.00002389414, 5.03896442664, 796.29800681640],
-      [0.00002579844, 0.02996736156, 3344.13554504880],
-      [0.00001528141, 1.14979301996, 6151.53388830500],
-      [0.00001798806, 0.65634057445, 529.69096509460],
-      [0.00001264357, 3.62275122593, 5092.15195811580],
-      [0.00001286228, 3.06796065034, 2146.16541647520],
-      [0.00001546404, 2.91579701718, 1751.53953141600],
-      [0.00001024902, 3.69334099279, 8962.45534991020],
-      [0.00000891566, 0.18293837498, 16703.06213349900],
-      [0.00000858759, 2.40093811940, 2914.01423582380],
-      [0.00000832715, 2.46418619474, 3340.59517304760],
-      [0.00000832720, 4.49495782139, 3340.62968035200],
-      [0.00000712902, 3.66335473479, 1059.38193018920],
-      [0.00000748723, 3.82248614017, 155.42039943420],
-      [0.00000723861, 0.67497311481, 3738.76143010800],
-      [0.00000635548, 2.92182225127, 8432.76438481560],
-      [0.00000655162, 0.48864064125, 3127.31333126180],
-      [0.00000550474, 3.81001042328, 0.98032106820],
-      [0.00000552750, 4.47479317037, 1748.01641306700],
-      [0.00000425966, 0.55364317304, 6283.07584999140],
-      [0.00000415131, 0.49662285038, 213.29909543800],
-      [0.00000472167, 3.62547124025, 1194.44701022460],
-      [0.00000306551, 0.38052848348, 6684.74797174860],
-      [0.00000312141, 0.99853944405, 6677.70173505060],
-      [0.00000293198, 4.22131299634, 20.77539549240],
-      [0.00000302375, 4.48618007156, 3532.06069281140],
-      [0.00000274027, 0.54222167059, 3340.54511639700],
-      [0.00000281079, 5.88163521788, 1349.86740965880],
-      [0.00000231183, 1.28242156993, 3870.30339179440],
-      [0.00000283602, 5.76885434940, 3149.16416058820],
-      [0.00000236117, 5.75503217933, 3333.49887969900],
-      [0.00000274033, 0.13372524985, 3340.67973700260],
-      [0.00000299395, 2.78323740866, 6254.62666252360]
-    ],
-    [
-      [3340.61242700512, 0.00000000000, 0.00000000000],
-      [0.01457554523, 3.60433733236, 3340.61242669980],
-      [0.00168414711, 3.92318567804, 6681.22485339960],
-      [0.00020622975, 4.26108844583, 10021.83728009940],
-      [0.00003452392, 4.73210393190, 3.52311834900],
-      [0.00002586332, 4.60670058555, 13362.44970679920],
-      [0.00000841535, 4.45864030426, 2281.23049651060]
-    ],
-    [
-      [0.00058152577, 2.04961712429, 3340.61242669980],
-      [0.00013459579, 2.45738706163, 6681.22485339960]
-    ]
-  ],
-  [
-    [
-      [0.03197134986, 3.76832042431, 3340.61242669980],
-      [0.00298033234, 4.10616996305, 6681.22485339960],
-      [0.00289104742, 0.00000000000, 0.00000000000],
-      [0.00031365539, 4.44651053090, 10021.83728009940],
-      [0.00003484100, 4.78812549260, 13362.44970679920]
-    ],
-    [
-      [0.00217310991, 6.04472194776, 3340.61242669980],
-      [0.00020976948, 3.14159265359, 0.00000000000],
-      [0.00012834709, 1.60810667915, 6681.22485339960]
-    ]
-  ],
-  [
-    [
-      [1.53033488271, 0.00000000000, 0.00000000000],
-      [0.14184953160, 3.47971283528, 3340.61242669980],
-      [0.00660776362, 3.81783443019, 6681.22485339960],
-      [0.00046179117, 4.15595316782, 10021.83728009940],
-      [0.00008109733, 5.55958416318, 2810.92146160520],
-      [0.00007485318, 1.77239078402, 5621.84292321040],
-      [0.00005523191, 1.36436303770, 2281.23049651060],
-      [0.00003825160, 4.49407183687, 13362.44970679920],
-      [0.00002306537, 0.09081579001, 2544.31441988340],
-      [0.00001999396, 5.36059617709, 3337.08930835080],
-      [0.00002484394, 4.92545639920, 2942.46342329160],
-      [0.00001960195, 4.74249437639, 3344.13554504880],
-      [0.00001167119, 2.11260868341, 5092.15195811580],
-      [0.00001102816, 5.00908403998, 398.14900340820],
-      [0.00000899066, 4.40791133207, 529.69096509460],
-      [0.00000992252, 5.83861961952, 6151.53388830500],
-      [0.00000807354, 2.10217065501, 1059.38193018920],
-      [0.00000797915, 3.44839203899, 796.29800681640],
-      [0.00000740975, 1.49906336885, 2146.16541647520]
-    ],
-    [
-      [0.01107433345, 2.03250524857, 3340.61242669980],
-      [0.00103175887, 2.37071847807, 6681.22485339960],
-      [0.00012877200, 0.00000000000, 0.00000000000],
-      [0.00010815880, 2.70888095665, 10021.83728009940]
-    ],
-    [
-      [0.00044242249, 0.47930604954, 3340.61242669980],
-      [0.00008138042, 0.86998389204, 6681.22485339960]
-    ]
-  ]
-],
-
-    # Jupiter
-    [
-  [
-    [
-      [0.59954691494, 0.00000000000, 0.00000000000],
-      [0.09695898719, 5.06191793158, 529.69096509460],
-      [0.00573610142, 1.44406205629, 7.11354700080],
-      [0.00306389205, 5.41734730184, 1059.38193018920],
-      [0.00097178296, 4.14264726552, 632.78373931320],
-      [0.00072903078, 3.64042916389, 522.57741809380],
-      [0.00064263975, 3.41145165351, 103.09277421860],
-      [0.00039806064, 2.29376740788, 419.48464387520],
-      [0.00038857767, 1.27231755835, 316.39186965660],
-      [0.00027964629, 1.78454591820, 536.80451209540],
-      [0.00013589730, 5.77481040790, 1589.07289528380],
-      [0.00008246349, 3.58227925840, 206.18554843720],
-      [0.00008768704, 3.63000308199, 949.17560896980],
-      [0.00007368042, 5.08101194270, 735.87651353180],
-      [0.00006263150, 0.02497628807, 213.29909543800],
-      [0.00006114062, 4.51319998626, 1162.47470440780],
-      [0.00004905396, 1.32084470588, 110.20632121940],
-      [0.00005305285, 1.30671216791, 14.22709400160],
-      [0.00005305441, 4.18625634012, 1052.26838318840],
-      [0.00004647248, 4.69958103684, 3.93215326310],
-      [0.00003045023, 4.31676431084, 426.59819087600],
-      [0.00002609999, 1.56667394063, 846.08283475120],
-      [0.00002028191, 1.06376530715, 3.18139373770],
-      [0.00001764763, 2.14148655117, 1066.49547719000],
-      [0.00001722972, 3.88036268267, 1265.56747862640],
-      [0.00001920945, 0.97168196472, 639.89728631400],
-      [0.00001633223, 3.58201833555, 515.46387109300],
-      [0.00001431999, 4.29685556046, 625.67019231240],
-      [0.00000973272, 4.09764549134, 95.97922721780]
-    ],
-    [
-      [529.69096508814, 0.00000000000, 0.00000000000],
-      [0.00489503243, 4.22082939470, 529.69096509460],
-      [0.00228917222, 6.02646855621, 7.11354700080],
-      [0.00030099479, 4.54540782858, 1059.38193018920],
-      [0.00020720920, 5.45943156902, 522.57741809380],
-      [0.00012103653, 0.16994816098, 536.80451209540],
-      [0.00006067987, 4.42422292017, 103.09277421860],
-      [0.00005433968, 3.98480737746, 419.48464387520],
-      [0.00004237744, 5.89008707199, 14.22709400160]
-    ],
-    [
-      [0.00047233601, 4.32148536482, 7.11354700080],
-      [0.00030649436, 2.92977788700, 529.69096509460],
-      [0.00014837605, 3.14159265359, 0.00000000000]
-    ]
-  ],
-  [
-    [
-      [0.02268615702, 3.55852606721, 529.69096509460],
-      [0.00109971634, 3.90809347197, 1059.38193018920],
-      [0.00110090358, 0.00000000000, 0.00000000000],
-      [0.00008101428, 3.60509572885, 522.57741809380],
-      [0.00006043996, 4.25883108339, 1589.07289528380],
-      [0.00006437782, 0.30627119215, 536.80451209540]
-    ],
-    [
-      [0.00078203446, 1.52377859742, 529.69096509460]
-    ]
-  ],
-  [
-    [
-      [5.20887429326, 0.00000000000, 0.00000000000],
-      [0.25209327119, 3.49108639871, 529.69096509460],
-      [0.00610599976, 3.84115365948, 1059.38193018920],
-      [0.00282029458, 2.57419881293, 632.78373931320],
-      [0.00187647346, 2.07590383214, 522.57741809380],
-      [0.00086792905, 0.71001145545, 419.48464387520],
-      [0.00072062974, 0.21465724607, 536.80451209540],
-      [0.00065517248, 5.97995884790, 316.39186965660],
-      [0.00029134542, 1.67759379655, 103.09277421860],
-      [0.00030135335, 2.16132003734, 949.17560896980],
-      [0.00023453271, 3.54023522184, 735.87651353180],
-      [0.00022283743, 4.19362594399, 1589.07289528380],
-      [0.00023947298, 0.27458037480, 7.11354700080],
-      [0.00013032614, 2.96042965363, 1162.47470440780],
-      [0.00009703360, 1.90669633585, 206.18554843720],
-      [0.00012749023, 2.71550286592, 1052.26838318840],
-      [0.00007057931, 2.18184839926, 1265.56747862640],
-      [0.00006137703, 6.26418240033, 846.08283475120],
-      [0.00002616976, 2.00994012876, 1581.95934828300]
-    ],
-    [
-      [0.01271801520, 2.64937512894, 529.69096509460],
-      [0.00061661816, 3.00076460387, 1059.38193018920],
-      [0.00053443713, 3.89717383175, 522.57741809380],
-      [0.00031185171, 4.88276958012, 536.80451209540],
-      [0.00041390269, 0.00000000000, 0.00000000000]
-    ]
-  ]
-],
-
-    # Saturn
-    [
-  [
-    [
-      [0.87401354025, 0.00000000000, 0.00000000000],
-      [0.11107659762, 3.96205090159, 213.29909543800],
-      [0.01414150957, 4.58581516874, 7.11354700080],
-      [0.00398379389, 0.52112032699, 206.18554843720],
-      [0.00350769243, 3.30329907896, 426.59819087600],
-      [0.00206816305, 0.24658372002, 103.09277421860],
-      [0.00079271300, 3.84007056878, 220.41264243880],
-      [0.00023990355, 4.66976924553, 110.20632121940],
-      [0.00016573588, 0.43719228296, 419.48464387520],
-      [0.00014906995, 5.76903183869, 316.39186965660],
-      [0.00015820290, 0.93809155235, 632.78373931320],
-      [0.00014609559, 1.56518472000, 3.93215326310],
-      [0.00013160301, 4.44891291899, 14.22709400160],
-      [0.00015053543, 2.71669915667, 639.89728631400],
-      [0.00013005299, 5.98119023644, 11.04570026390],
-      [0.00010725067, 3.12939523827, 202.25339517410],
-      [0.00005863206, 0.23656938524, 529.69096509460],
-      [0.00005227757, 4.20783365759, 3.18139373770],
-      [0.00006126317, 1.76328667907, 277.03499374140],
-      [0.00005019687, 3.17787728405, 433.71173787680],
-      [0.00004592550, 0.61977744975, 199.07200143640],
-      [0.00004005867, 2.24479718502, 63.73589830340],
-      [0.00002953796, 0.98280366998, 95.97922721780],
-      [0.00003873670, 3.22283226966, 138.51749687070],
-      [0.00002461186, 2.03163875071, 735.87651353180],
-      [0.00003269484, 0.77492638211, 949.17560896980],
-      [0.00001758145, 3.26580109940, 522.57741809380],
-      [0.00001640172, 5.50504453050, 846.08283475120],
-      [0.00001391327, 4.02333150505, 323.50541665740],
-      [0.00001580648, 4.37265307169, 309.27832265580],
-      [0.00001123498, 2.83726798446, 415.55249061210],
-      [0.00001017275, 3.71700135395, 227.52618943960],
-      [0.00000848642, 3.19150170830, 209.36694217490]
-    ],
-    [
-      [213.29909521690, 0.00000000000, 0.00000000000],
-      [0.01297370862, 1.82834923978, 213.29909543800],
-      [0.00564345393, 2.88499717272, 7.11354700080],
-      [0.00093734369, 1.06311793502, 426.59819087600],
-      [0.00107674962, 2.27769131009, 206.18554843720],
-      [0.00040244455, 2.04108104671, 220.41264243880],
-      [0.00019941774, 1.27954390470, 103.09277421860],
-      [0.00010511678, 2.74880342130, 14.22709400160],
-      [0.00006416106, 0.38238295041, 639.89728631400],
-      [0.00004848994, 2.43037610229, 419.48464387520],
-      [0.00004056892, 2.92133209468, 110.20632121940],
-      [0.00003768635, 3.64965330780, 3.93215326310]
-    ],
-    [
-      [0.00116441330, 1.17988132879, 7.11354700080],
-      [0.00091841837, 0.07325195840, 213.29909543800],
-      [0.00036661728, 0.00000000000, 0.00000000000],
-      [0.00015274496, 4.06493179167, 206.18554843720]
-    ]
-  ],
-  [
-    [
-      [0.04330678039, 3.60284428399, 213.29909543800],
-      [0.00240348302, 2.85238489373, 426.59819087600],
-      [0.00084745939, 0.00000000000, 0.00000000000],
-      [0.00030863357, 3.48441504555, 220.41264243880],
-      [0.00034116062, 0.57297307557, 206.18554843720],
-      [0.00014734070, 2.11846596715, 639.89728631400],
-      [0.00009916667, 5.79003188904, 419.48464387520],
-      [0.00006993564, 4.73604689720, 7.11354700080],
-      [0.00004807588, 5.43305312061, 316.39186965660]
-    ],
-    [
-      [0.00198927992, 4.93901017903, 213.29909543800],
-      [0.00036947916, 3.14159265359, 0.00000000000],
-      [0.00017966989, 0.51979431110, 426.59819087600]
-    ]
-  ],
-  [
-    [
-      [9.55758135486, 0.00000000000, 0.00000000000],
-      [0.52921382865, 2.39226219573, 213.29909543800],
-      [0.01873679867, 5.23549604660, 206.18554843720],
-      [0.01464663929, 1.64763042902, 426.59819087600],
-      [0.00821891141, 5.93520042303, 316.39186965660],
-      [0.00547506923, 5.01532618980, 103.09277421860],
-      [0.00371684650, 2.27114821115, 220.41264243880],
-      [0.00361778765, 3.13904301847, 7.11354700080],
-      [0.00140617506, 5.70406606781, 632.78373931320],
-      [0.00108974848, 3.29313390175, 110.20632121940],
-      [0.00069006962, 5.94099540992, 419.48464387520],
-      [0.00061053367, 0.94037691801, 639.89728631400],
-      [0.00048913294, 1.55733638681, 202.25339517410],
-      [0.00034143772, 0.19519102597, 277.03499374140],
-      [0.00032401773, 5.47084567016, 949.17560896980],
-      [0.00020936596, 0.46349251129, 735.87651353180],
-      [0.00009796004, 5.20477537945, 1265.56747862640],
-      [0.00011993338, 5.98050967385, 846.08283475120],
-      [0.00020839300, 1.52102476129, 433.71173787680],
-      [0.00015298404, 3.05943814940, 529.69096509460],
-      [0.00006465823, 0.17732249942, 1052.26838318840],
-      [0.00011380257, 1.73105427040, 522.57741809380],
-      [0.00003419618, 4.94550542171, 1581.95934828300]
-    ],
-    [
-      [0.06182981340, 0.25843511480, 213.29909543800],
-      [0.00506577242, 0.71114625261, 206.18554843720],
-      [0.00341394029, 5.79635741658, 426.59819087600],
-      [0.00188491195, 0.47215589652, 220.41264243880],
-      [0.00186261486, 3.14159265359, 0.00000000000],
-      [0.00143891146, 1.40744822888, 7.11354700080]
-    ],
-    [
-      [0.00436902572, 4.78671677509, 213.29909543800]
-    ]
-  ]
-],
-
-    # Uranus
-    [
-  [
-    [
-      [5.48129294297, 0.00000000000, 0.00000000000],
-      [0.09260408234, 0.89106421507, 74.78159856730],
-      [0.01504247898, 3.62719260920, 1.48447270830],
-      [0.00365981674, 1.89962179044, 73.29712585900],
-      [0.00272328168, 3.35823706307, 149.56319713460],
-      [0.00070328461, 5.39254450063, 63.73589830340],
-      [0.00068892678, 6.09292483287, 76.26607127560],
-      [0.00061998615, 2.26952066061, 2.96894541660],
-      [0.00061950719, 2.85098872691, 11.04570026390],
-      [0.00026468770, 3.14152083966, 71.81265315070],
-      [0.00025710476, 6.11379840493, 454.90936652730],
-      [0.00021078850, 4.36059339067, 148.07872442630],
-      [0.00017818647, 1.74436930289, 36.64856292950],
-      [0.00014613507, 4.73732166022, 3.93215326310],
-      [0.00011162509, 5.82681796350, 224.34479570190],
-      [0.00010997910, 0.48865004018, 138.51749687070],
-      [0.00009527478, 2.95516862826, 35.16409022120],
-      [0.00007545601, 5.23626582400, 109.94568878850],
-      [0.00004220241, 3.23328220918, 70.84944530420],
-      [0.00004051900, 2.27755017300, 151.04766984290],
-      [0.00003354596, 1.06549007380, 4.45341812490],
-      [0.00002926718, 4.62903718891, 9.56122755560],
-      [0.00003490340, 5.48306144511, 146.59425171800],
-      [0.00003144069, 4.75199570434, 77.75054398390],
-      [0.00002922333, 5.35235361027, 85.82729883120],
-      [0.00002272788, 4.36600400036, 70.32818044240],
-      [0.00002051219, 1.51773566586, 0.11187458460],
-      [0.00002148602, 0.60745949945, 38.13303563780],
-      [0.00001991643, 4.92437588682, 277.03499374140],
-      [0.00001376226, 2.04283539351, 65.22037101170],
-      [0.00001666902, 3.62744066769, 380.12776796000],
-      [0.00001284107, 3.11347961505, 202.25339517410],
-      [0.00001150429, 0.93343589092, 3.18139373770],
-      [0.00001533221, 2.58594681212, 52.69019803950],
-      [0.00001281604, 0.54271272721, 222.86032299360],
-      [0.00001372139, 4.19641530878, 111.43016149680],
-      [0.00001221029, 0.19900650030, 108.46121608020],
-      [0.00000946181, 1.19253165736, 127.47179660680],
-      [0.00001150989, 4.17898916639, 33.67961751290]
-    ],
-    [
-      [74.78159860910, 0.00000000000, 0.00000000000],
-      [0.00154332863, 5.24158770553, 74.78159856730],
-      [0.00024456474, 1.71260334156, 1.48447270830],
-      [0.00009258442, 0.42829732350, 11.04570026390],
-      [0.00008265977, 1.50218091379, 63.73589830340],
-      [0.00009150160, 1.41213765216, 149.56319713460]
-    ]
-  ],
-  [
-    [
-      [0.01346277648, 2.61877810547, 74.78159856730],
-      [0.00062341400, 5.08111189648, 149.56319713460],
-      [0.00061601196, 3.14159265359, 0.00000000000],
-      [0.00009963722, 1.61603805646, 76.26607127560],
-      [0.00009926160, 0.57630380333, 73.29712585900]
-    ],
-    [
-      [0.00034101978, 0.01321929936, 74.78159856730]
-    ]
-  ],
-  [
-    [
-      [19.21264847206, 0.00000000000, 0.00000000000],
-      [0.88784984413, 5.60377527014, 74.78159856730],
-      [0.03440836062, 0.32836099706, 73.29712585900],
-      [0.02055653860, 1.78295159330, 149.56319713460],
-      [0.00649322410, 4.52247285911, 76.26607127560],
-      [0.00602247865, 3.86003823674, 63.73589830340],
-      [0.00496404167, 1.40139935333, 454.90936652730],
-      [0.00338525369, 1.58002770318, 138.51749687070],
-      [0.00243509114, 1.57086606044, 71.81265315070],
-      [0.00190522303, 1.99809394714, 1.48447270830],
-      [0.00161858838, 2.79137786799, 148.07872442630],
-      [0.00143706183, 1.38368544947, 11.04570026390],
-      [0.00093192405, 0.17437220467, 36.64856292950],
-      [0.00071424548, 4.24509236074, 224.34479570190],
-      [0.00089806014, 3.66105364565, 109.94568878850],
-      [0.00039009723, 1.66971401684, 70.84944530420],
-      [0.00046677296, 1.39976401694, 35.16409022120],
-      [0.00039025624, 3.36234773834, 277.03499374140],
-      [0.00036755274, 3.88649278513, 146.59425171800],
-      [0.00030348723, 0.70100838798, 151.04766984290],
-      [0.00029156413, 3.18056336700, 77.75054398390],
-      [0.00022637073, 0.72518687029, 529.69096509460],
-      [0.00011959076, 1.75043392140, 984.60033162190],
-      [0.00025620756, 5.25656086672, 380.12776796000]
-    ],
-    [
-      [0.01479896629, 3.67205697578, 74.78159856730]
-    ]
-  ]
-],
-
-    # Neptune
-    [
-  [
-    [
-      [5.31188633046, 0.00000000000, 0.00000000000],
-      [0.01798475530, 2.90101273890, 38.13303563780],
-      [0.01019727652, 0.48580922867, 1.48447270830],
-      [0.00124531845, 4.83008090676, 36.64856292950],
-      [0.00042064466, 5.41054993053, 2.96894541660],
-      [0.00037714584, 6.09221808686, 35.16409022120],
-      [0.00033784738, 1.24488874087, 76.26607127560],
-      [0.00016482741, 0.00007727998, 491.55792945680],
-      [0.00009198584, 4.93747051954, 39.61750834610],
-      [0.00008994250, 0.27462171806, 175.16605980020]
-    ],
-    [
-      [38.13303563957, 0.00000000000, 0.00000000000],
-      [0.00016604172, 4.86323329249, 1.48447270830],
-      [0.00015744045, 2.27887427527, 38.13303563780]
-    ]
-  ],
-  [
-    [
-      [0.03088622933, 1.44104372644, 38.13303563780],
-      [0.00027780087, 5.91271884599, 76.26607127560],
-      [0.00027623609, 0.00000000000, 0.00000000000],
-      [0.00015355489, 2.52123799551, 36.64856292950],
-      [0.00015448133, 3.50877079215, 39.61750834610]
-    ]
-  ],
-  [
-    [
-      [30.07013205828, 0.00000000000, 0.00000000000],
-      [0.27062259632, 1.32999459377, 38.13303563780],
-      [0.01691764014, 3.25186135653, 36.64856292950],
-      [0.00807830553, 5.18592878704, 1.48447270830],
-      [0.00537760510, 4.52113935896, 35.16409022120],
-      [0.00495725141, 1.57105641650, 491.55792945680],
-      [0.00274571975, 1.84552258866, 175.16605980020],
-      [0.00012012320, 1.92059384991, 1021.24889455140],
-      [0.00121801746, 5.79754470298, 76.26607127560],
-      [0.00100896068, 0.37702724930, 73.29712585900],
-      [0.00135134092, 3.37220609835, 39.61750834610],
-      [0.00007571796, 1.07149207335, 388.46515523820]
-    ]
-  ]
-],
+_vsop: List[_vsop_model_t] = [
+_vsop_model_t(    # Mercury
+  _vsop_formula_t([
+    _vsop_series_t([
+      (4.40250710144, 0.00000000000, 0.00000000000),
+      (0.40989414977, 1.48302034195, 26087.90314157420),
+      (0.05046294200, 4.47785489551, 52175.80628314840),
+      (0.00855346844, 1.16520322459, 78263.70942472259),
+      (0.00165590362, 4.11969163423, 104351.61256629678),
+      (0.00034561897, 0.77930768443, 130439.51570787099),
+      (0.00007583476, 3.71348404924, 156527.41884944518)
+    ]),
+    _vsop_series_t([
+      (26087.90313685529, 0.00000000000, 0.00000000000),
+      (0.01131199811, 6.21874197797, 26087.90314157420),
+      (0.00292242298, 3.04449355541, 52175.80628314840),
+      (0.00075775081, 6.08568821653, 78263.70942472259),
+      (0.00019676525, 2.80965111777, 104351.61256629678)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.11737528961, 1.98357498767, 26087.90314157420),
+      (0.02388076996, 5.03738959686, 52175.80628314840),
+      (0.01222839532, 3.14159265359, 0.00000000000),
+      (0.00543251810, 1.79644363964, 78263.70942472259),
+      (0.00129778770, 4.83232503958, 104351.61256629678),
+      (0.00031866927, 1.58088495658, 130439.51570787099),
+      (0.00007963301, 4.60972126127, 156527.41884944518)
+    ]),
+    _vsop_series_t([
+      (0.00274646065, 3.95008450011, 26087.90314157420),
+      (0.00099737713, 3.14159265359, 0.00000000000)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.39528271651, 0.00000000000, 0.00000000000),
+      (0.07834131818, 6.19233722598, 26087.90314157420),
+      (0.00795525558, 2.95989690104, 52175.80628314840),
+      (0.00121281764, 6.01064153797, 78263.70942472259),
+      (0.00021921969, 2.77820093972, 104351.61256629678),
+      (0.00004354065, 5.82894543774, 130439.51570787099)
+    ]),
+    _vsop_series_t([
+      (0.00217347740, 4.65617158665, 26087.90314157420),
+      (0.00044141826, 1.42385544001, 52175.80628314840)
+    ])
+  ])
+),
+_vsop_model_t(    # Venus
+  _vsop_formula_t([
+    _vsop_series_t([
+      (3.17614666774, 0.00000000000, 0.00000000000),
+      (0.01353968419, 5.59313319619, 10213.28554621100),
+      (0.00089891645, 5.30650047764, 20426.57109242200),
+      (0.00005477194, 4.41630661466, 7860.41939243920),
+      (0.00003455741, 2.69964447820, 11790.62908865880),
+      (0.00002372061, 2.99377542079, 3930.20969621960),
+      (0.00001317168, 5.18668228402, 26.29831979980),
+      (0.00001664146, 4.25018630147, 1577.34354244780),
+      (0.00001438387, 4.15745084182, 9683.59458111640),
+      (0.00001200521, 6.15357116043, 30639.85663863300)
+    ]),
+    _vsop_series_t([
+      (10213.28554621638, 0.00000000000, 0.00000000000),
+      (0.00095617813, 2.46406511110, 10213.28554621100),
+      (0.00007787201, 0.62478482220, 20426.57109242200)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.05923638472, 0.26702775812, 10213.28554621100),
+      (0.00040107978, 1.14737178112, 20426.57109242200),
+      (0.00032814918, 3.14159265359, 0.00000000000)
+    ]),
+    _vsop_series_t([
+      (0.00287821243, 1.88964962838, 10213.28554621100)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.72334820891, 0.00000000000, 0.00000000000),
+      (0.00489824182, 4.02151831717, 10213.28554621100),
+      (0.00001658058, 4.90206728031, 20426.57109242200),
+      (0.00001378043, 1.12846591367, 11790.62908865880),
+      (0.00001632096, 2.84548795207, 7860.41939243920),
+      (0.00000498395, 2.58682193892, 9683.59458111640),
+      (0.00000221985, 2.01346696541, 19367.18916223280),
+      (0.00000237454, 2.55136053886, 15720.83878487840)
+    ]),
+    _vsop_series_t([
+      (0.00034551041, 0.89198706276, 10213.28554621100)
+    ])
+  ])
+),
+_vsop_model_t(    # Earth
+  _vsop_formula_t([
+    _vsop_series_t([
+      (1.75347045673, 0.00000000000, 0.00000000000),
+      (0.03341656453, 4.66925680415, 6283.07584999140),
+      (0.00034894275, 4.62610242189, 12566.15169998280),
+      (0.00003417572, 2.82886579754, 3.52311834900),
+      (0.00003497056, 2.74411783405, 5753.38488489680),
+      (0.00003135899, 3.62767041756, 77713.77146812050),
+      (0.00002676218, 4.41808345438, 7860.41939243920),
+      (0.00002342691, 6.13516214446, 3930.20969621960),
+      (0.00001273165, 2.03709657878, 529.69096509460),
+      (0.00001324294, 0.74246341673, 11506.76976979360),
+      (0.00000901854, 2.04505446477, 26.29831979980),
+      (0.00001199167, 1.10962946234, 1577.34354244780),
+      (0.00000857223, 3.50849152283, 398.14900340820),
+      (0.00000779786, 1.17882681962, 5223.69391980220),
+      (0.00000990250, 5.23268072088, 5884.92684658320),
+      (0.00000753141, 2.53339052847, 5507.55323866740),
+      (0.00000505267, 4.58292599973, 18849.22754997420),
+      (0.00000492392, 4.20505711826, 775.52261132400),
+      (0.00000356672, 2.91954114478, 0.06731030280),
+      (0.00000284125, 1.89869240932, 796.29800681640),
+      (0.00000242879, 0.34481445893, 5486.77784317500),
+      (0.00000317087, 5.84901948512, 11790.62908865880),
+      (0.00000271112, 0.31486255375, 10977.07880469900),
+      (0.00000206217, 4.80646631478, 2544.31441988340),
+      (0.00000205478, 1.86953770281, 5573.14280143310),
+      (0.00000202318, 2.45767790232, 6069.77675455340),
+      (0.00000126225, 1.08295459501, 20.77539549240),
+      (0.00000155516, 0.83306084617, 213.29909543800)
+    ]),
+    _vsop_series_t([
+      (6283.07584999140, 0.00000000000, 0.00000000000),
+      (0.00206058863, 2.67823455808, 6283.07584999140),
+      (0.00004303419, 2.63512233481, 12566.15169998280)
+    ]),
+    _vsop_series_t([
+      (0.00008721859, 1.07253635559, 6283.07584999140)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+    ]),
+    _vsop_series_t([
+      (0.00227777722, 3.41376620530, 6283.07584999140),
+      (0.00003805678, 3.37063423795, 12566.15169998280)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (1.00013988784, 0.00000000000, 0.00000000000),
+      (0.01670699632, 3.09846350258, 6283.07584999140),
+      (0.00013956024, 3.05524609456, 12566.15169998280),
+      (0.00003083720, 5.19846674381, 77713.77146812050),
+      (0.00001628463, 1.17387558054, 5753.38488489680),
+      (0.00001575572, 2.84685214877, 7860.41939243920),
+      (0.00000924799, 5.45292236722, 11506.76976979360),
+      (0.00000542439, 4.56409151453, 3930.20969621960),
+      (0.00000472110, 3.66100022149, 5884.92684658320),
+      (0.00000085831, 1.27079125277, 161000.68573767410),
+      (0.00000057056, 2.01374292245, 83996.84731811189),
+      (0.00000055736, 5.24159799170, 71430.69561812909),
+      (0.00000174844, 3.01193636733, 18849.22754997420),
+      (0.00000243181, 4.27349530790, 11790.62908865880)
+    ]),
+    _vsop_series_t([
+      (0.00103018607, 1.10748968172, 6283.07584999140),
+      (0.00001721238, 1.06442300386, 12566.15169998280)
+    ]),
+    _vsop_series_t([
+      (0.00004359385, 5.78455133808, 6283.07584999140)
+    ])
+  ])
+),
+_vsop_model_t(    # Mars
+  _vsop_formula_t([
+    _vsop_series_t([
+      (6.20347711581, 0.00000000000, 0.00000000000),
+      (0.18656368093, 5.05037100270, 3340.61242669980),
+      (0.01108216816, 5.40099836344, 6681.22485339960),
+      (0.00091798406, 5.75478744667, 10021.83728009940),
+      (0.00027744987, 5.97049513147, 3.52311834900),
+      (0.00010610235, 2.93958560338, 2281.23049651060),
+      (0.00012315897, 0.84956094002, 2810.92146160520),
+      (0.00008926784, 4.15697846427, 0.01725365220),
+      (0.00008715691, 6.11005153139, 13362.44970679920),
+      (0.00006797556, 0.36462229657, 398.14900340820),
+      (0.00007774872, 3.33968761376, 5621.84292321040),
+      (0.00003575078, 1.66186505710, 2544.31441988340),
+      (0.00004161108, 0.22814971327, 2942.46342329160),
+      (0.00003075252, 0.85696614132, 191.44826611160),
+      (0.00002628117, 0.64806124465, 3337.08930835080),
+      (0.00002937546, 6.07893711402, 0.06731030280),
+      (0.00002389414, 5.03896442664, 796.29800681640),
+      (0.00002579844, 0.02996736156, 3344.13554504880),
+      (0.00001528141, 1.14979301996, 6151.53388830500),
+      (0.00001798806, 0.65634057445, 529.69096509460),
+      (0.00001264357, 3.62275122593, 5092.15195811580),
+      (0.00001286228, 3.06796065034, 2146.16541647520),
+      (0.00001546404, 2.91579701718, 1751.53953141600),
+      (0.00001024902, 3.69334099279, 8962.45534991020),
+      (0.00000891566, 0.18293837498, 16703.06213349900),
+      (0.00000858759, 2.40093811940, 2914.01423582380),
+      (0.00000832715, 2.46418619474, 3340.59517304760),
+      (0.00000832720, 4.49495782139, 3340.62968035200),
+      (0.00000712902, 3.66335473479, 1059.38193018920),
+      (0.00000748723, 3.82248614017, 155.42039943420),
+      (0.00000723861, 0.67497311481, 3738.76143010800),
+      (0.00000635548, 2.92182225127, 8432.76438481560),
+      (0.00000655162, 0.48864064125, 3127.31333126180),
+      (0.00000550474, 3.81001042328, 0.98032106820),
+      (0.00000552750, 4.47479317037, 1748.01641306700),
+      (0.00000425966, 0.55364317304, 6283.07584999140),
+      (0.00000415131, 0.49662285038, 213.29909543800),
+      (0.00000472167, 3.62547124025, 1194.44701022460),
+      (0.00000306551, 0.38052848348, 6684.74797174860),
+      (0.00000312141, 0.99853944405, 6677.70173505060),
+      (0.00000293198, 4.22131299634, 20.77539549240),
+      (0.00000302375, 4.48618007156, 3532.06069281140),
+      (0.00000274027, 0.54222167059, 3340.54511639700),
+      (0.00000281079, 5.88163521788, 1349.86740965880),
+      (0.00000231183, 1.28242156993, 3870.30339179440),
+      (0.00000283602, 5.76885434940, 3149.16416058820),
+      (0.00000236117, 5.75503217933, 3333.49887969900),
+      (0.00000274033, 0.13372524985, 3340.67973700260),
+      (0.00000299395, 2.78323740866, 6254.62666252360)
+    ]),
+    _vsop_series_t([
+      (3340.61242700512, 0.00000000000, 0.00000000000),
+      (0.01457554523, 3.60433733236, 3340.61242669980),
+      (0.00168414711, 3.92318567804, 6681.22485339960),
+      (0.00020622975, 4.26108844583, 10021.83728009940),
+      (0.00003452392, 4.73210393190, 3.52311834900),
+      (0.00002586332, 4.60670058555, 13362.44970679920),
+      (0.00000841535, 4.45864030426, 2281.23049651060)
+    ]),
+    _vsop_series_t([
+      (0.00058152577, 2.04961712429, 3340.61242669980),
+      (0.00013459579, 2.45738706163, 6681.22485339960)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.03197134986, 3.76832042431, 3340.61242669980),
+      (0.00298033234, 4.10616996305, 6681.22485339960),
+      (0.00289104742, 0.00000000000, 0.00000000000),
+      (0.00031365539, 4.44651053090, 10021.83728009940),
+      (0.00003484100, 4.78812549260, 13362.44970679920)
+    ]),
+    _vsop_series_t([
+      (0.00217310991, 6.04472194776, 3340.61242669980),
+      (0.00020976948, 3.14159265359, 0.00000000000),
+      (0.00012834709, 1.60810667915, 6681.22485339960)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (1.53033488271, 0.00000000000, 0.00000000000),
+      (0.14184953160, 3.47971283528, 3340.61242669980),
+      (0.00660776362, 3.81783443019, 6681.22485339960),
+      (0.00046179117, 4.15595316782, 10021.83728009940),
+      (0.00008109733, 5.55958416318, 2810.92146160520),
+      (0.00007485318, 1.77239078402, 5621.84292321040),
+      (0.00005523191, 1.36436303770, 2281.23049651060),
+      (0.00003825160, 4.49407183687, 13362.44970679920),
+      (0.00002306537, 0.09081579001, 2544.31441988340),
+      (0.00001999396, 5.36059617709, 3337.08930835080),
+      (0.00002484394, 4.92545639920, 2942.46342329160),
+      (0.00001960195, 4.74249437639, 3344.13554504880),
+      (0.00001167119, 2.11260868341, 5092.15195811580),
+      (0.00001102816, 5.00908403998, 398.14900340820),
+      (0.00000899066, 4.40791133207, 529.69096509460),
+      (0.00000992252, 5.83861961952, 6151.53388830500),
+      (0.00000807354, 2.10217065501, 1059.38193018920),
+      (0.00000797915, 3.44839203899, 796.29800681640),
+      (0.00000740975, 1.49906336885, 2146.16541647520)
+    ]),
+    _vsop_series_t([
+      (0.01107433345, 2.03250524857, 3340.61242669980),
+      (0.00103175887, 2.37071847807, 6681.22485339960),
+      (0.00012877200, 0.00000000000, 0.00000000000),
+      (0.00010815880, 2.70888095665, 10021.83728009940)
+    ]),
+    _vsop_series_t([
+      (0.00044242249, 0.47930604954, 3340.61242669980),
+      (0.00008138042, 0.86998389204, 6681.22485339960)
+    ])
+  ])
+),
+_vsop_model_t(    # Jupiter
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.59954691494, 0.00000000000, 0.00000000000),
+      (0.09695898719, 5.06191793158, 529.69096509460),
+      (0.00573610142, 1.44406205629, 7.11354700080),
+      (0.00306389205, 5.41734730184, 1059.38193018920),
+      (0.00097178296, 4.14264726552, 632.78373931320),
+      (0.00072903078, 3.64042916389, 522.57741809380),
+      (0.00064263975, 3.41145165351, 103.09277421860),
+      (0.00039806064, 2.29376740788, 419.48464387520),
+      (0.00038857767, 1.27231755835, 316.39186965660),
+      (0.00027964629, 1.78454591820, 536.80451209540),
+      (0.00013589730, 5.77481040790, 1589.07289528380),
+      (0.00008246349, 3.58227925840, 206.18554843720),
+      (0.00008768704, 3.63000308199, 949.17560896980),
+      (0.00007368042, 5.08101194270, 735.87651353180),
+      (0.00006263150, 0.02497628807, 213.29909543800),
+      (0.00006114062, 4.51319998626, 1162.47470440780),
+      (0.00004905396, 1.32084470588, 110.20632121940),
+      (0.00005305285, 1.30671216791, 14.22709400160),
+      (0.00005305441, 4.18625634012, 1052.26838318840),
+      (0.00004647248, 4.69958103684, 3.93215326310),
+      (0.00003045023, 4.31676431084, 426.59819087600),
+      (0.00002609999, 1.56667394063, 846.08283475120),
+      (0.00002028191, 1.06376530715, 3.18139373770),
+      (0.00001764763, 2.14148655117, 1066.49547719000),
+      (0.00001722972, 3.88036268267, 1265.56747862640),
+      (0.00001920945, 0.97168196472, 639.89728631400),
+      (0.00001633223, 3.58201833555, 515.46387109300),
+      (0.00001431999, 4.29685556046, 625.67019231240),
+      (0.00000973272, 4.09764549134, 95.97922721780)
+    ]),
+    _vsop_series_t([
+      (529.69096508814, 0.00000000000, 0.00000000000),
+      (0.00489503243, 4.22082939470, 529.69096509460),
+      (0.00228917222, 6.02646855621, 7.11354700080),
+      (0.00030099479, 4.54540782858, 1059.38193018920),
+      (0.00020720920, 5.45943156902, 522.57741809380),
+      (0.00012103653, 0.16994816098, 536.80451209540),
+      (0.00006067987, 4.42422292017, 103.09277421860),
+      (0.00005433968, 3.98480737746, 419.48464387520),
+      (0.00004237744, 5.89008707199, 14.22709400160)
+    ]),
+    _vsop_series_t([
+      (0.00047233601, 4.32148536482, 7.11354700080),
+      (0.00030649436, 2.92977788700, 529.69096509460),
+      (0.00014837605, 3.14159265359, 0.00000000000)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.02268615702, 3.55852606721, 529.69096509460),
+      (0.00109971634, 3.90809347197, 1059.38193018920),
+      (0.00110090358, 0.00000000000, 0.00000000000),
+      (0.00008101428, 3.60509572885, 522.57741809380),
+      (0.00006043996, 4.25883108339, 1589.07289528380),
+      (0.00006437782, 0.30627119215, 536.80451209540)
+    ]),
+    _vsop_series_t([
+      (0.00078203446, 1.52377859742, 529.69096509460)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (5.20887429326, 0.00000000000, 0.00000000000),
+      (0.25209327119, 3.49108639871, 529.69096509460),
+      (0.00610599976, 3.84115365948, 1059.38193018920),
+      (0.00282029458, 2.57419881293, 632.78373931320),
+      (0.00187647346, 2.07590383214, 522.57741809380),
+      (0.00086792905, 0.71001145545, 419.48464387520),
+      (0.00072062974, 0.21465724607, 536.80451209540),
+      (0.00065517248, 5.97995884790, 316.39186965660),
+      (0.00029134542, 1.67759379655, 103.09277421860),
+      (0.00030135335, 2.16132003734, 949.17560896980),
+      (0.00023453271, 3.54023522184, 735.87651353180),
+      (0.00022283743, 4.19362594399, 1589.07289528380),
+      (0.00023947298, 0.27458037480, 7.11354700080),
+      (0.00013032614, 2.96042965363, 1162.47470440780),
+      (0.00009703360, 1.90669633585, 206.18554843720),
+      (0.00012749023, 2.71550286592, 1052.26838318840),
+      (0.00007057931, 2.18184839926, 1265.56747862640),
+      (0.00006137703, 6.26418240033, 846.08283475120),
+      (0.00002616976, 2.00994012876, 1581.95934828300)
+    ]),
+    _vsop_series_t([
+      (0.01271801520, 2.64937512894, 529.69096509460),
+      (0.00061661816, 3.00076460387, 1059.38193018920),
+      (0.00053443713, 3.89717383175, 522.57741809380),
+      (0.00031185171, 4.88276958012, 536.80451209540),
+      (0.00041390269, 0.00000000000, 0.00000000000)
+    ])
+  ])
+),
+_vsop_model_t(    # Saturn
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.87401354025, 0.00000000000, 0.00000000000),
+      (0.11107659762, 3.96205090159, 213.29909543800),
+      (0.01414150957, 4.58581516874, 7.11354700080),
+      (0.00398379389, 0.52112032699, 206.18554843720),
+      (0.00350769243, 3.30329907896, 426.59819087600),
+      (0.00206816305, 0.24658372002, 103.09277421860),
+      (0.00079271300, 3.84007056878, 220.41264243880),
+      (0.00023990355, 4.66976924553, 110.20632121940),
+      (0.00016573588, 0.43719228296, 419.48464387520),
+      (0.00014906995, 5.76903183869, 316.39186965660),
+      (0.00015820290, 0.93809155235, 632.78373931320),
+      (0.00014609559, 1.56518472000, 3.93215326310),
+      (0.00013160301, 4.44891291899, 14.22709400160),
+      (0.00015053543, 2.71669915667, 639.89728631400),
+      (0.00013005299, 5.98119023644, 11.04570026390),
+      (0.00010725067, 3.12939523827, 202.25339517410),
+      (0.00005863206, 0.23656938524, 529.69096509460),
+      (0.00005227757, 4.20783365759, 3.18139373770),
+      (0.00006126317, 1.76328667907, 277.03499374140),
+      (0.00005019687, 3.17787728405, 433.71173787680),
+      (0.00004592550, 0.61977744975, 199.07200143640),
+      (0.00004005867, 2.24479718502, 63.73589830340),
+      (0.00002953796, 0.98280366998, 95.97922721780),
+      (0.00003873670, 3.22283226966, 138.51749687070),
+      (0.00002461186, 2.03163875071, 735.87651353180),
+      (0.00003269484, 0.77492638211, 949.17560896980),
+      (0.00001758145, 3.26580109940, 522.57741809380),
+      (0.00001640172, 5.50504453050, 846.08283475120),
+      (0.00001391327, 4.02333150505, 323.50541665740),
+      (0.00001580648, 4.37265307169, 309.27832265580),
+      (0.00001123498, 2.83726798446, 415.55249061210),
+      (0.00001017275, 3.71700135395, 227.52618943960),
+      (0.00000848642, 3.19150170830, 209.36694217490)
+    ]),
+    _vsop_series_t([
+      (213.29909521690, 0.00000000000, 0.00000000000),
+      (0.01297370862, 1.82834923978, 213.29909543800),
+      (0.00564345393, 2.88499717272, 7.11354700080),
+      (0.00093734369, 1.06311793502, 426.59819087600),
+      (0.00107674962, 2.27769131009, 206.18554843720),
+      (0.00040244455, 2.04108104671, 220.41264243880),
+      (0.00019941774, 1.27954390470, 103.09277421860),
+      (0.00010511678, 2.74880342130, 14.22709400160),
+      (0.00006416106, 0.38238295041, 639.89728631400),
+      (0.00004848994, 2.43037610229, 419.48464387520),
+      (0.00004056892, 2.92133209468, 110.20632121940),
+      (0.00003768635, 3.64965330780, 3.93215326310)
+    ]),
+    _vsop_series_t([
+      (0.00116441330, 1.17988132879, 7.11354700080),
+      (0.00091841837, 0.07325195840, 213.29909543800),
+      (0.00036661728, 0.00000000000, 0.00000000000),
+      (0.00015274496, 4.06493179167, 206.18554843720)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.04330678039, 3.60284428399, 213.29909543800),
+      (0.00240348302, 2.85238489373, 426.59819087600),
+      (0.00084745939, 0.00000000000, 0.00000000000),
+      (0.00030863357, 3.48441504555, 220.41264243880),
+      (0.00034116062, 0.57297307557, 206.18554843720),
+      (0.00014734070, 2.11846596715, 639.89728631400),
+      (0.00009916667, 5.79003188904, 419.48464387520),
+      (0.00006993564, 4.73604689720, 7.11354700080),
+      (0.00004807588, 5.43305312061, 316.39186965660)
+    ]),
+    _vsop_series_t([
+      (0.00198927992, 4.93901017903, 213.29909543800),
+      (0.00036947916, 3.14159265359, 0.00000000000),
+      (0.00017966989, 0.51979431110, 426.59819087600)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (9.55758135486, 0.00000000000, 0.00000000000),
+      (0.52921382865, 2.39226219573, 213.29909543800),
+      (0.01873679867, 5.23549604660, 206.18554843720),
+      (0.01464663929, 1.64763042902, 426.59819087600),
+      (0.00821891141, 5.93520042303, 316.39186965660),
+      (0.00547506923, 5.01532618980, 103.09277421860),
+      (0.00371684650, 2.27114821115, 220.41264243880),
+      (0.00361778765, 3.13904301847, 7.11354700080),
+      (0.00140617506, 5.70406606781, 632.78373931320),
+      (0.00108974848, 3.29313390175, 110.20632121940),
+      (0.00069006962, 5.94099540992, 419.48464387520),
+      (0.00061053367, 0.94037691801, 639.89728631400),
+      (0.00048913294, 1.55733638681, 202.25339517410),
+      (0.00034143772, 0.19519102597, 277.03499374140),
+      (0.00032401773, 5.47084567016, 949.17560896980),
+      (0.00020936596, 0.46349251129, 735.87651353180),
+      (0.00009796004, 5.20477537945, 1265.56747862640),
+      (0.00011993338, 5.98050967385, 846.08283475120),
+      (0.00020839300, 1.52102476129, 433.71173787680),
+      (0.00015298404, 3.05943814940, 529.69096509460),
+      (0.00006465823, 0.17732249942, 1052.26838318840),
+      (0.00011380257, 1.73105427040, 522.57741809380),
+      (0.00003419618, 4.94550542171, 1581.95934828300)
+    ]),
+    _vsop_series_t([
+      (0.06182981340, 0.25843511480, 213.29909543800),
+      (0.00506577242, 0.71114625261, 206.18554843720),
+      (0.00341394029, 5.79635741658, 426.59819087600),
+      (0.00188491195, 0.47215589652, 220.41264243880),
+      (0.00186261486, 3.14159265359, 0.00000000000),
+      (0.00143891146, 1.40744822888, 7.11354700080)
+    ]),
+    _vsop_series_t([
+      (0.00436902572, 4.78671677509, 213.29909543800)
+    ])
+  ])
+),
+_vsop_model_t(    # Uranus
+  _vsop_formula_t([
+    _vsop_series_t([
+      (5.48129294297, 0.00000000000, 0.00000000000),
+      (0.09260408234, 0.89106421507, 74.78159856730),
+      (0.01504247898, 3.62719260920, 1.48447270830),
+      (0.00365981674, 1.89962179044, 73.29712585900),
+      (0.00272328168, 3.35823706307, 149.56319713460),
+      (0.00070328461, 5.39254450063, 63.73589830340),
+      (0.00068892678, 6.09292483287, 76.26607127560),
+      (0.00061998615, 2.26952066061, 2.96894541660),
+      (0.00061950719, 2.85098872691, 11.04570026390),
+      (0.00026468770, 3.14152083966, 71.81265315070),
+      (0.00025710476, 6.11379840493, 454.90936652730),
+      (0.00021078850, 4.36059339067, 148.07872442630),
+      (0.00017818647, 1.74436930289, 36.64856292950),
+      (0.00014613507, 4.73732166022, 3.93215326310),
+      (0.00011162509, 5.82681796350, 224.34479570190),
+      (0.00010997910, 0.48865004018, 138.51749687070),
+      (0.00009527478, 2.95516862826, 35.16409022120),
+      (0.00007545601, 5.23626582400, 109.94568878850),
+      (0.00004220241, 3.23328220918, 70.84944530420),
+      (0.00004051900, 2.27755017300, 151.04766984290),
+      (0.00003354596, 1.06549007380, 4.45341812490),
+      (0.00002926718, 4.62903718891, 9.56122755560),
+      (0.00003490340, 5.48306144511, 146.59425171800),
+      (0.00003144069, 4.75199570434, 77.75054398390),
+      (0.00002922333, 5.35235361027, 85.82729883120),
+      (0.00002272788, 4.36600400036, 70.32818044240),
+      (0.00002051219, 1.51773566586, 0.11187458460),
+      (0.00002148602, 0.60745949945, 38.13303563780),
+      (0.00001991643, 4.92437588682, 277.03499374140),
+      (0.00001376226, 2.04283539351, 65.22037101170),
+      (0.00001666902, 3.62744066769, 380.12776796000),
+      (0.00001284107, 3.11347961505, 202.25339517410),
+      (0.00001150429, 0.93343589092, 3.18139373770),
+      (0.00001533221, 2.58594681212, 52.69019803950),
+      (0.00001281604, 0.54271272721, 222.86032299360),
+      (0.00001372139, 4.19641530878, 111.43016149680),
+      (0.00001221029, 0.19900650030, 108.46121608020),
+      (0.00000946181, 1.19253165736, 127.47179660680),
+      (0.00001150989, 4.17898916639, 33.67961751290)
+    ]),
+    _vsop_series_t([
+      (74.78159860910, 0.00000000000, 0.00000000000),
+      (0.00154332863, 5.24158770553, 74.78159856730),
+      (0.00024456474, 1.71260334156, 1.48447270830),
+      (0.00009258442, 0.42829732350, 11.04570026390),
+      (0.00008265977, 1.50218091379, 63.73589830340),
+      (0.00009150160, 1.41213765216, 149.56319713460)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.01346277648, 2.61877810547, 74.78159856730),
+      (0.00062341400, 5.08111189648, 149.56319713460),
+      (0.00061601196, 3.14159265359, 0.00000000000),
+      (0.00009963722, 1.61603805646, 76.26607127560),
+      (0.00009926160, 0.57630380333, 73.29712585900)
+    ]),
+    _vsop_series_t([
+      (0.00034101978, 0.01321929936, 74.78159856730)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (19.21264847206, 0.00000000000, 0.00000000000),
+      (0.88784984413, 5.60377527014, 74.78159856730),
+      (0.03440836062, 0.32836099706, 73.29712585900),
+      (0.02055653860, 1.78295159330, 149.56319713460),
+      (0.00649322410, 4.52247285911, 76.26607127560),
+      (0.00602247865, 3.86003823674, 63.73589830340),
+      (0.00496404167, 1.40139935333, 454.90936652730),
+      (0.00338525369, 1.58002770318, 138.51749687070),
+      (0.00243509114, 1.57086606044, 71.81265315070),
+      (0.00190522303, 1.99809394714, 1.48447270830),
+      (0.00161858838, 2.79137786799, 148.07872442630),
+      (0.00143706183, 1.38368544947, 11.04570026390),
+      (0.00093192405, 0.17437220467, 36.64856292950),
+      (0.00071424548, 4.24509236074, 224.34479570190),
+      (0.00089806014, 3.66105364565, 109.94568878850),
+      (0.00039009723, 1.66971401684, 70.84944530420),
+      (0.00046677296, 1.39976401694, 35.16409022120),
+      (0.00039025624, 3.36234773834, 277.03499374140),
+      (0.00036755274, 3.88649278513, 146.59425171800),
+      (0.00030348723, 0.70100838798, 151.04766984290),
+      (0.00029156413, 3.18056336700, 77.75054398390),
+      (0.00022637073, 0.72518687029, 529.69096509460),
+      (0.00011959076, 1.75043392140, 984.60033162190),
+      (0.00025620756, 5.25656086672, 380.12776796000)
+    ]),
+    _vsop_series_t([
+      (0.01479896629, 3.67205697578, 74.78159856730)
+    ])
+  ])
+),
+_vsop_model_t(    # Neptune
+  _vsop_formula_t([
+    _vsop_series_t([
+      (5.31188633046, 0.00000000000, 0.00000000000),
+      (0.01798475530, 2.90101273890, 38.13303563780),
+      (0.01019727652, 0.48580922867, 1.48447270830),
+      (0.00124531845, 4.83008090676, 36.64856292950),
+      (0.00042064466, 5.41054993053, 2.96894541660),
+      (0.00037714584, 6.09221808686, 35.16409022120),
+      (0.00033784738, 1.24488874087, 76.26607127560),
+      (0.00016482741, 0.00007727998, 491.55792945680),
+      (0.00009198584, 4.93747051954, 39.61750834610),
+      (0.00008994250, 0.27462171806, 175.16605980020)
+    ]),
+    _vsop_series_t([
+      (38.13303563957, 0.00000000000, 0.00000000000),
+      (0.00016604172, 4.86323329249, 1.48447270830),
+      (0.00015744045, 2.27887427527, 38.13303563780)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (0.03088622933, 1.44104372644, 38.13303563780),
+      (0.00027780087, 5.91271884599, 76.26607127560),
+      (0.00027623609, 0.00000000000, 0.00000000000),
+      (0.00015355489, 2.52123799551, 36.64856292950),
+      (0.00015448133, 3.50877079215, 39.61750834610)
+    ])
+  ]),
+  _vsop_formula_t([
+    _vsop_series_t([
+      (30.07013205828, 0.00000000000, 0.00000000000),
+      (0.27062259632, 1.32999459377, 38.13303563780),
+      (0.01691764014, 3.25186135653, 36.64856292950),
+      (0.00807830553, 5.18592878704, 1.48447270830),
+      (0.00537760510, 4.52113935896, 35.16409022120),
+      (0.00495725141, 1.57105641650, 491.55792945680),
+      (0.00274571975, 1.84552258866, 175.16605980020),
+      (0.00012012320, 1.92059384991, 1021.24889455140),
+      (0.00121801746, 5.79754470298, 76.26607127560),
+      (0.00100896068, 0.37702724930, 73.29712585900),
+      (0.00135134092, 3.37220609835, 39.61750834610),
+      (0.00007571796, 1.07149207335, 388.46515523820)
+    ])
+  ])
+),
 ]
 
-def _VsopFormula(formula, t, clamp_angle):
+def _VsopFormula(formula: _vsop_formula_t, t: float, clamp_angle: bool) -> float:
     tpower = 1.0
     coord = 0.0
-    for series in formula:
-        incr = tpower * sum(A * math.cos(B + C*t) for (A, B, C) in series)
+    for series in formula.seriesList:
+        incr = tpower * sum((ampl * math.cos(phas + freq*t)) for (ampl, phas, freq) in series.termList)
         if clamp_angle:
             # Longitude angles can be hundreds of radians.
             # Improve precision by keeping each increment within [-2*pi, +2*pi].
@@ -3408,15 +3143,15 @@ def _VsopFormula(formula, t, clamp_angle):
         tpower *= t
     return coord
 
-def _VsopDeriv(formula, t):
-    tpower = 1      # t**s
-    dpower = 0      # t**(s-1)
-    deriv = 0
+def _VsopDeriv(formula: _vsop_formula_t, t: float) -> float:
+    tpower = 1.0      # t**s
+    dpower = 0.0      # t**(s-1)
+    deriv = 0.0
     s = 0
-    for series in formula:
-        sin_sum = 0
-        cos_sum = 0
-        for (ampl, phas, freq) in series:
+    for series in formula.seriesList:
+        sin_sum = 0.0
+        cos_sum = 0.0
+        for (ampl, phas, freq) in series.termList:
             angle = phas + (t * freq)
             sin_sum += ampl * freq * math.sin(angle)
             if s > 0:
@@ -3428,19 +3163,15 @@ def _VsopDeriv(formula, t):
     return deriv
 
 _DAYS_PER_MILLENNIUM = 365250.0
-_LON_INDEX = 0
-_LAT_INDEX = 1
-_RAD_INDEX = 2
 
-
-def _VsopRotate(eclip):
+def _VsopRotate(eclip: _TerseVector) -> _TerseVector:
     # Convert ecliptic cartesian coordinates to equatorial cartesian coordinates.
     x = eclip.x + 0.000000440360*eclip.y - 0.000000190919*eclip.z
     y = -0.000000479966*eclip.x + 0.917482137087*eclip.y - 0.397776982902*eclip.z
     z = 0.397776982902*eclip.y + 0.917482137087*eclip.z
     return _TerseVector(x, y, z)
 
-def _VsopSphereToRect(lon, lat, rad):
+def _VsopSphereToRect(lon: float, lat: float, rad: float) -> _TerseVector:
     # Convert spherical coordinates to cartesian coordinates.
     r_coslat = rad * math.cos(lat)
     return _TerseVector(
@@ -3449,35 +3180,37 @@ def _VsopSphereToRect(lon, lat, rad):
         rad * math.sin(lat)
     )
 
-def _CalcVsop(model, time):
+def _CalcVsop(model: _vsop_model_t, time: Time) -> Vector:
     t = time.tt / _DAYS_PER_MILLENNIUM
-    lon = _VsopFormula(model[0], t, True)
-    lat = _VsopFormula(model[1], t, False)
-    rad = _VsopFormula(model[2], t, False)
+    lon = _VsopFormula(model.lon, t, True)
+    lat = _VsopFormula(model.lat, t, False)
+    rad = _VsopFormula(model.rad, t, False)
     eclip = _VsopSphereToRect(lon, lat, rad)
     return _VsopRotate(eclip).ToAstroVector(time)
 
 class _body_state_t:
-    def __init__(self, tt, r, v):
+    def __init__(self, tt: float, r: _TerseVector, v: _TerseVector) -> None:
         self.tt  = tt
         self.r = r
         self.v = v
 
-    def clone(self):
+    def clone(self) -> "_body_state_t":
         '''Make a copy of this body state.'''
         return _body_state_t(self.tt, self.r.clone(), self.v.clone())
 
-    def __sub__(self, other):
+    def __sub__(self, other: "_body_state_t") -> "_body_state_t":
         return _body_state_t(self.tt, self.r - other.r, self.v - other.v)
 
-def _CalcVsopPosVel(model, tt):
+def _CalcVsopPosVel(model: _vsop_model_t, tt: float) -> _body_state_t:
     t = tt / _DAYS_PER_MILLENNIUM
 
-    lon = _VsopFormula(model[0], t, True)
-    lat = _VsopFormula(model[1], t, False)
-    rad = _VsopFormula(model[2], t, False)
+    lon = _VsopFormula(model.lon, t, True)
+    lat = _VsopFormula(model.lat, t, False)
+    rad = _VsopFormula(model.rad, t, False)
 
-    (dlon_dt, dlat_dt, drad_dt) = [_VsopDeriv(formula, t) for formula in model]
+    dlon_dt = _VsopDeriv(model.lon, t)
+    dlat_dt = _VsopDeriv(model.lat, t)
+    drad_dt = _VsopDeriv(model.rad, t)
 
     # Use spherical coords and spherical derivatives to calculate
     # the velocity vector in rectangular coordinates.
@@ -3515,7 +3248,7 @@ def _CalcVsopPosVel(model, tt):
     return _body_state_t(tt, equ_pos, equ_vel)
 
 
-def _AdjustBarycenter(ssb, time, body, pmass):
+def _AdjustBarycenter(ssb: Vector, time: Time, body: Body, pmass: float) -> None:
     shift = pmass / (pmass + _SUN_GM)
     planet = _CalcVsop(_vsop[body.value], time)
     ssb.x += shift * planet.x
@@ -3523,7 +3256,7 @@ def _AdjustBarycenter(ssb, time, body, pmass):
     ssb.z += shift * planet.z
 
 
-def _CalcSolarSystemBarycenter(time):
+def _CalcSolarSystemBarycenter(time: Time) -> Vector:
     ssb = Vector(0.0, 0.0, 0.0, time)
     _AdjustBarycenter(ssb, time, Body.Jupiter, _JUPITER_GM)
     _AdjustBarycenter(ssb, time, Body.Saturn,  _SATURN_GM)
@@ -3532,142 +3265,100 @@ def _CalcSolarSystemBarycenter(time):
     return ssb
 
 
-def _VsopHelioDistance(model, time):
+def _VsopHelioDistance(model: _vsop_model_t, time: Time) -> float:
     # The caller only wants to know the distance between the planet and the Sun.
     # So we only need to calculate the radial component of the spherical coordinates.
     # There is no need to translate coordinates.
-    return _VsopFormula(model[2], time.tt / _DAYS_PER_MILLENNIUM, False)
+    return _VsopFormula(model.rad, time.tt / _DAYS_PER_MILLENNIUM, False)
 
-def _CalcEarth(time):
+def _CalcEarth(time: Time) -> Vector:
     return _CalcVsop(_vsop[Body.Earth.value], time)
 
 # END VSOP
 #----------------------------------------------------------------------------
 # BEGIN Pluto Integrator
 
+class _pstate:
+    def __init__(self, tt: float, pos: Tuple[float, float, float], vel: Tuple[float, float, float]) -> None:
+        self.tt = tt
+        self.pos = _TerseVector(pos[0], pos[1], pos[2])
+        self.vel = _TerseVector(vel[0], vel[1], vel[2])
+
 _PLUTO_NUM_STATES = 51
 _PLUTO_TIME_STEP  = 29200
 _PLUTO_DT         = 146
 _PLUTO_NSTEPS     = 201
 
-_PlutoStateTable = [
-    [ -730000.0, [-26.118207232108, -14.376168177825,   3.384402515299], [ 1.6339372163656e-03, -2.7861699588508e-03, -1.3585880229445e-03]]
-,   [ -700800.0, [ 41.974905202127,  -0.448502952929, -12.770351505989], [ 7.3458569351457e-04,  2.2785014891658e-03,  4.8619778602049e-04]]
-,   [ -671600.0, [ 14.706930780744,  44.269110540027,   9.353698474772], [-2.1000147999800e-03,  2.2295915939915e-04,  7.0143443551414e-04]]
-,   [ -642400.0, [-29.441003929957,  -6.430161530570,   6.858481011305], [ 8.4495803960544e-04, -3.0783914758711e-03, -1.2106305981192e-03]]
-,   [ -613200.0, [ 39.444396946234,  -6.557989760571, -13.913760296463], [ 1.1480029005873e-03,  2.2400006880665e-03,  3.5168075922288e-04]]
-,   [ -584000.0, [ 20.230380950700,  43.266966657189,   7.382966091923], [-1.9754081700585e-03,  5.3457141292226e-04,  7.5929169129793e-04]]
-,   [ -554800.0, [-30.658325364620,   2.093818874552,   9.880531138071], [ 6.1010603013347e-05, -3.1326500935382e-03, -9.9346125151067e-04]]
-,   [ -525600.0, [ 35.737703251673, -12.587706024764, -14.677847247563], [ 1.5802939375649e-03,  2.1347678412429e-03,  1.9074436384343e-04]]
-,   [ -496400.0, [ 25.466295188546,  41.367478338417,   5.216476873382], [-1.8054401046468e-03,  8.3283083599510e-04,  8.0260156912107e-04]]
-,   [ -467200.0, [-29.847174904071,  10.636426313081,  12.297904180106], [-6.3257063052907e-04, -2.9969577578221e-03, -7.4476074151596e-04]]
-,   [ -438000.0, [ 30.774692107687, -18.236637015304, -14.945535879896], [ 2.0113162005465e-03,  1.9353827024189e-03, -2.0937793168297e-06]]
-,   [ -408800.0, [ 30.243153324028,  38.656267888503,   2.938501750218], [-1.6052508674468e-03,  1.1183495337525e-03,  8.3333973416824e-04]]
-,   [ -379600.0, [-27.288984772533,  18.643162147874,  14.023633623329], [-1.1856388898191e-03, -2.7170609282181e-03, -4.9015526126399e-04]]
-,   [ -350400.0, [ 24.519605196774, -23.245756064727, -14.626862367368], [ 2.4322321483154e-03,  1.6062008146048e-03, -2.3369181613312e-04]]
-,   [ -321200.0, [ 34.505274805875,  35.125338586954,   0.557361475637], [-1.3824391637782e-03,  1.3833397561817e-03,  8.4823598806262e-04]]
-,   [ -292000.0, [-23.275363915119,  25.818514298769,  15.055381588598], [-1.6062295460975e-03, -2.3395961498533e-03, -2.4377362639479e-04]]
-,   [ -262800.0, [ 17.050384798092, -27.180376290126, -13.608963321694], [ 2.8175521080578e-03,  1.1358749093955e-03, -4.9548725258825e-04]]
-,   [ -233600.0, [ 38.093671910285,  30.880588383337,  -1.843688067413], [-1.1317697153459e-03,  1.6128814698472e-03,  8.4177586176055e-04]]
-,   [ -204400.0, [-18.197852930878,  31.932869934309,  15.438294826279], [-1.9117272501813e-03, -1.9146495909842e-03, -1.9657304369835e-05]]
-,   [ -175200.0, [  8.528924039997, -29.618422200048, -11.805400994258], [ 3.1034370787005e-03,  5.1393633292430e-04, -7.7293066202546e-04]]
-,   [ -146000.0, [ 40.946857258640,  25.904973592021,  -4.256336240499], [-8.3652705194051e-04,  1.8129497136404e-03,  8.1564228273060e-04]]
-,   [ -116800.0, [-12.326958895325,  36.881883446292,  15.217158258711], [-2.1166103705038e-03, -1.4814420035990e-03,  1.7401209844705e-04]]
-,   [  -87600.0, [ -0.633258375909, -30.018759794709,  -9.171932874950], [ 3.2016994581737e-03, -2.5279858672148e-04, -1.0411088271861e-03]]
-,   [  -58400.0, [ 42.936048423883,  20.344685584452,  -6.588027007912], [-5.0525450073192e-04,  1.9910074335507e-03,  7.7440196540269e-04]]
-,   [  -29200.0, [ -5.975910552974,  40.611809958460,  14.470131723673], [-2.2184202156107e-03, -1.0562361130164e-03,  3.3652250216211e-04]]
-,   [       0.0, [ -9.875369580774, -27.978926224737,  -5.753711824704], [ 3.0287533248818e-03, -1.1276087003636e-03, -1.2651326732361e-03]]
-,   [   29200.0, [ 43.958831986165,  14.214147973292,  -8.808306227163], [-1.4717608981871e-04,  2.1404187242141e-03,  7.1486567806614e-04]]
-,   [   58400.0, [  0.678136763520,  43.094461639362,  13.243238780721], [-2.2358226110718e-03, -6.3233636090933e-04,  4.7664798895648e-04]]
-,   [   87600.0, [-18.282602096834, -23.305039586660,  -1.766620508028], [ 2.5567245263557e-03, -1.9902940754171e-03, -1.3943491701082e-03]]
-,   [  116800.0, [ 43.873338744526,   7.700705617215, -10.814273666425], [ 2.3174803055677e-04,  2.2402163127924e-03,  6.2988756452032e-04]]
-,   [  146000.0, [  7.392949027906,  44.382678951534,  11.629500214854], [-2.1932815453830e-03, -2.1751799585364e-04,  5.9556516201114e-04]]
-,   [  175200.0, [-24.981690229261, -16.204012851426,   2.466457544298], [ 1.8193989149580e-03, -2.6765419531201e-03, -1.3848283502247e-03]]
-,   [  204400.0, [ 42.530187039511,   0.845935508021, -12.554907527683], [ 6.5059779150669e-04,  2.2725657282262e-03,  5.1133743202822e-04]]
-,   [  233600.0, [ 13.999526486822,  44.462363044894,   9.669418486465], [-2.1079296569252e-03,  1.7533423831993e-04,  6.9128485798076e-04]]
-,   [  262800.0, [-29.184024803031,  -7.371243995762,   6.493275957928], [ 9.3581363109681e-04, -3.0610357109184e-03, -1.2364201089345e-03]]
-,   [  292000.0, [ 39.831980671753,  -6.078405766765, -13.909815358656], [ 1.1117769689167e-03,  2.2362097830152e-03,  3.6230548231153e-04]]
-,   [  321200.0, [ 20.294955108476,  43.417190420251,   7.450091985932], [-1.9742157451535e-03,  5.3102050468554e-04,  7.5938408813008e-04]]
-,   [  350400.0, [-30.669992302160,   2.318743558955,   9.973480913858], [ 4.5605107450676e-05, -3.1308219926928e-03, -9.9066533301924e-04]]
-,   [  379600.0, [ 35.626122155983, -12.897647509224, -14.777586508444], [ 1.6015684949743e-03,  2.1171931182284e-03,  1.8002516202204e-04]]
-,   [  408800.0, [ 26.133186148561,  41.232139187599,   5.006401326220], [-1.7857704419579e-03,  8.6046232702817e-04,  8.0614690298954e-04]]
-,   [  438000.0, [-29.576740229230,  11.863535943587,  12.631323039872], [-7.2292830060955e-04, -2.9587820140709e-03, -7.0824296450300e-04]]
-,   [  467200.0, [ 29.910805787391, -19.159019294000, -15.013363865194], [ 2.0871080437997e-03,  1.8848372554514e-03, -3.8528655083926e-05]]
-,   [  496400.0, [ 31.375957451819,  38.050372720763,   2.433138343754], [-1.5546055556611e-03,  1.1699815465629e-03,  8.3565439266001e-04]]
-,   [  525600.0, [-26.360071336928,  20.662505904952,  14.414696258958], [-1.3142373118349e-03, -2.6236647854842e-03, -4.2542017598193e-04]]
-,   [  554800.0, [ 22.599441488648, -24.508879898306, -14.484045731468], [ 2.5454108304806e-03,  1.4917058755191e-03, -3.0243665086079e-04]]
-,   [  584000.0, [ 35.877864013014,  33.894226366071,  -0.224524636277], [-1.2941245730845e-03,  1.4560427668319e-03,  8.4762160640137e-04]]
-,   [  613200.0, [-21.538149762417,  28.204068269761,  15.321973799534], [-1.7312117409010e-03, -2.1939631314577e-03, -1.6316913275180e-04]]
-,   [  642400.0, [ 13.971521374415, -28.339941764789, -13.083792871886], [ 2.9334630526035e-03,  9.1860931752944e-04, -5.9939422488627e-04]]
-,   [  671600.0, [ 39.526942044143,  28.939897360110,  -2.872799527539], [-1.0068481658095e-03,  1.7021132888090e-03,  8.3578230511981e-04]]
-,   [  700800.0, [-15.576200701394,  34.399412961275,  15.466033737854], [-2.0098814612884e-03, -1.7191109825989e-03,  7.0414782780416e-05]]
-,   [  730000.0, [  4.243252837090, -30.118201690825, -10.707441231349], [ 3.1725847067411e-03,  1.6098461202270e-04, -9.0672150593868e-04]]
+_PlutoStateTable: List[_pstate] = [
+    _pstate( -730000.0, (-26.118207232108, -14.376168177825,   3.384402515299), ( 1.6339372163656e-03, -2.7861699588508e-03, -1.3585880229445e-03))
+,   _pstate( -700800.0, ( 41.974905202127,  -0.448502952929, -12.770351505989), ( 7.3458569351457e-04,  2.2785014891658e-03,  4.8619778602049e-04))
+,   _pstate( -671600.0, ( 14.706930780744,  44.269110540027,   9.353698474772), (-2.1000147999800e-03,  2.2295915939915e-04,  7.0143443551414e-04))
+,   _pstate( -642400.0, (-29.441003929957,  -6.430161530570,   6.858481011305), ( 8.4495803960544e-04, -3.0783914758711e-03, -1.2106305981192e-03))
+,   _pstate( -613200.0, ( 39.444396946234,  -6.557989760571, -13.913760296463), ( 1.1480029005873e-03,  2.2400006880665e-03,  3.5168075922288e-04))
+,   _pstate( -584000.0, ( 20.230380950700,  43.266966657189,   7.382966091923), (-1.9754081700585e-03,  5.3457141292226e-04,  7.5929169129793e-04))
+,   _pstate( -554800.0, (-30.658325364620,   2.093818874552,   9.880531138071), ( 6.1010603013347e-05, -3.1326500935382e-03, -9.9346125151067e-04))
+,   _pstate( -525600.0, ( 35.737703251673, -12.587706024764, -14.677847247563), ( 1.5802939375649e-03,  2.1347678412429e-03,  1.9074436384343e-04))
+,   _pstate( -496400.0, ( 25.466295188546,  41.367478338417,   5.216476873382), (-1.8054401046468e-03,  8.3283083599510e-04,  8.0260156912107e-04))
+,   _pstate( -467200.0, (-29.847174904071,  10.636426313081,  12.297904180106), (-6.3257063052907e-04, -2.9969577578221e-03, -7.4476074151596e-04))
+,   _pstate( -438000.0, ( 30.774692107687, -18.236637015304, -14.945535879896), ( 2.0113162005465e-03,  1.9353827024189e-03, -2.0937793168297e-06))
+,   _pstate( -408800.0, ( 30.243153324028,  38.656267888503,   2.938501750218), (-1.6052508674468e-03,  1.1183495337525e-03,  8.3333973416824e-04))
+,   _pstate( -379600.0, (-27.288984772533,  18.643162147874,  14.023633623329), (-1.1856388898191e-03, -2.7170609282181e-03, -4.9015526126399e-04))
+,   _pstate( -350400.0, ( 24.519605196774, -23.245756064727, -14.626862367368), ( 2.4322321483154e-03,  1.6062008146048e-03, -2.3369181613312e-04))
+,   _pstate( -321200.0, ( 34.505274805875,  35.125338586954,   0.557361475637), (-1.3824391637782e-03,  1.3833397561817e-03,  8.4823598806262e-04))
+,   _pstate( -292000.0, (-23.275363915119,  25.818514298769,  15.055381588598), (-1.6062295460975e-03, -2.3395961498533e-03, -2.4377362639479e-04))
+,   _pstate( -262800.0, ( 17.050384798092, -27.180376290126, -13.608963321694), ( 2.8175521080578e-03,  1.1358749093955e-03, -4.9548725258825e-04))
+,   _pstate( -233600.0, ( 38.093671910285,  30.880588383337,  -1.843688067413), (-1.1317697153459e-03,  1.6128814698472e-03,  8.4177586176055e-04))
+,   _pstate( -204400.0, (-18.197852930878,  31.932869934309,  15.438294826279), (-1.9117272501813e-03, -1.9146495909842e-03, -1.9657304369835e-05))
+,   _pstate( -175200.0, (  8.528924039997, -29.618422200048, -11.805400994258), ( 3.1034370787005e-03,  5.1393633292430e-04, -7.7293066202546e-04))
+,   _pstate( -146000.0, ( 40.946857258640,  25.904973592021,  -4.256336240499), (-8.3652705194051e-04,  1.8129497136404e-03,  8.1564228273060e-04))
+,   _pstate( -116800.0, (-12.326958895325,  36.881883446292,  15.217158258711), (-2.1166103705038e-03, -1.4814420035990e-03,  1.7401209844705e-04))
+,   _pstate(  -87600.0, ( -0.633258375909, -30.018759794709,  -9.171932874950), ( 3.2016994581737e-03, -2.5279858672148e-04, -1.0411088271861e-03))
+,   _pstate(  -58400.0, ( 42.936048423883,  20.344685584452,  -6.588027007912), (-5.0525450073192e-04,  1.9910074335507e-03,  7.7440196540269e-04))
+,   _pstate(  -29200.0, ( -5.975910552974,  40.611809958460,  14.470131723673), (-2.2184202156107e-03, -1.0562361130164e-03,  3.3652250216211e-04))
+,   _pstate(       0.0, ( -9.875369580774, -27.978926224737,  -5.753711824704), ( 3.0287533248818e-03, -1.1276087003636e-03, -1.2651326732361e-03))
+,   _pstate(   29200.0, ( 43.958831986165,  14.214147973292,  -8.808306227163), (-1.4717608981871e-04,  2.1404187242141e-03,  7.1486567806614e-04))
+,   _pstate(   58400.0, (  0.678136763520,  43.094461639362,  13.243238780721), (-2.2358226110718e-03, -6.3233636090933e-04,  4.7664798895648e-04))
+,   _pstate(   87600.0, (-18.282602096834, -23.305039586660,  -1.766620508028), ( 2.5567245263557e-03, -1.9902940754171e-03, -1.3943491701082e-03))
+,   _pstate(  116800.0, ( 43.873338744526,   7.700705617215, -10.814273666425), ( 2.3174803055677e-04,  2.2402163127924e-03,  6.2988756452032e-04))
+,   _pstate(  146000.0, (  7.392949027906,  44.382678951534,  11.629500214854), (-2.1932815453830e-03, -2.1751799585364e-04,  5.9556516201114e-04))
+,   _pstate(  175200.0, (-24.981690229261, -16.204012851426,   2.466457544298), ( 1.8193989149580e-03, -2.6765419531201e-03, -1.3848283502247e-03))
+,   _pstate(  204400.0, ( 42.530187039511,   0.845935508021, -12.554907527683), ( 6.5059779150669e-04,  2.2725657282262e-03,  5.1133743202822e-04))
+,   _pstate(  233600.0, ( 13.999526486822,  44.462363044894,   9.669418486465), (-2.1079296569252e-03,  1.7533423831993e-04,  6.9128485798076e-04))
+,   _pstate(  262800.0, (-29.184024803031,  -7.371243995762,   6.493275957928), ( 9.3581363109681e-04, -3.0610357109184e-03, -1.2364201089345e-03))
+,   _pstate(  292000.0, ( 39.831980671753,  -6.078405766765, -13.909815358656), ( 1.1117769689167e-03,  2.2362097830152e-03,  3.6230548231153e-04))
+,   _pstate(  321200.0, ( 20.294955108476,  43.417190420251,   7.450091985932), (-1.9742157451535e-03,  5.3102050468554e-04,  7.5938408813008e-04))
+,   _pstate(  350400.0, (-30.669992302160,   2.318743558955,   9.973480913858), ( 4.5605107450676e-05, -3.1308219926928e-03, -9.9066533301924e-04))
+,   _pstate(  379600.0, ( 35.626122155983, -12.897647509224, -14.777586508444), ( 1.6015684949743e-03,  2.1171931182284e-03,  1.8002516202204e-04))
+,   _pstate(  408800.0, ( 26.133186148561,  41.232139187599,   5.006401326220), (-1.7857704419579e-03,  8.6046232702817e-04,  8.0614690298954e-04))
+,   _pstate(  438000.0, (-29.576740229230,  11.863535943587,  12.631323039872), (-7.2292830060955e-04, -2.9587820140709e-03, -7.0824296450300e-04))
+,   _pstate(  467200.0, ( 29.910805787391, -19.159019294000, -15.013363865194), ( 2.0871080437997e-03,  1.8848372554514e-03, -3.8528655083926e-05))
+,   _pstate(  496400.0, ( 31.375957451819,  38.050372720763,   2.433138343754), (-1.5546055556611e-03,  1.1699815465629e-03,  8.3565439266001e-04))
+,   _pstate(  525600.0, (-26.360071336928,  20.662505904952,  14.414696258958), (-1.3142373118349e-03, -2.6236647854842e-03, -4.2542017598193e-04))
+,   _pstate(  554800.0, ( 22.599441488648, -24.508879898306, -14.484045731468), ( 2.5454108304806e-03,  1.4917058755191e-03, -3.0243665086079e-04))
+,   _pstate(  584000.0, ( 35.877864013014,  33.894226366071,  -0.224524636277), (-1.2941245730845e-03,  1.4560427668319e-03,  8.4762160640137e-04))
+,   _pstate(  613200.0, (-21.538149762417,  28.204068269761,  15.321973799534), (-1.7312117409010e-03, -2.1939631314577e-03, -1.6316913275180e-04))
+,   _pstate(  642400.0, ( 13.971521374415, -28.339941764789, -13.083792871886), ( 2.9334630526035e-03,  9.1860931752944e-04, -5.9939422488627e-04))
+,   _pstate(  671600.0, ( 39.526942044143,  28.939897360110,  -2.872799527539), (-1.0068481658095e-03,  1.7021132888090e-03,  8.3578230511981e-04))
+,   _pstate(  700800.0, (-15.576200701394,  34.399412961275,  15.466033737854), (-2.0098814612884e-03, -1.7191109825989e-03,  7.0414782780416e-05))
+,   _pstate(  730000.0, (  4.243252837090, -30.118201690825, -10.707441231349), ( 3.1725847067411e-03,  1.6098461202270e-04, -9.0672150593868e-04))
 ]
 
 
-class _TerseVector:
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
-
-    def clone(self):
-        '''Create a copy of this vector.'''
-        return _TerseVector(self.x, self.y, self.z)
-
-    @staticmethod
-    def zero():
-        '''Return a zero vector.'''
-        return _TerseVector(0.0, 0.0, 0.0)
-
-    def ToAstroVector(self, time):
-        '''Convert _TerseVector object to Vector object.'''
-        return Vector(self.x, self.y, self.z, time)
-
-    def quadrature(self):
-        '''Return magnitude squared of this vector.'''
-        return self.x**2 + self.y**2 + self.z**2
-
-    def mean(self, other):
-        '''Return the average of this vector and another vector.'''
-        return _TerseVector((self.x + other.x)/2.0, (self.y + other.y)/2.0, (self.z + other.z)/2.0)
-
-    def __add__(self, other):
-        return _TerseVector(self.x + other.x, self.y + other.y, self.z + other.z)
-
-    def __sub__(self, other):
-        return _TerseVector(self.x - other.x, self.y - other.y, self.z - other.z)
-
-    def __mul__(self, scalar):
-        return _TerseVector(scalar * self.x, scalar * self.y, scalar * self.z)
-
-    def __rmul__(self, scalar):
-        return _TerseVector(scalar * self.x, scalar * self.y, scalar * self.z)
-
-    def __truediv__(self, scalar):
-        return _TerseVector(self.x / scalar, self.y / scalar, self.z / scalar)
-
-
-def _BodyStateFromTable(entry):
-    [ tt, [rx, ry, rz], [vx, vy, vz] ] = entry
-    return _body_state_t(tt, _TerseVector(rx, ry, rz), _TerseVector(vx, vy, vz))
-
-
-def _AdjustBarycenterPosVel(ssb, tt, body, planet_gm):
+def _AdjustBarycenterPosVel(ssb: _body_state_t, tt: float, body: Body, planet_gm: float) -> _body_state_t:
     shift = planet_gm / (planet_gm + _SUN_GM)
     planet = _CalcVsopPosVel(_vsop[body.value], tt)
     ssb.r += shift * planet.r
     ssb.v += shift * planet.v
     return planet
 
-def _AccelerationIncrement(small_pos, gm, major_pos):
+def _AccelerationIncrement(small_pos: _TerseVector, gm: float, major_pos: _TerseVector) -> _TerseVector:
     delta = major_pos - small_pos
     r2 = delta.quadrature()
     return (gm / (r2 * math.sqrt(r2))) * delta
 
 
 class _major_bodies_t:
-    def __init__(self, tt):
+    def __init__(self, tt: float) -> None:
         # Accumulate the Solar System Barycenter position.
         ssb = _body_state_t(tt, _TerseVector(0,0,0), _TerseVector(0,0,0))
         # Calculate the position and velocity vectors of the 4 major planets.
@@ -3687,7 +3378,7 @@ class _major_bodies_t:
         # Convert heliocentric SSB to barycentric Sun.
         self.Sun = _body_state_t(tt, -1*ssb.r, -1*ssb.v)
 
-    def Acceleration(self, pos):
+    def Acceleration(self, pos: _TerseVector) -> _TerseVector:
         '''Use barycentric coordinates of the Sun and major planets to calculate
         the gravitational acceleration vector experienced at location 'pos'.'''
         acc  = _AccelerationIncrement(pos, _SUN_GM,     self.Sun.r)
@@ -3699,31 +3390,31 @@ class _major_bodies_t:
 
 
 class _body_grav_calc_t:
-    def __init__(self, tt, r, v, a):
+    def __init__(self, tt: float, r: _TerseVector, v: _TerseVector, a: _TerseVector) -> None:
         self.tt = tt    # J2000 terrestrial time [days]
         self.r = r      # position [au]
         self.v = v      # velocity [au/day]
         self.a = a      # acceleration [au/day^2]
 
-    def clone(self):
+    def clone(self) -> "_body_grav_calc_t":
         '''Creates a copy of this gravity simulation state.'''
         return _body_grav_calc_t(self.tt, self.r.clone(), self.v.clone(), self.a.clone())
 
 
 class _grav_sim_t:
-    def __init__(self, bary, grav):
+    def __init__(self, bary: _major_bodies_t, grav: _body_grav_calc_t) -> None:
         self.bary = bary
         self.grav = grav
 
 
-def _UpdatePosition(dt, r, v, a):
+def _UpdatePosition(dt: float, r: _TerseVector, v: _TerseVector, a: _TerseVector) -> _TerseVector:
     return _TerseVector(
         r.x + dt*(v.x + dt*a.x/2.0),
         r.y + dt*(v.y + dt*a.y/2.0),
         r.z + dt*(v.z + dt*a.z/2.0)
     )
 
-def _UpdateVelocity(dt, v, a):
+def _UpdateVelocity(dt: float, v: _TerseVector, a: _TerseVector) -> _TerseVector:
     return _TerseVector(
         v.x + dt*a.x,
         v.y + dt*a.y,
@@ -3731,7 +3422,7 @@ def _UpdateVelocity(dt, v, a):
     )
 
 
-def _GravSim(tt2, calc1):
+def _GravSim(tt2: float, calc1: _body_grav_calc_t) -> _grav_sim_t:
     dt = tt2 - calc1.tt
 
     # Calculate where the major bodies (Sun, Jupiter...Neptune) will be at tt2.
@@ -3752,10 +3443,10 @@ def _GravSim(tt2, calc1):
     return _grav_sim_t(bary2, grav)
 
 
-_pluto_cache = [None] * (_PLUTO_NUM_STATES - 1)
+_pluto_cache: List[Optional[List[_body_grav_calc_t]]] = [None] * (_PLUTO_NUM_STATES - 1)
 
 
-def _ClampIndex(frac, nsteps):
+def _ClampIndex(frac: float, nsteps: int) -> int:
     index = math.floor(frac)
     if index < 0:
         return 0
@@ -3764,60 +3455,58 @@ def _ClampIndex(frac, nsteps):
     return index
 
 
-def _GravFromState(entry):
-    state = _BodyStateFromTable(entry)
-    bary = _major_bodies_t(state.tt)
-    r = state.r + bary.Sun.r
-    v = state.v + bary.Sun.v
+def _GravFromState(entry: _pstate) -> _grav_sim_t:
+    bary = _major_bodies_t(entry.tt)
+    r = entry.pos + bary.Sun.r
+    v = entry.vel + bary.Sun.v
     a = bary.Acceleration(r)
-    grav = _body_grav_calc_t(state.tt, r, v, a)
+    grav = _body_grav_calc_t(entry.tt, r, v, a)
     return _grav_sim_t(bary, grav)
 
 
-def _GetSegment(cache, tt):
-    if (tt < _PlutoStateTable[0][0]) or (tt > _PlutoStateTable[_PLUTO_NUM_STATES-1][0]):
+def _GetSegment(cache: List[Optional[List[_body_grav_calc_t]]], tt: float) -> Optional[List[_body_grav_calc_t]]:
+    if (tt < _PlutoStateTable[0].tt) or (tt > _PlutoStateTable[_PLUTO_NUM_STATES-1].tt):
         # Don't bother calculating a segment. Let the caller crawl backward/forward to this time.
         return None
 
-    seg_index = _ClampIndex((tt - _PlutoStateTable[0][0]) / _PLUTO_TIME_STEP, _PLUTO_NUM_STATES-1)
+    seg_index = _ClampIndex((tt - _PlutoStateTable[0].tt) / _PLUTO_TIME_STEP, _PLUTO_NUM_STATES-1)
     if cache[seg_index] is None:
-        seg = cache[seg_index] = [None] * _PLUTO_NSTEPS
-
-        # Each endpoint is exact.
-        seg[0] = _GravFromState(_PlutoStateTable[seg_index]).grav
-        seg[_PLUTO_NSTEPS-1] = _GravFromState(_PlutoStateTable[seg_index + 1]).grav
+        seg = cache[seg_index] = [ _GravFromState(_PlutoStateTable[seg_index]).grav ]
 
         # Simulate forwards from the lower time bound.
         step_tt = seg[0].tt
         i = 1
         while i < _PLUTO_NSTEPS-1:
             step_tt += _PLUTO_DT
-            seg[i] = _GravSim(step_tt, seg[i-1]).grav
+            seg.append(_GravSim(step_tt, seg[i-1]).grav)
             i += 1
+        seg.append(_GravFromState(_PlutoStateTable[seg_index + 1]).grav)
 
         # Simulate backwards from the upper time bound.
+        # Tricky: the reverse list will be one element shorter than `seg`,
+        # because we don't need to fade-mix the first time slot in reverse.
         step_tt = seg[_PLUTO_NSTEPS-1].tt
-        reverse = [None] * _PLUTO_NSTEPS
-        reverse[_PLUTO_NSTEPS-1] = seg[_PLUTO_NSTEPS-1]
+        reverse = [ seg[-1] ]
         i = _PLUTO_NSTEPS - 2
         while i > 0:
             step_tt -= _PLUTO_DT
-            reverse[i] = _GravSim(step_tt, reverse[i+1]).grav
+            reverse.append(_GravSim(step_tt, reverse[-1]).grav)
             i -= 1
+        reverse.reverse()
 
         # Fade-mix the two series so that there are no discontinuities.
         i = _PLUTO_NSTEPS - 2
         while i > 0:
             ramp = i / (_PLUTO_NSTEPS-1)
-            seg[i].r = seg[i].r*(1 - ramp) + reverse[i].r*ramp
-            seg[i].v = seg[i].v*(1 - ramp) + reverse[i].v*ramp
-            seg[i].a = seg[i].a*(1 - ramp) + reverse[i].a*ramp
+            seg[i].r = seg[i].r*(1 - ramp) + reverse[i-1].r*ramp
+            seg[i].v = seg[i].v*(1 - ramp) + reverse[i-1].v*ramp
+            seg[i].a = seg[i].a*(1 - ramp) + reverse[i-1].a*ramp
             i -= 1
 
     return cache[seg_index]
 
 
-def _CalcPlutoOneWay(entry, target_tt, dt):
+def _CalcPlutoOneWay(entry: _pstate, target_tt: float, dt: float) -> _grav_sim_t:
     sim = _GravFromState(entry)
     n = math.ceil((target_tt - sim.grav.tt) / dt)
     for i in range(n):
@@ -3825,14 +3514,14 @@ def _CalcPlutoOneWay(entry, target_tt, dt):
     return sim
 
 
-def _CalcPluto(time, helio):
+def _CalcPluto(time: Time, helio: bool) -> StateVector:
     bary = None
     seg = _GetSegment(_pluto_cache, time.tt)
     if seg is None:
         # The target time is outside the year range 0000..4000.
         # Calculate it by crawling backward from 0000 or forward from 4000.
         # FIXFIXFIX - This is super slow. Could optimize this with extra caching if needed.
-        if time.tt < _PlutoStateTable[0][0]:
+        if time.tt < _PlutoStateTable[0].tt:
             sim = _CalcPlutoOneWay(_PlutoStateTable[0], time.tt, -_PLUTO_DT)
         else:
             sim = _CalcPlutoOneWay(_PlutoStateTable[_PLUTO_NUM_STATES-1], time.tt, +_PLUTO_DT)
@@ -3874,139 +3563,155 @@ def _CalcPluto(time, helio):
 #----------------------------------------------------------------------------
 # BEGIN Jupiter Moons
 
+class _js:
+    '''A trigonometric series inside a Jovian moon model.'''
+    def __init__(self, series: List[Tuple[float, float, float]]) -> None:
+        self.series = series
+
+class _jm:
+    '''A Keplerian model for one of Jupiter's moons.'''
+    def __init__(self, mu: float, al0: float, al1: float, a: _js, l: _js, z: _js, zeta: _js) -> None:
+        self.mu = mu
+        self.al0 = al0
+        self.al1 = al1
+        self.a = a
+        self.l = l
+        self.z = z
+        self.zeta = zeta
+
 _Rotation_JUP_EQJ = RotationMatrix([
     [  9.99432765338654e-01, -3.36771074697641e-02,  0.00000000000000e+00 ],
     [  3.03959428906285e-02,  9.02057912352809e-01,  4.30543388542295e-01 ],
     [ -1.44994559663353e-02, -4.30299169409101e-01,  9.02569881273754e-01 ]
 ])
 
-_JupiterMoonModel = [
+_JupiterMoonModel: List[_jm] = [
     # [0] Io
-    [
+    _jm(
          2.8248942843381399e-07,  1.4462132960212239e+00,  3.5515522861824000e+00, # mu, al0, al1
-        [   # a
-            [  0.0028210960212903,  0.0000000000000000e+00,  0.0000000000000000e+00 ]
-        ],
-        [   # l
-            [ -0.0001925258348666,  4.9369589722644998e+00,  1.3584836583050000e-02 ],
-            [ -0.0000970803596076,  4.3188796477322002e+00,  1.3034138432430000e-02 ],
-            [ -0.0000898817416500,  1.9080016428616999e+00,  3.0506486715799999e-03 ],
-            [ -0.0000553101050262,  1.4936156681568999e+00,  1.2938928911549999e-02 ]
-        ],
-        [   # z
-            [  0.0041510849668155,  4.0899396355450000e+00, -1.2906864146660001e-02 ],
-            [  0.0006260521444113,  1.4461888986270000e+00,  3.5515522949801999e+00 ],
-            [  0.0000352747346169,  2.1256287034577999e+00,  1.2727416566999999e-04 ]
-        ],
-        [   # zeta
-            [  0.0003142172466014,  2.7964219722923001e+00, -2.3150960980000000e-03 ],
-            [  0.0000904169207946,  1.0477061879627001e+00, -5.6920638196000003e-04 ]
-        ]
-    ],
+        _js([   # a
+            (  0.0028210960212903,  0.0000000000000000e+00,  0.0000000000000000e+00 )
+        ]),
+        _js([   # l
+            ( -0.0001925258348666,  4.9369589722644998e+00,  1.3584836583050000e-02 ),
+            ( -0.0000970803596076,  4.3188796477322002e+00,  1.3034138432430000e-02 ),
+            ( -0.0000898817416500,  1.9080016428616999e+00,  3.0506486715799999e-03 ),
+            ( -0.0000553101050262,  1.4936156681568999e+00,  1.2938928911549999e-02 )
+        ]),
+        _js([   # z
+            (  0.0041510849668155,  4.0899396355450000e+00, -1.2906864146660001e-02 ),
+            (  0.0006260521444113,  1.4461888986270000e+00,  3.5515522949801999e+00 ),
+            (  0.0000352747346169,  2.1256287034577999e+00,  1.2727416566999999e-04 )
+        ]),
+        _js([   # zeta
+            (  0.0003142172466014,  2.7964219722923001e+00, -2.3150960980000000e-03 ),
+            (  0.0000904169207946,  1.0477061879627001e+00, -5.6920638196000003e-04 )
+        ])
+    ),
 
     # [1] Europa
-    [
+    _jm(
          2.8248327439289299e-07, -3.7352634374713622e-01,  1.7693227111234699e+00, # mu, al0, al1
-        [   # a
-            [  0.0044871037804314,  0.0000000000000000e+00,  0.0000000000000000e+00 ],
-            [  0.0000004324367498,  1.8196456062910000e+00,  1.7822295777568000e+00 ]
-        ],
-        [   # l
-            [  0.0008576433172936,  4.3188693178264002e+00,  1.3034138308049999e-02 ],
-            [  0.0004549582875086,  1.4936531751079001e+00,  1.2938928819619999e-02 ],
-            [  0.0003248939825174,  1.8196494533458001e+00,  1.7822295777568000e+00 ],
-            [ -0.0003074250079334,  4.9377037005910998e+00,  1.3584832867240000e-02 ],
-            [  0.0001982386144784,  1.9079869054759999e+00,  3.0510121286900001e-03 ],
-            [  0.0001834063551804,  2.1402853388529000e+00,  1.4500978933800000e-03 ],
-            [ -0.0001434383188452,  5.6222140366630002e+00,  8.9111478887838003e-01 ],
-            [ -0.0000771939140944,  4.3002724372349999e+00,  2.6733443704265998e+00 ]
-        ],
-        [   # z
-            [ -0.0093589104136341,  4.0899396509038999e+00, -1.2906864146660001e-02 ],
-            [  0.0002988994545555,  5.9097265185595003e+00,  1.7693227079461999e+00 ],
-            [  0.0002139036390350,  2.1256289300016000e+00,  1.2727418406999999e-04 ],
-            [  0.0001980963564781,  2.7435168292649998e+00,  6.7797343008999997e-04 ],
-            [  0.0001210388158965,  5.5839943711203004e+00,  3.2056614899999997e-05 ],
-            [  0.0000837042048393,  1.6094538368039000e+00, -9.0402165808846002e-01 ],
-            [  0.0000823525166369,  1.4461887708689001e+00,  3.5515522949801999e+00 ]
-        ],
-        [   # zeta
-            [  0.0040404917832303,  1.0477063169425000e+00, -5.6920640539999997e-04 ],
-            [  0.0002200421034564,  3.3368857864364001e+00, -1.2491307306999999e-04 ],
-            [  0.0001662544744719,  2.4134862374710999e+00,  0.0000000000000000e+00 ],
-            [  0.0000590282470983,  5.9719930968366004e+00, -3.0561602250000000e-05 ]
-        ]
-    ],
+        _js([   # a
+            (  0.0044871037804314,  0.0000000000000000e+00,  0.0000000000000000e+00 ),
+            (  0.0000004324367498,  1.8196456062910000e+00,  1.7822295777568000e+00 )
+        ]),
+        _js([   # l
+            (  0.0008576433172936,  4.3188693178264002e+00,  1.3034138308049999e-02 ),
+            (  0.0004549582875086,  1.4936531751079001e+00,  1.2938928819619999e-02 ),
+            (  0.0003248939825174,  1.8196494533458001e+00,  1.7822295777568000e+00 ),
+            ( -0.0003074250079334,  4.9377037005910998e+00,  1.3584832867240000e-02 ),
+            (  0.0001982386144784,  1.9079869054759999e+00,  3.0510121286900001e-03 ),
+            (  0.0001834063551804,  2.1402853388529000e+00,  1.4500978933800000e-03 ),
+            ( -0.0001434383188452,  5.6222140366630002e+00,  8.9111478887838003e-01 ),
+            ( -0.0000771939140944,  4.3002724372349999e+00,  2.6733443704265998e+00 )
+        ]),
+        _js([   # z
+            ( -0.0093589104136341,  4.0899396509038999e+00, -1.2906864146660001e-02 ),
+            (  0.0002988994545555,  5.9097265185595003e+00,  1.7693227079461999e+00 ),
+            (  0.0002139036390350,  2.1256289300016000e+00,  1.2727418406999999e-04 ),
+            (  0.0001980963564781,  2.7435168292649998e+00,  6.7797343008999997e-04 ),
+            (  0.0001210388158965,  5.5839943711203004e+00,  3.2056614899999997e-05 ),
+            (  0.0000837042048393,  1.6094538368039000e+00, -9.0402165808846002e-01 ),
+            (  0.0000823525166369,  1.4461887708689001e+00,  3.5515522949801999e+00 )
+        ]),
+        _js([   # zeta
+            (  0.0040404917832303,  1.0477063169425000e+00, -5.6920640539999997e-04 ),
+            (  0.0002200421034564,  3.3368857864364001e+00, -1.2491307306999999e-04 ),
+            (  0.0001662544744719,  2.4134862374710999e+00,  0.0000000000000000e+00 ),
+            (  0.0000590282470983,  5.9719930968366004e+00, -3.0561602250000000e-05 )
+        ])
+    ),
 
     # [2] Ganymede
-    [
+    _jm(
          2.8249818418472298e-07,  2.8740893911433479e-01,  8.7820792358932798e-01, # mu, al0, al1
-        [   # a
-            [  0.0071566594572575,  0.0000000000000000e+00,  0.0000000000000000e+00 ],
-            [  0.0000013930299110,  1.1586745884981000e+00,  2.6733443704265998e+00 ]
-        ],
-        [   # l
-            [  0.0002310797886226,  2.1402987195941998e+00,  1.4500978438400001e-03 ],
-            [ -0.0001828635964118,  4.3188672736968003e+00,  1.3034138282630000e-02 ],
-            [  0.0001512378778204,  4.9373102372298003e+00,  1.3584834812520000e-02 ],
-            [ -0.0001163720969778,  4.3002659861490002e+00,  2.6733443704265998e+00 ],
-            [ -0.0000955478069846,  1.4936612842567001e+00,  1.2938928798570001e-02 ],
-            [  0.0000815246854464,  5.6222137132535002e+00,  8.9111478887838003e-01 ],
-            [ -0.0000801219679602,  1.2995922951532000e+00,  1.0034433456728999e+00 ],
-            [ -0.0000607017260182,  6.4978769669238001e-01,  5.0172167043264004e-01 ]
-        ],
-        [   # z
-            [  0.0014289811307319,  2.1256295942738999e+00,  1.2727413029000001e-04 ],
-            [  0.0007710931226760,  5.5836330003496002e+00,  3.2064341100000001e-05 ],
-            [  0.0005925911780766,  4.0899396636447998e+00, -1.2906864146660001e-02 ],
-            [  0.0002045597496146,  5.2713683670371996e+00, -1.2523544076106000e-01 ],
-            [  0.0001785118648258,  2.8743156721063001e-01,  8.7820792442520001e-01 ],
-            [  0.0001131999784893,  1.4462127277818000e+00,  3.5515522949801999e+00 ],
-            [ -0.0000658778169210,  2.2702423990985001e+00, -1.7951364394536999e+00 ],
-            [  0.0000497058888328,  5.9096792204858000e+00,  1.7693227129285001e+00 ]
-        ],
-        [   # zeta
-            [  0.0015932721570848,  3.3368862796665000e+00, -1.2491307058000000e-04 ],
-            [  0.0008533093128905,  2.4133881688166001e+00,  0.0000000000000000e+00 ],
-            [  0.0003513347911037,  5.9720789850126996e+00, -3.0561017709999999e-05 ],
-            [ -0.0001441929255483,  1.0477061764435001e+00, -5.6920632124000004e-04 ]
-        ]
-    ],
+        _js([   # a
+            (  0.0071566594572575,  0.0000000000000000e+00,  0.0000000000000000e+00 ),
+            (  0.0000013930299110,  1.1586745884981000e+00,  2.6733443704265998e+00 )
+        ]),
+        _js([   # l
+            (  0.0002310797886226,  2.1402987195941998e+00,  1.4500978438400001e-03 ),
+            ( -0.0001828635964118,  4.3188672736968003e+00,  1.3034138282630000e-02 ),
+            (  0.0001512378778204,  4.9373102372298003e+00,  1.3584834812520000e-02 ),
+            ( -0.0001163720969778,  4.3002659861490002e+00,  2.6733443704265998e+00 ),
+            ( -0.0000955478069846,  1.4936612842567001e+00,  1.2938928798570001e-02 ),
+            (  0.0000815246854464,  5.6222137132535002e+00,  8.9111478887838003e-01 ),
+            ( -0.0000801219679602,  1.2995922951532000e+00,  1.0034433456728999e+00 ),
+            ( -0.0000607017260182,  6.4978769669238001e-01,  5.0172167043264004e-01 )
+        ]),
+        _js([   # z
+            (  0.0014289811307319,  2.1256295942738999e+00,  1.2727413029000001e-04 ),
+            (  0.0007710931226760,  5.5836330003496002e+00,  3.2064341100000001e-05 ),
+            (  0.0005925911780766,  4.0899396636447998e+00, -1.2906864146660001e-02 ),
+            (  0.0002045597496146,  5.2713683670371996e+00, -1.2523544076106000e-01 ),
+            (  0.0001785118648258,  2.8743156721063001e-01,  8.7820792442520001e-01 ),
+            (  0.0001131999784893,  1.4462127277818000e+00,  3.5515522949801999e+00 ),
+            ( -0.0000658778169210,  2.2702423990985001e+00, -1.7951364394536999e+00 ),
+            (  0.0000497058888328,  5.9096792204858000e+00,  1.7693227129285001e+00 )
+        ]),
+        _js([   # zeta
+            (  0.0015932721570848,  3.3368862796665000e+00, -1.2491307058000000e-04 ),
+            (  0.0008533093128905,  2.4133881688166001e+00,  0.0000000000000000e+00 ),
+            (  0.0003513347911037,  5.9720789850126996e+00, -3.0561017709999999e-05 ),
+            ( -0.0001441929255483,  1.0477061764435001e+00, -5.6920632124000004e-04 )
+        ])
+    ),
 
     # [3] Callisto
-    [
+    _jm(
          2.8249214488990899e-07, -3.6203412913757038e-01,  3.7648623343382798e-01, # mu, al0, al1
-        [   # a
-            [  0.0125879701715314,  0.0000000000000000e+00,  0.0000000000000000e+00 ],
-            [  0.0000035952049470,  6.4965776007116005e-01,  5.0172168165034003e-01 ],
-            [  0.0000027580210652,  1.8084235781510001e+00,  3.1750660413359002e+00 ]
-        ],
-        [   # l
-            [  0.0005586040123824,  2.1404207189814999e+00,  1.4500979323100001e-03 ],
-            [ -0.0003805813868176,  2.7358844897852999e+00,  2.9729650620000000e-05 ],
-            [  0.0002205152863262,  6.4979652596399995e-01,  5.0172167243580001e-01 ],
-            [  0.0001877895151158,  1.8084787604004999e+00,  3.1750660413359002e+00 ],
-            [  0.0000766916975242,  6.2720114319754998e+00,  1.3928364636651001e+00 ],
-            [  0.0000747056855106,  1.2995916202344000e+00,  1.0034433456728999e+00 ]
-        ],
-        [   # z
-            [  0.0073755808467977,  5.5836071576083999e+00,  3.2065099140000001e-05 ],
-            [  0.0002065924169942,  5.9209831565786004e+00,  3.7648624194703001e-01 ],
-            [  0.0001589869764021,  2.8744006242622999e-01,  8.7820792442520001e-01 ],
-            [ -0.0001561131605348,  2.1257397865089001e+00,  1.2727441285000001e-04 ],
-            [  0.0001486043380971,  1.4462134301023000e+00,  3.5515522949801999e+00 ],
-            [  0.0000635073108731,  5.9096803285953996e+00,  1.7693227129285001e+00 ],
-            [  0.0000599351698525,  4.1125517584797997e+00, -2.7985797954588998e+00 ],
-            [  0.0000540660842731,  5.5390350845569003e+00,  2.8683408228299999e-03 ],
-            [ -0.0000489596900866,  4.6218149483337996e+00, -6.2695712529518999e-01 ]
-        ],
-        [   # zeta
-            [  0.0038422977898495,  2.4133922085556998e+00,  0.0000000000000000e+00 ],
-            [  0.0022453891791894,  5.9721736773277003e+00, -3.0561255249999997e-05 ],
-            [ -0.0002604479450559,  3.3368746306408998e+00, -1.2491309972000001e-04 ],
-            [  0.0000332112143230,  5.5604137742336999e+00,  2.9003768850700000e-03 ]
-        ]
-    ]
+        _js([   # a
+            (  0.0125879701715314,  0.0000000000000000e+00,  0.0000000000000000e+00 ),
+            (  0.0000035952049470,  6.4965776007116005e-01,  5.0172168165034003e-01 ),
+            (  0.0000027580210652,  1.8084235781510001e+00,  3.1750660413359002e+00 )
+        ]),
+        _js([   # l
+            (  0.0005586040123824,  2.1404207189814999e+00,  1.4500979323100001e-03 ),
+            ( -0.0003805813868176,  2.7358844897852999e+00,  2.9729650620000000e-05 ),
+            (  0.0002205152863262,  6.4979652596399995e-01,  5.0172167243580001e-01 ),
+            (  0.0001877895151158,  1.8084787604004999e+00,  3.1750660413359002e+00 ),
+            (  0.0000766916975242,  6.2720114319754998e+00,  1.3928364636651001e+00 ),
+            (  0.0000747056855106,  1.2995916202344000e+00,  1.0034433456728999e+00 )
+        ]),
+        _js([   # z
+            (  0.0073755808467977,  5.5836071576083999e+00,  3.2065099140000001e-05 ),
+            (  0.0002065924169942,  5.9209831565786004e+00,  3.7648624194703001e-01 ),
+            (  0.0001589869764021,  2.8744006242622999e-01,  8.7820792442520001e-01 ),
+            ( -0.0001561131605348,  2.1257397865089001e+00,  1.2727441285000001e-04 ),
+            (  0.0001486043380971,  1.4462134301023000e+00,  3.5515522949801999e+00 ),
+            (  0.0000635073108731,  5.9096803285953996e+00,  1.7693227129285001e+00 ),
+            (  0.0000599351698525,  4.1125517584797997e+00, -2.7985797954588998e+00 ),
+            (  0.0000540660842731,  5.5390350845569003e+00,  2.8683408228299999e-03 ),
+            ( -0.0000489596900866,  4.6218149483337996e+00, -6.2695712529518999e-01 )
+        ]),
+        _js([   # zeta
+            (  0.0038422977898495,  2.4133922085556998e+00,  0.0000000000000000e+00 ),
+            (  0.0022453891791894,  5.9721736773277003e+00, -3.0561255249999997e-05 ),
+            ( -0.0002604479450559,  3.3368746306408998e+00, -1.2491309972000001e-04 ),
+            (  0.0000332112143230,  5.5604137742336999e+00,  2.9003768850700000e-03 )
+        ])
+    )
 ]
 
 class JupiterMoonsInfo:
@@ -4031,13 +3736,13 @@ class JupiterMoonsInfo:
     callisto : StateVector
         The position and velocity of Jupiter's moon Callisto.
     """
-    def __init__(self, moon):
+    def __init__(self, moon: List[StateVector]) -> None:
         self.io = moon[0]
         self.europa = moon[1]
         self.ganymede = moon[2]
         self.callisto = moon[3]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'JupiterMoonsInfo(io={}, europa={}, ganymede={}, callisto={})'.format(
             repr(self.io),
             repr(self.europa),
@@ -4046,12 +3751,12 @@ class JupiterMoonsInfo:
         )
 
 
-def _JupiterMoon_elem2pv(time, mu, A, AL, K, H, Q, P):
+def _JupiterMoon_elem2pv(time: Time, mu: float, A: float, AL: float, K: float, H: float, Q: float, P: float) -> StateVector:
     # Translation of FORTRAN subroutine ELEM2PV from:
     # https://ftp.imcce.fr/pub/ephem/satel/galilean/L1/L1.2/
     AN = math.sqrt(mu / (A*A*A))
     EE = AL + K*math.sin(AL) - H*math.cos(AL)
-    DE = 1
+    DE = 1.0
     while abs(DE) >= 1.0e-12:
         CE = math.cos(EE)
         SE = math.sin(EE)
@@ -4083,7 +3788,7 @@ def _JupiterMoon_elem2pv(time, mu, A, AL, K, H, Q, P):
     )
 
 
-def _CalcJupiterMoon(time, mu, al0, al1, a, l, z, zeta):
+def _CalcJupiterMoon(time: Time, model: _jm) -> StateVector:
     # This is a translation of FORTRAN code by Duriez, Lainey, and Vienne:
     # https://ftp.imcce.fr/pub/ephem/satel/galilean/L1/L1.2/
 
@@ -4091,11 +3796,11 @@ def _CalcJupiterMoon(time, mu, al0, al1, a, l, z, zeta):
 
     # Calculate 6 orbital elements at the given time t.
     elem0 = 0.0
-    for (amplitude, phase, frequency) in a:
+    for (amplitude, phase, frequency) in model.a.series:
         elem0 += amplitude * math.cos(phase + (t * frequency))
 
-    elem1 = al0 + (t * al1)
-    for (amplitude, phase, frequency) in l:
+    elem1 = model.al0 + (t * model.al1)
+    for (amplitude, phase, frequency) in model.l.series:
         elem1 += amplitude * math.sin(phase + (t * frequency))
 
     elem1 = math.fmod(elem1, _PI2)
@@ -4104,26 +3809,26 @@ def _CalcJupiterMoon(time, mu, al0, al1, a, l, z, zeta):
 
     elem2 = 0.0
     elem3 = 0.0
-    for (amplitude, phase, frequency) in z:
+    for (amplitude, phase, frequency) in model.z.series:
         arg = phase + (t * frequency)
         elem2 += amplitude * math.cos(arg)
         elem3 += amplitude * math.sin(arg)
 
     elem4 = 0.0
     elem5 = 0.0
-    for (amplitude, phase, frequency) in zeta:
+    for (amplitude, phase, frequency) in model.zeta.series:
         arg = phase + (t * frequency)
         elem4 += amplitude * math.cos(arg)
         elem5 += amplitude * math.sin(arg)
 
     # Convert the oribital elements into position vectors in the Jupiter equatorial system (JUP).
-    state = _JupiterMoon_elem2pv(time, mu, elem0, elem1, elem2, elem3, elem4, elem5)
+    state = _JupiterMoon_elem2pv(time, model.mu, elem0, elem1, elem2, elem3, elem4, elem5)
 
     # Re-orient position and velocity vectors from Jupiter-equatorial (JUP) to Earth-equatorial in J2000 (EQJ).
     return RotateState(_Rotation_JUP_EQJ, state)
 
 
-def JupiterMoons(time):
+def JupiterMoons(time: Time) -> JupiterMoonsInfo:
     """Calculates jovicentric positions and velocities of Jupiter's largest 4 moons.
 
     Calculates position and velocity vectors for Jupiter's moons
@@ -4148,39 +3853,36 @@ def JupiterMoons(time):
     JupiterMoonsInfo
         The positions and velocities of Jupiter's 4 largest moons.
     """
-    infolist = []
-    for (mu, al0, al1, a, l, z, zeta) in _JupiterMoonModel:
-        infolist.append(_CalcJupiterMoon(time, mu, al0, al1, a, l, z, zeta))
-    return JupiterMoonsInfo(infolist)
+    return JupiterMoonsInfo([_CalcJupiterMoon(time, model) for model in _JupiterMoonModel])
 
 # END Jupiter Moons
 #----------------------------------------------------------------------------
 # BEGIN Search
 
-def _QuadInterp(tm, dt, fa, fm, fb):
+def _QuadInterp(tm: float, dt: float, fa: float, fm: float, fb: float) -> Optional[Tuple[float, float]]:
     Q = (fb + fa)/2 - fm
     R = (fb - fa)/2
     S = fm
 
-    if Q == 0:
+    if Q == 0.0:
         # This is a line, not a parabola.
-        if R == 0:
+        if R == 0.0:
             # This is a HORIZONTAL line... can't make progress!
             return None
         x = -S / R
-        if not (-1 <= x <= +1):
+        if not (-1.0 <= x <= +1.0):
             return None  # out of bounds
     else:
         # It really is a parabola. Find roots x1, x2.
         u = R*R - 4*Q*S
-        if u <= 0:
+        if u <= 0.0:
             return None
         ru = math.sqrt(u)
-        x1 = (-R + ru) / (2 * Q)
-        x2 = (-R - ru) / (2 * Q)
+        x1 = (-R + ru) / (2.0 * Q)
+        x2 = (-R - ru) / (2.0 * Q)
 
-        if -1 <= x1 <= +1:
-            if -1 <= x2 <= +1:
+        if -1.0 <= x1 <= +1.0:
+            if -1.0 <= x2 <= +1.0:
                 # Two solutions... so parabola intersects twice.
                 return None
             x = x1
@@ -4193,7 +3895,7 @@ def _QuadInterp(tm, dt, fa, fm, fb):
     df_dt = (2*Q*x + R) / dt
     return (t, df_dt)
 
-def Search(func, context, t1, t2, dt_tolerance_seconds):
+def Search(func: Callable[[Any, Time], float], context: object, t1: Time, t2: Time, dt_tolerance_seconds: float) -> Optional[Time]:
     """Searches for a time at which a function's value increases through zero.
 
     Certain astronomy calculations involve finding a time when an event occurs.
@@ -4341,7 +4043,7 @@ def Search(func, context, t1, t2, dt_tolerance_seconds):
 #----------------------------------------------------------------------------
 
 
-def HelioVector(body, time):
+def HelioVector(body: Body, time: Time) -> Vector:
     """Calculates heliocentric Cartesian coordinates of a body in the J2000 equatorial system.
 
     This function calculates the position of the given celestial body as a vector,
@@ -4359,6 +4061,7 @@ def HelioVector(body, time):
     body : Body
         The celestial body whose heliocentric position is to be calculated:
         The Sun, Moon, EMB, SSB, or any of the planets.
+        Also allowed to be a user-defined star created by #DefineStar.
     time : Time
         The time at which to calculate the heliocentric position.
 
@@ -4392,10 +4095,14 @@ def HelioVector(body, time):
     if body == Body.SSB:
         return _CalcSolarSystemBarycenter(time)
 
-    raise InvalidBodyError()
+    star = _UserDefinedStar(body)
+    if star:
+        return VectorFromSphere(Spherical(star.dec, 15.0*star.ra, star.dist), time)
+
+    raise InvalidBodyError(body)
 
 
-def HelioDistance(body, time):
+def HelioDistance(body: Body, time: Time) -> float:
     """Calculates the distance between a body and the Sun at a given time.
 
     Given a date and time, this function calculates the distance between
@@ -4408,7 +4115,7 @@ def HelioDistance(body, time):
     ----------
     body : Body
         A body for which to calculate a heliocentric distance:
-        the Sun, Moon, or any of the planets.
+        the Sun, Moon, any of the planets, or a user-defined star.
     time : Time
         The date and time for which to calculate the heliocentric distance.
 
@@ -4422,6 +4129,10 @@ def HelioDistance(body, time):
 
     if 0 <= body.value < len(_vsop):
         return _VsopHelioDistance(_vsop[body.value], time)
+
+    star = _UserDefinedStar(body)
+    if star:
+        return star.dist
 
     return HelioVector(body, time).Length()
 
@@ -4440,11 +4151,11 @@ class PositionFunction(abc.ABC):
     specified time. It is passed an instance of `PositionFunction`
     that expresses a relative position vector function.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @abc.abstractmethod
-    def Position(self, time):
+    def Position(self, time: Time) -> Vector:
         """Returns a relative position vector for a given time.
 
         Parameters
@@ -4457,7 +4168,7 @@ class PositionFunction(abc.ABC):
         Vector
         """
 
-def CorrectLightTravel(func, time):
+def CorrectLightTravel(func: PositionFunction, time: Time) -> Vector:
     """Solve for light travel time of a vector function.
 
     When observing a distant object, for example Jupiter as seen from Earth,
@@ -4508,14 +4219,14 @@ def CorrectLightTravel(func, time):
 
 
 class _BodyPosition(PositionFunction):
-    def __init__(self, observerBody, targetBody, aberration, observerPos):
+    def __init__(self, observerBody: Body, targetBody: Body, aberration: bool, observerPos: Optional[Vector]) -> None:
         super().__init__()
         self.observerBody = observerBody
         self.targetBody = targetBody
         self.aberration = aberration
         self.observerPos = observerPos
 
-    def Position(self, time):
+    def Position(self, time: Time) -> Vector:
         if self.aberration:
             # The following discussion is worded with the observer body being the Earth,
             # which is often the case. However, the same reasoning applies to any observer body
@@ -4536,12 +4247,13 @@ class _BodyPosition(PositionFunction):
         else:
             # No aberration, so use the pre-calculated initial position of
             # the observer body that is already stored in this object.
+            assert self.observerPos is not None
             observerPos = self.observerPos
         # Subtract the bodies' heliocentric positions to obtain a relative position vector.
         return HelioVector(self.targetBody, time) - observerPos
 
 
-def BackdatePosition(time, observerBody, targetBody, aberration):
+def BackdatePosition(time: Time, observerBody: Body, targetBody: Body, aberration: bool) -> Vector:
     """Solve for light travel time correction of apparent position.
 
     When observing a distant object, for example Jupiter as seen from Earth,
@@ -4578,6 +4290,24 @@ def BackdatePosition(time, observerBody, targetBody, aberration):
         Its `t` field holds the time that light left the observed
         body to arrive at the observer at the observation time.
     """
+    if _UserDefinedStar(targetBody):
+        # This is a user-defined star, which must be treated as a special case.
+        # First, we assume its heliocentric position does not change with time.
+        # Second, we assume its heliocentric position has already been corrected
+        # for light-travel time, its coordinates given as it appears on Earth at the present.
+        # Therefore, no backdating is applied.
+        tvec = HelioVector(targetBody, time)
+        if aberration:
+            # (Observer velocity) - (light vector) = (Aberration-corrected direction to target body).
+            # Note that this is an approximation, because technically the light vector should
+            # be measured in barycentric coordinates, not heliocentric. The error is very small.
+            ostate = HelioState(observerBody, time)
+            rvec = tvec - ostate.Position()
+            s = C_AUDAY / rvec.Length()    # conversion factor from relative distance to speed of light
+            return rvec + ostate.Velocity()/s
+        # No correction is needed. Simply return the star's current position as seen from the observer.
+        return tvec - HelioVector(observerBody, time)
+
     if aberration:
         # With aberration, `BackdatePosition` will calculate `observerPos` at different times.
         # Therefore, do not waste time calculating it now.
@@ -4591,7 +4321,7 @@ def BackdatePosition(time, observerBody, targetBody, aberration):
     return CorrectLightTravel(func, time)
 
 
-def GeoVector(body, time, aberration):
+def GeoVector(body: Body, time: Time, aberration: bool) -> Vector:
     """Calculates geocentric Cartesian coordinates of a body in the J2000 equatorial system.
 
     This function calculates the position of the given celestial body as a vector,
@@ -4638,7 +4368,7 @@ def GeoVector(body, time, aberration):
     return vec
 
 
-def _ExportState(terse, time):
+def _ExportState(terse: _body_state_t, time: Time) -> StateVector:
     return StateVector(
         terse.r.x, terse.r.y, terse.r.z,
         terse.v.x, terse.v.y, terse.v.z,
@@ -4646,12 +4376,12 @@ def _ExportState(terse, time):
     )
 
 
-def BaryState(body, time):
+def BaryState(body: Body, time: Time) -> StateVector:
     """Calculates barycentric position and velocity vectors for the given body.
 
     Given a body and a time, calculates the barycentric position and velocity
     vectors for the center of that body at that time.
-    The vectors are expressed in equatorial J2000 coordinates (EQJ).
+    The vectors are expressed in J2000 mean equator coordinates (EQJ).
 
     Parameters
     ----------
@@ -4721,15 +4451,15 @@ def BaryState(body, time):
             time
         )
 
-    raise InvalidBodyError()
+    raise InvalidBodyError(body)
 
 
-def HelioState(body, time):
+def HelioState(body: Body, time: Time) -> StateVector:
     """Calculates heliocentric position and velocity vectors for the given body.
 
     Given a body and a time, calculates the position and velocity
     vectors for the center of that body at that time, relative to the center of the Sun.
-    The vectors are expressed in equatorial J2000 coordinates (EQJ).
+    The vectors are expressed in J2000 mean equator coordinates (EQJ).
     If you need the position vector only, it is more efficient to call #HelioVector.
     The Sun's center is a non-inertial frame of reference. In other words, the Sun
     experiences acceleration due to gravitational forces, mostly from the larger
@@ -4744,6 +4474,7 @@ def HelioState(body, time):
         Supported values are `Body.Sun`, `Body.SSB`, `Body.Moon`, `Body.EMB`, and all planets:
         `Body.Mercury`, `Body.Venus`, `Body.Earth`, `Body.Mars`, `Body.Jupiter`,
         `Body.Saturn`, `Body.Uranus`, `Body.Neptune`, `Body.Pluto`.
+        Also allowed to be a user-defined star created by #DefineStar.
     time : Time
         The date and time for which to calculate position and velocity.
 
@@ -4790,10 +4521,14 @@ def HelioState(body, time):
             time
         )
 
-    raise InvalidBodyError()
+    if _UserDefinedStar(body):
+        vec = HelioVector(body, time)
+        return StateVector(vec.x, vec.y, vec.z, 0.0, 0.0, 0.0, time)
+
+    raise InvalidBodyError(body)
 
 
-def Equator(body, time, observer, ofdate, aberration):
+def Equator(body: Body, time: Time, observer: Observer, ofdate: bool, aberration: bool) -> Equatorial:
     """Calculates equatorial coordinates of a celestial body as seen by an observer on the Earth's surface.
 
     Calculates topocentric equatorial coordinates in one of two different systems:
@@ -4846,7 +4581,7 @@ def Equator(body, time, observer, ofdate, aberration):
     return _vector2radec(datevect, time)
 
 
-def ObserverVector(time, observer, ofdate):
+def ObserverVector(time: Time, observer: Observer, ofdate: bool) -> Vector:
     """Calculates geocentric equatorial coordinates of an observer on the surface of the Earth.
 
     This function calculates a vector from the center of the Earth to
@@ -4874,7 +4609,7 @@ def ObserverVector(time, observer, ofdate):
         The caller may pass `False` to use the orientation of the Earth's equator
         at noon UTC on January 1, 2000, in which case this function corrects for precession
         and nutation of the Earth as it was at the moment specified by the `time` parameter.
-        Or the caller may pass `true` to use the Earth's equator at `time`
+        Or the caller may pass `True` to use the Earth's equator at `time`
         as the orientation.
 
     Returns
@@ -4890,7 +4625,7 @@ def ObserverVector(time, observer, ofdate):
         ovec = _precession(ovec, time, _PrecessDir.Into2000)
     return Vector(ovec[0], ovec[1], ovec[2], time)
 
-def ObserverState(time, observer, ofdate):
+def ObserverState(time: Time, observer: Observer, ofdate: bool) -> StateVector:
     """Calculates geocentric equatorial position and velocity of an observer on the surface of the Earth.
 
     This function calculates position and velocity vectors of an observer
@@ -4917,7 +4652,7 @@ def ObserverState(time, observer, ofdate):
         The caller may pass `False` to use the orientation of the Earth's equator
         at noon UTC on January 1, 2000, in which case this function corrects for precession
         and nutation of the Earth as it was at the moment specified by the `time` parameter.
-        Or the caller may pass `true` to use the Earth's equator at `time`
+        Or the caller may pass `True` to use the Earth's equator at `time`
         as the orientation.
 
     Returns
@@ -4937,7 +4672,7 @@ def ObserverState(time, observer, ofdate):
         state = _precession_posvel(state, time, _PrecessDir.Into2000)
     return state
 
-def VectorObserver(vector, ofdate):
+def VectorObserver(vector: Vector, ofdate: bool) -> Observer:
     """Calculates the geographic location corresponding to an equatorial vector.
 
     This is the inverse function of #ObserverVector.
@@ -4970,7 +4705,7 @@ def VectorObserver(vector, ofdate):
         ovec = _nutation(ovec, vector.t, _PrecessDir.From2000)
     return _inverse_terra(ovec, gast)
 
-def ObserverGravity(latitude, height):
+def ObserverGravity(latitude: float, height: float) -> float:
     """Calculates the gravitational acceleration experienced by an observer on the Earth.
 
     This function implements the WGS 84 Ellipsoidal Gravity Formula.
@@ -5040,13 +4775,13 @@ class HorizontalCoordinates:
     dec : float
         The declination in degrees.
     """
-    def __init__(self, azimuth, altitude, ra, dec):
+    def __init__(self, azimuth: float, altitude: float, ra: float, dec: float) -> None:
         self.azimuth = azimuth
         self.altitude = altitude
         self.ra = ra
         self.dec = dec
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'HorizontalCoordinates(azimuth={}, altitude={}, ra={}, dec={})'.format(
             self.azimuth,
             self.altitude,
@@ -5054,7 +4789,7 @@ class HorizontalCoordinates:
             self.dec
         )
 
-def Horizon(time, observer, ra, dec, refraction):
+def Horizon(time: Time, observer: Observer, ra: float, dec: float, refraction: Refraction) -> HorizontalCoordinates:
     """Calculates the apparent location of a body relative to the local horizon of an observer on the Earth.
 
     Given a date and time, the geographic location of an observer on the Earth, and
@@ -5097,7 +4832,7 @@ def Horizon(time, observer, ra, dec, refraction):
     refraction : Refraction
         The option for selecting whether to correct for atmospheric lensing.
         If `Refraction.Normal`, a well-behaved refraction model is used.
-        If `Refraction.None`, no refraction correct is performed.
+        If `Refraction.Airless`, no refraction correct is performed.
         `Refraction.JplHorizons` is used only for compatibility testing
         with the JPL Horizons online tool.
 
@@ -5145,7 +4880,7 @@ def Horizon(time, observer, ra, dec, refraction):
     uwe = [sinlon, -coslon, 0.0]
 
     # Correct the vectors uze, une, uwe for the Earth's rotation by calculating
-    # sideral time. Call spin() for each uncorrected vector to rotate about
+    # sidereal time. Call spin() for each uncorrected vector to rotate about
     # the Earth's axis to yield corrected unit vectors uz, un, uw.
     # Multiply sidereal hours by -15 to convert to degrees and flip eastward
     # rotation of the Earth to westward apparent movement of objects with time.
@@ -5217,13 +4952,16 @@ def Horizon(time, observer, ra, dec, refraction):
 
     return HorizontalCoordinates(az, 90.0 - zd, hor_ra, hor_dec)
 
-def RefractionAngle(refraction, altitude):
+def RefractionAngle(refraction: Refraction, altitude: float) -> float:
     """Calculates the amount of "lift" to an altitude angle caused by atmospheric refraction.
 
     Given an altitude angle and a refraction option, calculates
     the amount of "lift" caused by atmospheric refraction.
     This is the number of degrees higher in the sky an object appears
     due to lensing of the Earth's atmosphere.
+    This function works best near sea level.
+    To correct for higher elevations, call #Atmosphere for that
+    elevation and multiply the refraction angle by the resulting relative density.
 
     Parameters
     ----------
@@ -5273,7 +5011,7 @@ def RefractionAngle(refraction, altitude):
         raise Error('Inalid refraction option')
     return refr
 
-def InverseRefractionAngle(refraction, bent_altitude):
+def InverseRefractionAngle(refraction: Refraction, bent_altitude: float) -> float:
     """Calculates the inverse of an atmospheric refraction angle.
 
     Given an observed altitude angle that includes atmospheric refraction,
@@ -5327,15 +5065,15 @@ class EclipticCoordinates:
     elon : float
         Longitude in degrees around the ecliptic plane prograde from the equinox.
     """
-    def __init__(self, vec, elat, elon):
+    def __init__(self, vec: Vector, elat: float, elon: float) -> None:
         self.vec = vec
         self.elat = elat
         self.elon = elon
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'EclipticCoordinates({}, elat={}, elon={})'.format(repr(self.vec), self.elat, self.elon)
 
-def _RotateEquatorialToEcliptic(pos, obliq_radians, time):
+def _RotateEquatorialToEcliptic(pos: List[float], obliq_radians: float, time: Time) -> EclipticCoordinates:
     cos_ob = math.cos(obliq_radians)
     sin_ob = math.sin(obliq_radians)
     ex = +pos[0]
@@ -5352,7 +5090,7 @@ def _RotateEquatorialToEcliptic(pos, obliq_radians, time):
     vec = Vector(ex, ey, ez, time)
     return EclipticCoordinates(vec, elat, elon)
 
-def SunPosition(time):
+def SunPosition(time: Time) -> EclipticCoordinates:
     """Calculates geocentric ecliptic coordinates for the Sun.
 
     This function calculates the position of the Sun as seen from the Earth.
@@ -5394,34 +5132,44 @@ def SunPosition(time):
     true_obliq = math.radians(adjusted_time._etilt().tobl)
     return _RotateEquatorialToEcliptic(sun_ofdate, true_obliq, time)
 
-def Ecliptic(equ):
-    """Converts J2000 equatorial Cartesian coordinates to J2000 ecliptic coordinates.
+def Ecliptic(eqj: Vector) -> EclipticCoordinates:
+    """Converts a J2000 mean equator (EQJ) vector to a true ecliptic of date (ETC) vector and angles.
 
     Given coordinates relative to the Earth's equator at J2000 (the instant of noon UTC
-    on 1 January 2000), this function converts those coordinates to J2000 ecliptic coordinates,
+    on 1 January 2000), this function converts those coordinates to true ecliptic coordinates of date,
     which are relative to the plane of the Earth's orbit around the Sun.
 
     Parameters
     ----------
-    equ : Equatorial
+    eqj : Vector
         Equatorial coordinates in the J2000 frame of reference.
+        You can call #GeoVector to obtain suitable equatorial coordinates.
 
     Returns
     -------
     EclipticCoordinates
-        Ecliptic coordinates in the J2000 frame of reference.
+        Spherical and vector coordinates expressed in true ecliptic coordinates of date (ECT).
     """
-    # Based on NOVAS functions equ2ecl() and equ2ecl_vec().
-    ob2000 = 0.40909260059599012   # mean obliquity of the J2000 ecliptic in radians
-    return _RotateEquatorialToEcliptic([equ.x, equ.y, equ.z], ob2000, equ.t)
+    # Calculate nutation and obliquity for this time.
+    # As an optimization, the nutation angles are cached in `eqj.t`,
+    # and reused below when the `nutation` function is called.
+    et = _e_tilt(eqj.t)
 
-def EclipticLongitude(body, time):
-    """Calculates heliocentric ecliptic longitude of a body based on the J2000 equinox.
+    # Convert J2000 mean equator (EQJ) to true equator of date (EQD).
+    mean_pos = _precession([eqj.x, eqj.y, eqj.z], eqj.t, _PrecessDir.From2000)
+    eqd_pos = _nutation(mean_pos, eqj.t, _PrecessDir.From2000)
+
+    # Rotate from EQD to true ecliptic of date (ECT).
+    return _RotateEquatorialToEcliptic(eqd_pos, math.radians(et.tobl), eqj.t)
+
+
+def EclipticLongitude(body: Body, time: Time) -> float:
+    """Calculates heliocentric ecliptic longitude of a body.
 
     This function calculates the angle around the plane of the Earth's orbit
     of a celestial body, as seen from the center of the Sun.
     The angle is measured prograde (in the direction of the Earth's orbit around the Sun)
-    in degrees from the J2000 equinox. The ecliptic longitude is always in the range [0, 360).
+    in degrees from the true equinox of date. The ecliptic longitude is always in the range [0, 360).
 
     Parameters
     ----------
@@ -5436,12 +5184,12 @@ def EclipticLongitude(body, time):
         An angular value in degrees indicating the ecliptic longitude of the body.
     """
     if body == Body.Sun:
-        raise InvalidBodyError()
+        raise InvalidBodyError(body)
     hv = HelioVector(body, time)
     eclip = Ecliptic(hv)
     return eclip.elon
 
-def AngleFromSun(body, time):
+def AngleFromSun(body: Body, time: Time) -> float:
     """Returns the angle between the given body and the Sun, as seen from the Earth.
 
     This function calculates the angular separation between the given body and the Sun,
@@ -5468,7 +5216,7 @@ def AngleFromSun(body, time):
     bv = GeoVector(body, time, True)
     return AngleBetween(sv, bv)
 
-def PairLongitude(body1, body2, time):
+def PairLongitude(body1: Body, body2: Body, time: Time) -> float:
     """Returns one body's ecliptic longitude with respect to another, as seen from the Earth.
 
     This function determines where one body appears around the ecliptic plane
@@ -5510,6 +5258,18 @@ def PairLongitude(body1, body2, time):
     eclip2 = Ecliptic(vector2)
     return _NormalizeLongitude(eclip1.elon - eclip2.elon)
 
+@enum.unique
+class Visibility(enum.Enum):
+    """Indicates whether a body (especially Mercury or Venus) is best seen in the morning or evening.
+
+    Values
+    ------
+    Morning : The body is best visible in the morning, before sunrise.
+    Evening : The body is best visible in the evening, after sunset.
+    """
+    Morning = 0
+    Evening = 1
+
 class ElongationEvent:
     """Contains information about the visibility of a celestial body at a given date and time.
 
@@ -5527,13 +5287,13 @@ class ElongationEvent:
     ecliptic_separation : float
         The difference between the ecliptic longitudes of the body and the Sun, as seen from the Earth.
     """
-    def __init__(self, time, visibility, elongation, ecliptic_separation):
+    def __init__(self, time: Time, visibility: Visibility, elongation: float, ecliptic_separation: float) -> None:
         self.time = time
         self.visibility = visibility
         self.elongation = elongation
         self.ecliptic_separation = ecliptic_separation
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'ElongationEvent({}, {}, elongation={}, ecliptic_separation={})'.format(
             repr(self.time),
             self.visibility,
@@ -5541,19 +5301,7 @@ class ElongationEvent:
             self.ecliptic_separation
         )
 
-@enum.unique
-class Visibility(enum.Enum):
-    """Indicates whether a body (especially Mercury or Venus) is best seen in the morning or evening.
-
-    Values
-    ------
-    Morning : The body is best visible in the morning, before sunrise.
-    Evening : The body is best visible in the evening, after sunset.
-    """
-    Morning = 0
-    Evening = 1
-
-def Elongation(body, time):
+def Elongation(body: Body, time: Time) -> ElongationEvent:
     """Determines visibility of a celestial body relative to the Sun, as seen from the Earth.
 
     This function returns an #ElongationEvent object, which provides the following
@@ -5594,13 +5342,13 @@ def Elongation(body, time):
     angle = AngleFromSun(body, time)
     return ElongationEvent(time, visibility, angle, esep)
 
-def _rlon_offset(body, time, direction, targetRelLon):
+def _rlon_offset(body: Body, time: Time, direction: float, targetRelLon: float) -> float:
     plon = EclipticLongitude(body, time)
     elon = EclipticLongitude(Body.Earth, time)
     diff = direction * (elon - plon)
     return _LongitudeOffset(diff - targetRelLon)
 
-def SearchRelativeLongitude(body, targetRelLon, startTime):
+def SearchRelativeLongitude(body: Body, targetRelLon:float, startTime: Time) -> Time:
     """Searches for when the Earth and another planet are separated by a certain ecliptic longitude.
 
     Searches for the time when the Earth and another planet are separated by a specified angle
@@ -5654,9 +5402,9 @@ def SearchRelativeLongitude(body, targetRelLon, startTime):
     if body == Body.Earth:
         raise EarthNotAllowedError()
     if body in (Body.Moon, Body.Sun):
-        raise InvalidBodyError()
+        raise InvalidBodyError(body)
     syn = _SynodicPeriod(body)
-    direction = +1 if _IsSuperiorPlanet(body) else -1
+    direction = +1.0 if _IsSuperiorPlanet(body) else -1.0
     # Iterate until we converge on the desired event.
     # Calculate the error angle, which will be a negative number of degrees,
     # meaning we are "behind" the target relative longitude.
@@ -5684,7 +5432,7 @@ def SearchRelativeLongitude(body, targetRelLon, startTime):
         iter_count += 1
     raise NoConvergeError()
 
-def _neg_elong_slope(body, time):
+def _neg_elong_slope(body: Body, time: Time) -> float:
     dt = 0.1
     t1 = time.AddDays(-dt/2.0)
     t2 = time.AddDays(+dt/2.0)
@@ -5692,7 +5440,7 @@ def _neg_elong_slope(body, time):
     e2 = AngleFromSun(body, t2)
     return (e1 - e2)/dt
 
-def SearchMaxElongation(body, startTime):
+def SearchMaxElongation(body: Body, startTime: Time) -> Optional[ElongationEvent]:
     """Finds a date and time when Mercury or Venus reaches its maximum angle from the Sun as seen from the Earth.
 
     Mercury and Venus are are often difficult to observe because they are closer to the Sun than the Earth is.
@@ -5726,7 +5474,7 @@ def SearchMaxElongation(body, startTime):
         s1 = 40.0
         s2 = 50.0
     else:
-        raise InvalidBodyError()
+        raise InvalidBodyError(body)
     syn = _SynodicPeriod(body)
     iter_count = 1
     while iter_count <= 2:
@@ -5799,12 +5547,14 @@ def SearchMaxElongation(body, startTime):
         startTime = t2.AddDays(1.0)
         iter_count += 1
 
+    raise InternalError()   # should never take more than 2 iterations
 
-def _sun_offset(targetLon, time):
+
+def _sun_offset(targetLon: float, time: Time) -> float:
     ecl = SunPosition(time)
     return _LongitudeOffset(ecl.elon - targetLon)
 
-def SearchSunLongitude(targetLon, startTime, limitDays):
+def SearchSunLongitude(targetLon: float, startTime: Time, limitDays: float) -> Optional[Time]:
     """Searches for the time when the Sun reaches an apparent ecliptic longitude as seen from the Earth.
 
     This function finds the moment in time, if any exists in the given time window,
@@ -5841,7 +5591,7 @@ def SearchSunLongitude(targetLon, startTime, limitDays):
     t2 = startTime.AddDays(limitDays)
     return Search(_sun_offset, targetLon, startTime, t2, 0.01)
 
-def MoonPhase(time):
+def MoonPhase(time: Time) -> float:
     """Returns the Moon's phase as an angle from 0 to 360 degrees.
 
     This function determines the phase of the Moon using its apparent
@@ -5864,11 +5614,11 @@ def MoonPhase(time):
     """
     return PairLongitude(Body.Moon, Body.Sun, time)
 
-def _moon_offset(targetLon, time):
+def _moon_offset(targetLon: float, time: Time) -> float:
     angle = MoonPhase(time)
     return _LongitudeOffset(angle - targetLon)
 
-def SearchMoonPhase(targetLon, startTime, limitDays):
+def SearchMoonPhase(targetLon: float, startTime: Time, limitDays: float) -> Optional[Time]:
     """Searches for the time that the Moon reaches a specified phase.
 
     Lunar phases are conventionally defined in terms of the Moon's geocentric ecliptic
@@ -5893,7 +5643,9 @@ def SearchMoonPhase(targetLon, startTime, limitDays):
     startTime : Time
          The beginning of the time window in which to search for the Moon reaching the specified phase.
     limitDays : float
-         The number of days after `startTime` that limits the time window for the search.
+         The number of days away from `startTime` that limits the time window for the search.
+         If the value is negative, the search is performed into the past from `startTime`.
+         Otherwise, the search is performed into the future from `startTime`.
 
     Returns
     -------
@@ -5911,16 +5663,27 @@ def SearchMoonPhase(targetLon, startTime, limitDays):
     # But we must return None if the final result goes beyond limitDays after startTime.
     uncertainty = 1.5
     ya = _moon_offset(targetLon, startTime)
-    if ya > 0.0:
-        ya -= 360.0     # force searching forward in time, not backward
-    est_dt = -(_MEAN_SYNODIC_MONTH * ya) / 360.0
-    dt1 = est_dt - uncertainty
-    if dt1 > limitDays:
-        return None     # not possible for moon phase to occur within the specified window
-    dt2 = min(limitDays, est_dt + uncertainty)
+    if limitDays < 0.0:
+        # Search backward in time.
+        if ya < 0.0:
+            ya += 360.0
+        est_dt = -(_MEAN_SYNODIC_MONTH * ya) / 360.0
+        dt2 = est_dt + uncertainty
+        if dt2 < limitDays:
+            return None     # not possible for moon phase to occur within the specified window
+        dt1 = max(limitDays, est_dt - uncertainty)
+    else:
+        # Search forward in time.
+        if ya > 0.0:
+            ya -= 360.0
+        est_dt = -(_MEAN_SYNODIC_MONTH * ya) / 360.0
+        dt1 = est_dt - uncertainty
+        if dt1 > limitDays:
+            return None     # not possible for moon phase to occur within the specified window
+        dt2 = min(limitDays, est_dt + uncertainty)
     t1 = startTime.AddDays(dt1)
     t2 = startTime.AddDays(dt2)
-    return Search(_moon_offset, targetLon, t1, t2, 1.0)
+    return Search(_moon_offset, targetLon, t1, t2, 0.1)
 
 class MoonQuarter:
     """A lunar quarter event along with its date and time.
@@ -5939,14 +5702,14 @@ class MoonQuarter:
     time : Time
         The date and time of the lunar quarter.
     """
-    def __init__(self, quarter, time):
+    def __init__(self, quarter: int, time: Time) -> None:
         self.quarter = quarter
         self.time = time
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'MoonQuarter({}, {})'.format(self.quarter, repr(self.time))
 
-def SearchMoonQuarter(startTime):
+def SearchMoonQuarter(startTime: Time) -> MoonQuarter:
     """Finds the first lunar quarter after the specified date and time.
 
     A lunar quarter is one of the following four lunar phase events:
@@ -5974,7 +5737,7 @@ def SearchMoonQuarter(startTime):
         raise InternalError()
     return MoonQuarter(quarter, time)
 
-def NextMoonQuarter(mq):
+def NextMoonQuarter(mq: MoonQuarter) -> MoonQuarter:
     """Continues searching for lunar quarters from a previous search.
 
     After calling #SearchMoonQuarter, this function can be called
@@ -6000,6 +5763,72 @@ def NextMoonQuarter(mq):
     if next_mq.quarter != (1 + mq.quarter) % 4:
         raise InternalError()
     return next_mq
+
+
+class AtmosphereInfo:
+    """Information about idealized atmospheric variables at a given elevation.
+
+    Attributes
+    ----------
+    pressure : float
+        Atmospheric pressure in pascals.
+    temperature : float
+        Atmospheric temperature in kelvins.
+    density : float
+        Atmospheric densitive relative to sea level.
+    """
+    def __init__(self, pressure:float, temperature:float, density:float) -> None:
+        self.pressure = pressure
+        self.temperature = temperature
+        self.density = density
+
+    def __repr__(self) -> str:
+        return 'AtmosphereInfo({} Pa, {} K, {})'.format(self.pressure, self.temperature, self.density)
+
+
+def Atmosphere(elevationMeters: float) -> AtmosphereInfo:
+    """Calculates U.S. Standard Atmosphere (1976) variables as a function of elevation.
+
+    This function calculates idealized values of pressure, temperature, and density
+    using the U.S. Standard Atmosphere (1976) model.
+    1. COESA, U.S. Standard Atmosphere, 1976, U.S. Government Printing Office, Washington, DC, 1976.
+    2. Jursa, A. S., Ed., Handbook of Geophysics and the Space Environment, Air Force Geophysics Laboratory, 1985.
+    See:
+    https://hbcp.chemnetbase.com/faces/documents/14_12/14_12_0001.xhtml
+    https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pdf
+    https://www.ngdc.noaa.gov/stp/space-weather/online-publications/miscellaneous/us-standard-atmosphere-1976/us-standard-atmosphere_st76-1562_noaa.pdf
+
+    Parameters
+    ----------
+    elevationMeters : float
+        The elevation above sea level at which to calculate atmospheric variables.
+        Must be in the range -500 to +100000, or an exception will occur.
+
+    Returns
+    -------
+    AtmosphereInfo
+    """
+    P0 = 101325.0     # pressure at sea level [pascals]
+    T0 = 288.15       # temperature at sea level [kelvins]
+    T1 = 216.65       # temperature between 20 km and 32 km [kelvins]
+
+    if elevationMeters < -500.0 or elevationMeters > 100000.0:
+        raise Error('Invalid elevationMeters value: {}'.format(elevationMeters))
+
+    if elevationMeters <= 11000.0:
+        temperature = T0 - 0.0065*elevationMeters
+        pressure = P0 * (T0 / temperature)**(-5.25577)
+    elif elevationMeters <= 20000.0:
+        temperature = T1
+        pressure = 22632.0 * math.exp(-0.00015768832 * (elevationMeters - 11000.0))
+    else:
+        temperature = T1 + 0.001*(elevationMeters - 20000.0)
+        pressure = 5474.87 * (T1 / temperature)**(34.16319)
+
+    # The density is calculated relative to the sea level value.
+    # Using the ideal gas law PV=nRT, we deduce that density is proportional to P/T.
+    density = (pressure / temperature) / (P0 / T0)
+    return AtmosphereInfo(pressure, temperature, density)
 
 
 class IlluminationInfo:
@@ -6035,7 +5864,7 @@ class IlluminationInfo:
         as seen from observers on the Earth, and are thus very difficult to see.
         For bodies other than Saturn, `ring_tilt` is `None`.
     """
-    def __init__(self, time, mag, phase, helio_dist, geo_dist, hc, gc, ring_tilt):
+    def __init__(self, time: Time, mag: float, phase: float, helio_dist: float, geo_dist: float, hc: Vector, gc: Vector, ring_tilt: Optional[float]) -> None:
         self.time = time
         self.mag = mag
         self.phase_angle = phase
@@ -6046,7 +5875,7 @@ class IlluminationInfo:
         self.gc = gc
         self.ring_tilt = ring_tilt
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'IlluminationInfo({}, mag={}, phase_angle={}, helio_dist={}, geo_dist={}, hc={}, gc={}, ring_tilt={})'.format(
             repr(self.time),
             self.mag,
@@ -6058,7 +5887,7 @@ class IlluminationInfo:
             repr(self.ring_tilt)
         )
 
-def _MoonMagnitude(phase, helio_dist, geo_dist):
+def _MoonMagnitude(phase: float, helio_dist: float, geo_dist: float) -> float:
     # https://astronomy.stackexchange.com/questions/10246/is-there-a-simple-analytical-formula-for-the-lunar-phase-brightness-curve
     rad = math.radians(phase)
     mag = -12.717 + 1.49*abs(rad) + 0.0431*(rad**4)
@@ -6067,7 +5896,7 @@ def _MoonMagnitude(phase, helio_dist, geo_dist):
     mag += 5.0 * math.log10(helio_dist * geo_au)
     return mag
 
-def _SaturnMagnitude(phase, helio_dist, geo_dist, gc, time):
+def _SaturnMagnitude(phase: float, helio_dist: float, geo_dist: float, gc: Vector, time: Time) -> Tuple[float, float]:
     # Based on formulas by Paul Schlyter found here:
     # http://www.stjarnhimlen.se/comp/ppcomp.html#15
 
@@ -6090,9 +5919,9 @@ def _SaturnMagnitude(phase, helio_dist, geo_dist, gc, time):
     ring_tilt = math.degrees(tilt)
     return (mag, ring_tilt)
 
-def _VisualMagnitude(body, phase, helio_dist, geo_dist):
+def _VisualMagnitude(body: Body, phase: float, helio_dist: float, geo_dist: float) -> float:
     # For Mercury and Venus, see:  https://iopscience.iop.org/article/10.1086/430212
-    c0 = c1 = c2 = c3 = 0
+    c0 = c1 = c2 = c3 = 0.0
     if body == Body.Mercury:
         c0 = -0.60; c1 = +4.98; c2 = -4.88; c3 = +3.02
     elif body == Body.Venus:
@@ -6111,14 +5940,14 @@ def _VisualMagnitude(body, phase, helio_dist, geo_dist):
     elif body == Body.Pluto:
         c0 = -1.00; c1 = +4.00
     else:
-        raise InvalidBodyError()
+        raise InvalidBodyError(body)
 
     x = phase / 100.0
     mag = c0 + x*(c1 + x*(c2 + x*c3))
     mag += 5.0 * math.log10(helio_dist * geo_dist)
     return mag
 
-def Illumination(body, time):
+def Illumination(body: Body, time: Time) -> IlluminationInfo:
     """Finds visual magnitude, phase angle, and other illumination information about a celestial body.
 
     This function calculates information about how bright a celestial body appears from the Earth,
@@ -6181,7 +6010,7 @@ def Illumination(body, time):
         mag = _VisualMagnitude(body, phase, helio_dist, geo_dist)
     return IlluminationInfo(time, mag, phase, helio_dist, geo_dist, hc, gc, ring_tilt)
 
-def _mag_slope(body, time):
+def _mag_slope(body: Body, time: Time) -> float:
     # The Search() function finds a transition from negative to positive values.
     # The derivative of magnitude y with respect to time t (dy/dt)
     # is negative as an object gets brighter, because the magnitude numbers
@@ -6194,7 +6023,7 @@ def _mag_slope(body, time):
     y2 = Illumination(body, t2)
     return (y2.mag - y1.mag) / dt
 
-def SearchPeakMagnitude(body, startTime):
+def SearchPeakMagnitude(body: Body, startTime: Time) -> IlluminationInfo:
     """Searches for the date and time Venus will next appear brightest as seen from the Earth.
 
     This function searches for the date and time Venus appears brightest as seen from the Earth.
@@ -6224,7 +6053,7 @@ def SearchPeakMagnitude(body, startTime):
     s1 = 10.0
     s2 = 30.0
     if body != Body.Venus:
-        raise InvalidBodyError()
+        raise InvalidBodyError(body)
 
     iter_count = 1
     while iter_count <= 2:
@@ -6312,19 +6141,19 @@ class HourAngleEvent:
     hor : HorizontalCoordinates
         Apparent coordinates of the body at the time it crosses the specified hour angle.
     """
-    def __init__(self, time, hor):
+    def __init__(self, time: Time, hor: HorizontalCoordinates):
         self.time = time
         self.hor = hor
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'HourAngleEvent({}, {})'.format(repr(self.time), repr(self.hor))
 
-def SearchHourAngle(body, observer, hourAngle, startTime):
-    """Searches for the time when a celestial body reaches a specified hour angle as seen by an observer on the Earth.
+def SearchHourAngle(body: Body, observer: Observer, hourAngle: float, startTime: Time, direction: int = +1) -> HourAngleEvent:
+    """Searches for the time when the center of a body reaches a specified hour angle as seen by an observer on the Earth.
 
     The *hour angle* of a celestial body indicates its position in the sky with respect
     to the Earth's rotation. The hour angle depends on the location of the observer on the Earth.
-    The hour angle is 0 when the body reaches its highest angle above the horizon in a given day.
+    The hour angle is 0 when the body's center reaches its highest angle above the horizon in a given day.
     The hour angle increases by 1 unit for every sidereal hour that passes after that point, up
     to 24 sidereal hours when it reaches the highest point again. So the hour angle indicates
     the number of hours that have passed since the most recent time that the body has culminated,
@@ -6346,7 +6175,8 @@ def SearchHourAngle(body, observer, hourAngle, startTime):
     Parameters
     ----------
     body : Body
-         The celestial body, which can the Sun, the Moon, or any planet other than the Earth.
+         The Sun, Moon, any planet other than the Earth,
+         or a user-defined star that was created by a call to #DefineStar.
     observer : Observer
          Indicates a location on or near the surface of the Earth where the observer is located.
     hourAngle : float
@@ -6354,6 +6184,10 @@ def SearchHourAngle(body, observer, hourAngle, startTime):
          body's most recent culmination.
     startTime : Time
          The date and time at which to start the search.
+    direction : int
+        The direction in time to perform the search: a positive value
+        searches forward in time, a negative value searches backward in time.
+        The function throws an exception if `direction` is zero.
 
     Returns
     -------
@@ -6364,6 +6198,9 @@ def SearchHourAngle(body, observer, hourAngle, startTime):
 
     if hourAngle < 0.0 or hourAngle >= 24.0:
         raise Error('Invalid hour angle.')
+
+    if direction == 0:
+        raise Error('Direction must be positive or negative.')
 
     iter_count = 0
     time = startTime
@@ -6377,9 +6214,15 @@ def SearchHourAngle(body, observer, hourAngle, startTime):
         # the hour angle to the desired value.
         delta_sidereal_hours = math.fmod(((hourAngle + ofdate.ra - observer.longitude/15) - gast), 24.0)
         if iter_count == 1:
-            # On the first iteration, always search forward in time.
-            if delta_sidereal_hours < 0.0:
-                delta_sidereal_hours += 24.0
+            # On the first iteration, always search in the requested time direction.
+            if direction > 0:
+                # Search forward in time.
+                if delta_sidereal_hours < 0.0:
+                    delta_sidereal_hours += 24.0
+            else:
+                # Search backward in time.
+                if delta_sidereal_hours > 0.0:
+                    delta_sidereal_hours -= 24.0
         else:
             # On subsequent iterations, we make the smallest possible adjustment,
             # either forward or backward in time.
@@ -6398,6 +6241,41 @@ def SearchHourAngle(body, observer, hourAngle, startTime):
         delta_days = (delta_sidereal_hours / 24.0) * _SOLAR_DAYS_PER_SIDEREAL_DAY
         time = time.AddDays(delta_days)
 
+
+def HourAngle(body: Body, time: Time, observer: Observer) -> float:
+    """Finds the hour angle of a body for a given observer and time.
+
+    The *hour angle* of a celestial body indicates its position in the sky with respect
+    to the Earth's rotation. The hour angle depends on the location of the observer on the Earth.
+    The hour angle is 0 when the body's center reaches its highest angle above the horizon in a given day.
+    The hour angle increases by 1 unit for every sidereal hour that passes after that point, up
+    to 24 sidereal hours when it reaches the highest point again. So the hour angle indicates
+    the number of hours that have passed since the most recent time that the body has culminated,
+    or reached its highest point.
+
+    This function returns the hour angle of the body as seen at the given time and geogrpahic location.
+    The hour angle is a number in the half-open range [0, 24).
+
+    Parameters
+    ----------
+    body : Body
+        The body whose observed hour angle is to be found.
+    time : Time
+        The date and time of the observation.
+    observer : Observer
+        The geographic location where the observation takes place.
+
+    Returns
+    -------
+    float
+    """
+    gast = SiderealTime(time)
+    ofdate = Equator(body, time, observer, True, True)
+    hourAngle = math.fmod(observer.longitude/15.0 + gast - ofdate.ra, 24.0)
+    if hourAngle < 0.0:
+        hourAngle += 24.0
+    return hourAngle
+
 @enum.unique
 class Direction(enum.Enum):
     """Indicates whether a body is rising above or setting below the horizon.
@@ -6414,92 +6292,231 @@ class Direction(enum.Enum):
     Rise = +1
     Set  = -1
 
+class _AscentInfo:
+    def __init__(self, tx: Time, ty: Time, ax: float, ay: float) -> None:
+        self.tx = tx
+        self.ty = ty
+        self.ax = ax
+        self.ay = ay
 
-def _InternalSearchAltitude(body, observer, direction, startTime, limitDays, altitude_error_func, altitude_error_context):
-    if direction == Direction.Rise:
-        ha_before = 12.0    # minimum altitude (bottom) happens BEFORE the body rises.
-        ha_after  =  0.0    # maximum altitude (culmination) happens AFTER the body rises.
-    elif direction == Direction.Set:
-        ha_before =  0.0    # culmination happens BEFORE the body sets.
-        ha_after  = 12.0    # bottom happens AFTER the body sets.
-    else:
-        raise Error('Invalid value for direction parameter')
+    def __str__(self) -> str:
+        return 'AscentInfo(tx={}, ty={}, ax={}, ay={})'.format(self.tx, self.ty, self.ax, self.ay)
 
-    # See if the body is currently above/below the horizon.
-    # If we are looking for next rise time and the body is below the horizon,
-    # we use the current time as the lower time bound and the next culmination
-    # as the upper bound.
-    # If the body is above the horizon, we search for the next bottom and use it
-    # as the lower bound and the next culmination after that bottom as the upper bound.
-    # The same logic applies for finding set times, only we swap the hour angles.
-    time_start = startTime
-    alt_before = altitude_error_func(altitude_error_context, time_start)
-    if alt_before > 0.0:
-        # We are past the sought event, so we have to wait for the next "before" event (culm/bottom).
-        evt_before = SearchHourAngle(body, observer, ha_before, time_start)
-        time_before = evt_before.time
-        alt_before = altitude_error_func(altitude_error_context, time_before)
-    else:
-        # We are before or at the sought ebvent, so we find the next "after" event (bottom/culm),
-        # and use the current time as the "before" event.
-        time_before = time_start
-
-    evt_after = SearchHourAngle(body, observer, ha_after, time_before)
-    alt_after = altitude_error_func(altitude_error_context, evt_after.time)
-
-    while True:
-        if alt_before <= 0.0 and alt_after > 0.0:
-            # Search between the "before time" and the "after time" for the desired event.
-            event_time = Search(altitude_error_func, altitude_error_context, time_before, evt_after.time, 1.0)
-            if event_time is not None:
-                return event_time
-        # We didn't find the desired event, so use the "after" time to find the next "before" event.
-        evt_before = SearchHourAngle(body, observer, ha_before, evt_after.time)
-        evt_after = SearchHourAngle(body, observer, ha_after, evt_before.time)
-        if evt_before.time.ut >= time_start.ut + limitDays:
-            return None
-        time_before = evt_before.time
-        alt_before = altitude_error_func(altitude_error_context, evt_before.time)
-        alt_after = altitude_error_func(altitude_error_context, evt_after.time)
-
-
-class _peak_altitude_context:
-    def __init__(self, body, direction, observer, body_radius_au):
+class _altitude_context:
+    def __init__(self, body: Body, direction: Direction, observer: Observer, bodyRadiusAu: float, targetAltitude: float) -> None:
         self.body = body
         self.direction = direction
         self.observer = observer
-        self.body_radius_au = body_radius_au
+        self.bodyRadiusAu = bodyRadiusAu
+        self.targetAltitude = targetAltitude
 
-
-def _peak_altitude(context, time):
-    # Return the angular altitude above or below the horizon
-    # of the highest part (the peak) of the given object.
-    # This is defined as the apparent altitude of the center of the body plus
-    # the body's angular radius.
-    # The 'direction' parameter controls whether the angle is measured
-    # positive above the horizon or positive below the horizon,
-    # depending on whether the caller wants rise times or set times, respectively.
-
+def _altdiff(context: _altitude_context, time: Time) -> float:
     ofdate = Equator(context.body, time, context.observer, True, True)
-
-    # We calculate altitude without refraction, then add fixed refraction near the horizon.
-    # This gives us the time of rise/set without the extra work.
     hor = Horizon(time, context.observer, ofdate.ra, ofdate.dec, Refraction.Airless)
-    alt = hor.altitude + math.degrees(context.body_radius_au / ofdate.dist)
-    return context.direction.value * (alt + _REFRACTION_NEAR_HORIZON)
+    altitude = hor.altitude + math.degrees(math.asin(context.bodyRadiusAu / ofdate.dist))
+    return float(context.direction.value)*(altitude - context.targetAltitude)
+
+def _MaxAltitudeSlope(body: Body, latitude: float) -> float:
+    # Calculate the maximum possible rate that this body's altitude
+    # could change [degrees/day] as seen by this observer.
+    # First use experimentally determined extreme bounds for this body
+    # of how much topocentric RA and DEC can ever change per rate of time.
+    # We need minimum possible d(RA)/dt, and maximum possible magnitude of d(DEC)/dt.
+    # Conservatively, we round d(RA)/dt down, d(DEC)/dt up.
+    # Then calculate the resulting maximum possible altitude change rate.
+
+    if not (-90.0 <= latitude <= +90.0):
+        raise Error('Invalid geographic latitude: {}'.format(latitude))
+
+    if body == Body.Moon:
+        deriv_ra  = +4.5
+        deriv_dec = +8.2
+    elif body == Body.Sun:
+        deriv_ra  = +0.8
+        deriv_dec = +0.5
+    elif body == Body.Mercury:
+        deriv_ra  = -1.6
+        deriv_dec = +1.0
+    elif body == Body.Venus:
+        deriv_ra  = -0.8
+        deriv_dec = +0.6
+    elif body == Body.Mars:
+        deriv_ra  = -0.5
+        deriv_dec = +0.4
+    elif body in [Body.Jupiter, Body.Saturn, Body.Uranus, Body.Neptune, Body.Pluto]:
+        deriv_ra  = -0.2
+        deriv_dec = +0.2
+    elif _UserDefinedStar(body):
+        # The minimum allowed heliocentric distance of a user-defined star
+        # is one light-year. This can cause a tiny amount of parallax (about 0.001 degrees).
+        # Also, including stellar aberration (22 arcsec = 0.006 degrees), we provide a
+        # generous safety buffer of 0.008 degrees.
+        deriv_ra  = -0.008
+        deriv_dec = +0.008
+    elif body == Body.Earth:
+        raise EarthNotAllowedError()
+    else:
+        raise InvalidBodyError(body)
+
+    latrad = math.radians(latitude)
+    return abs(((360.0 / _SOLAR_DAYS_PER_SIDEREAL_DAY) - deriv_ra)*math.cos(latrad)) + abs(deriv_dec*math.sin(latrad))
 
 
-def SearchRiseSet(body, observer, direction, startTime, limitDays):
+def _FindAscent(depth: int, context: _altitude_context, max_deriv_alt: float, t1: Time, t2: Time, a1: float, a2: float) -> Optional[_AscentInfo]:
+    # See if we can find any time interval where the altitude-diff function
+    # rises from non-positive to positive.
+
+    if a1 < 0.0 and a2 >= 0.0:
+        # Trivial success case: the endpoints already rise through zero.
+        return _AscentInfo(t1, t2, a1, a2)
+
+    if a1 >= 0.0 and a2 < 0.0:
+        # Trivial failure case: Assume Nyquist condition prevents an ascent.
+        return None
+
+    if depth > 17:
+        # Safety valve: do not allow unlimited recursion.
+        # This should never happen if the rest of the logic is working correctly,
+        # so fail the whole search if it does happen. It's a bug!
+        raise InternalError()
+
+    # Both altitudes are on the same side of zero: both are negative, or both are non-negative.
+    # There could be a convex "hill" or a concave "valley" that passes through zero.
+    # In polar regions sometimes there is a rise/set or set/rise pair within minutes of each other.
+    # For example, the Moon can be below the horizon, then the very top of it becomes
+    # visible (moonrise) for a few minutes, then it moves sideways and down below
+    # the horizon again (moonset). We want to catch these cases.
+    # However, for efficiency and practicality concerns, because the rise/set search itself
+    # has a 0.1 second threshold, we do not worry about rise/set pairs that are less than
+    # one second apart. These are marginal cases that are rendered highly uncertain
+    # anyway, due to unpredictable atmospheric refraction conditions (air temperature and pressure).
+
+    dt = t2.ut - t1.ut
+    if dt * _SECONDS_PER_DAY < 1.0:
+        return None
+
+    # Is it possible to reach zero from the altitude that is closer to zero?
+    da = min(abs(a1), abs(a2))
+
+    # Without loss of generality, assume |a1| <= |a2|.
+    # (Reverse the argument in the case |a2| < |a1|.)
+    # Imagine you have to "drive" from a1 to 0, then back to a2.
+    # You can't go faster than max_deriv_alt. If you can't reach 0 in half the time,
+    # you certainly don't have time to reach 0, turn around, and still make your way
+    # back up to a2 (which is at least as far from 0 than a1 is) in the time interval dt.
+    # Therefore, the time threshold is half the time interval, or dt/2.
+    if da > max_deriv_alt*(dt / 2):
+        # Prune: the altitude cannot change fast enough to reach zero.
+        return None
+
+    # Bisect the time interval and evaluate the altitude at the midpoint.
+    tmid = Time((t1.ut + t2.ut)/2)
+    amid = _altdiff(context, tmid)
+
+    return (
+        _FindAscent(1+depth, context, max_deriv_alt, t1, tmid, a1, amid) or
+        _FindAscent(1+depth, context, max_deriv_alt, tmid, t2, amid, a2)
+    )
+
+
+def _InternalSearchAltitude(body: Body, observer: Observer, direction: Direction, startTime: Time, limitDays: float, bodyRadiusAu: float, targetAltitude: float) -> Optional[Time]:
+    if not (-90.0 <= targetAltitude <= +90.0):
+        raise Error('Invalid target altitude angle: {}'.format(targetAltitude))
+
+    RISE_SET_DT = 0.42  # 10.08 hours: Nyquist-safe for 22-hour period.
+    max_deriv_alt = _MaxAltitudeSlope(body, observer.latitude)
+    context = _altitude_context(body, direction, observer, bodyRadiusAu, targetAltitude)
+
+    # We allow searching forward or backward in time.
+    # But we want to keep t1 < t2, so we need a few if/else statements.
+    t1 = startTime
+    t2 = t1
+    a1 = _altdiff(context, t1)
+    a2 = a1
+
+    while True:
+        if limitDays < 0.0:
+            t1 = t2.AddDays(-RISE_SET_DT)
+            a1 = _altdiff(context, t1)
+        else:
+            t2 = t1.AddDays(+RISE_SET_DT)
+            a2 = _altdiff(context, t2)
+
+        ascent = _FindAscent(0, context, max_deriv_alt, t1, t2, a1, a2)
+        if ascent:
+            # We found a time interval [t1, t2] that contains an alt-diff
+            # rising from negative a1 to non-negative a2.
+            # Search for the time where the root occurs.
+            time = Search(_altdiff, context, ascent.tx, ascent.ty, 0.1)
+            if time:
+                # Now that we have a solution, we have to check whether it goes outside the time bounds.
+                if limitDays < 0.0:
+                    if time.ut < startTime.ut + limitDays:
+                        return None
+                else:
+                    if time.ut > startTime.ut + limitDays:
+                        return None
+                return time     # success!
+
+            # The search should have succeeded. Something is wrong with the ascent finder!
+            raise InternalError()
+
+        # There is no ascent in this interval, so keep searching.
+        if limitDays < 0.0:
+            if t1.ut < startTime.ut + limitDays:
+                return None
+            t2 = t1
+            a2 = a1
+        else:
+            if t2.ut > startTime.ut + limitDays:
+                return None
+            t1 = t2
+            a1 = a2
+
+
+def _HorizonDipAngle(observer: Observer, metersAboveGround: float) -> float:
+    # Calculate the effective radius of the Earth at ground level below the observer.
+    # Correct for the Earth's oblateness.
+    phi = math.radians(observer.latitude)
+    sinphi = math.sin(phi)
+    cosphi = math.cos(phi)
+    c = 1.0 / math.hypot(cosphi, sinphi*_EARTH_FLATTENING)
+    s = c * (_EARTH_FLATTENING * _EARTH_FLATTENING)
+    ht_km = (observer.height - metersAboveGround) / 1000.0     # height of ground above sea level
+    ach = _EARTH_EQUATORIAL_RADIUS_KM*c + ht_km
+    ash = _EARTH_EQUATORIAL_RADIUS_KM*s + ht_km
+    radius_m = 1000.0 * math.hypot(ach*cosphi, ash*sinphi)
+
+    # Correct refraction of a ray of light traveling tangent to the Earth's surface.
+    # Based on: https://www.largeformatphotography.info/sunmooncalc/SMCalc.js
+    # which in turn derives from:
+    # Sweer, John. 1938.  The Path of a Ray of Light Tangent to the Surface of the Earth.
+    # Journal of the Optical Society of America 28 (September):327-329.
+
+    # k = refraction index
+    k = 0.175 * (1.0 - (6.5e-3/283.15)*(observer.height - (2.0/3.0)*metersAboveGround))**3.256
+
+    # Calculate how far below the observer's horizontal plane the observed horizon dips.
+    return math.degrees(-(math.sqrt(2*(1 - k)*metersAboveGround / radius_m) / (1 - k)))
+
+
+
+def SearchRiseSet(body: Body, observer: Observer, direction: Direction, startTime: Time, limitDays: float, metersAboveGround: float = 0.0) -> Optional[Time]:
     """Searches for the next time a celestial body rises or sets as seen by an observer on the Earth.
 
     This function finds the next rise or set time of the Sun, Moon, or planet other than the Earth.
     Rise time is when the body first starts to be visible above the horizon.
     For example, sunrise is the moment that the top of the Sun first appears to peek above the horizon.
     Set time is the moment when the body appears to vanish below the horizon.
+    Therefore, this function adjusts for the apparent angular radius of the observed body
+    (significant only for the Sun and Moon).
 
     This function corrects for typical atmospheric refraction, which causes celestial
     bodies to appear higher above the horizon than they would if the Earth had no atmosphere.
     It also adjusts for the apparent angular radius of the observed body (significant only for the Sun and Moon).
+    Astronomy Engine uses a correction of 34 arcminutes. Real-world refraction varies based
+    on air temperature, pressure, and humidity; such weather-based conditions are outside
+    the scope of Astronomy Engine.
 
     Note that rise or set may not occur in every 24 hour period.
     For example, near the Earth's poles, there are long periods of time where
@@ -6512,7 +6529,8 @@ def SearchRiseSet(body, observer, direction, startTime, limitDays):
     Parameters
     ----------
     body : Body
-        The Sun, Moon, or any planet other than the Earth.
+        The Sun, Moon, any planet other than the Earth, or a user-defined star
+        that was created by a call to #DefineStar.
     observer : Observer
         The location where observation takes place.
     direction : Direction
@@ -6520,11 +6538,21 @@ def SearchRiseSet(body, observer, direction, startTime, limitDays):
     startTime : Time
         The date and time at which to start the search.
     limitDays : float
-        Limits how many days to search for a rise or set time.
+        Limits how many days to search for a rise or set time, and defines
+        the direction in time to search. When `limitDays` is positive, the
+        search is performed into the future, after `startTime`.
+        When negative, the search is performed into the past, before `startTime`.
         To limit a rise or set time to the same day, you can use a value of 1 day.
         In cases where you want to find the next rise or set time no matter how far
-        in the future (for example, for an observer near the south pole), you can pass
-        in a larger value like 365.
+        in the future (for example, for an observer near the south pole), you can
+        pass in a larger value like 365.
+    metersAboveGround : float
+        Default value = 0.0.
+        Usually the observer is located at ground level. Then this parameter
+        should be zero. But if the observer is significantly higher than ground
+        level, for example in an airplane, this parameter should be a positive
+        number indicating how far above the ground the observer is.
+        An exception occurs if `metersAboveGround` is negative.
 
     Returns
     -------
@@ -6532,37 +6560,34 @@ def SearchRiseSet(body, observer, direction, startTime, limitDays):
         If the rise or set time is found within the specified time window,
         this function returns that time. Otherwise, it returns `None`.
     """
-    if body == Body.Earth:
-        raise EarthNotAllowedError()
+    if not math.isfinite(metersAboveGround) or metersAboveGround < 0.0:
+        raise Error('Invalid value for metersAboveGround: {}'.format(metersAboveGround))
 
+    # Determine the radius of the body to be observed.
     if body == Body.Sun:
-        body_radius = _SUN_RADIUS_AU
+        bodyRadiusAu = _SUN_RADIUS_AU
     elif body == Body.Moon:
-        body_radius = _MOON_EQUATORIAL_RADIUS_AU
+        bodyRadiusAu = _MOON_EQUATORIAL_RADIUS_AU
     else:
-        body_radius = 0.0
+        bodyRadiusAu = 0.0
 
-    context = _peak_altitude_context(body, direction, observer, body_radius)
-    return _InternalSearchAltitude(body, observer, direction, startTime, limitDays, _peak_altitude, context)
+    # Calculate atmospheric density at ground level.
+    atmos = Atmosphere(observer.height - metersAboveGround)
 
+    # Calculate the apparent angular dip of the horizon.
+    dip = _HorizonDipAngle(observer, metersAboveGround)
 
-class _altitude_error_context:
-    def __init__(self, body, direction, observer, altitude):
-        self.body = body
-        self.direction = direction
-        self.observer = observer
-        self.altitude = altitude
+    # Correct refraction for objects near the horizon, using atmospheric density at the ground.
+    altitude = dip - (_REFRACTION_NEAR_HORIZON * atmos.density)
 
-def _altitude_error_func(context, time):
-    ofdate = Equator(context.body, time, context.observer, True, True)
-    hor = Horizon(time, context.observer, ofdate.ra, ofdate.dec, Refraction.Airless)
-    return context.direction.value * (hor.altitude - context.altitude)
+    # Search for the top of the body crossing the corrected altitude angle.
+    return _InternalSearchAltitude(body, observer, direction, startTime, limitDays, bodyRadiusAu, altitude)
 
 
-def SearchAltitude(body, observer, direction, dateStart, limitDays, altitude):
-    """Finds the next time a body reaches a given altitude.
+def SearchAltitude(body: Body, observer: Observer, direction: Direction, startTime: Time, limitDays: float, altitude: float) -> Optional[Time]:
+    """Finds the next time the center of a body passes through a given altitude.
 
-    Finds when the given body ascends or descends through a given
+    Finds when the center of the given body ascends or descends through a given
     altitude angle, as seen by an observer at the specified location on the Earth.
     By using the appropriate combination of `direction` and `altitude` parameters,
     this function can be used to find when civil, nautical, or astronomical twilight
@@ -6578,10 +6603,25 @@ def SearchAltitude(body, observer, direction, dateStart, limitDays, altitude):
 
     Astronomical twilight uses -18 degrees as the `altitude` value.
 
+    By convention for twilight time calculations, the altitude is not corrected for
+    atmospheric refraction. This is because the target altitudes are below the horizon,
+    and refraction is not directly observable.
+
+    `SearchAltitude` is not intended to find rise/set times of a body for two reasons:
+    (1) Rise/set times of the Sun or Moon are defined by their topmost visible portion, not their centers.
+    (2) Rise/set times are affected significantly by atmospheric refraction.
+    Therefore, it is better to use #SearchRiseSet to find rise/set times, which
+    corrects for both of these considerations.
+
+    `SearchAltitude` will not work reliably for altitudes at or near the body's
+    maximum or minimum altitudes. To find the time a body reaches minimum or maximum altitude
+    angles, use #SearchHourAngle.
+
     Parameters
     ----------
     body : Body
-        The Sun, Moon, or any planet other than the Earth.
+        The Sun, Moon, any planet other than the Earth,
+        or a user-defined star that was created by a call to #DefineStar.
     observer : Observer
         The location where observation takes place.
     direction : Direction
@@ -6590,8 +6630,14 @@ def SearchAltitude(body, observer, direction, dateStart, limitDays, altitude):
     startTime : Time
         The date and time at which to start the search.
     limitDays : float
-        The fractional number of days after `dateStart` that limits
-        when the altitude event is to be found. Must be a positive number.
+        Limits how many days to search for the body reaching the altitude angle,
+        and defines the direction in time to search. When `limitDays` is positive, the
+        search is performed into the future, after `startTime`.
+        When negative, the search is performed into the past, before `startTime`.
+        To limit the search to the same day, you can use a value of 1 day.
+        In cases where you want to find the altitude event no matter how far
+        in the future (for example, for an observer near the south pole), you can
+        pass in a larger value like 365.
     altitude : float
         The desired altitude angle of the body's center above (positive)
         or below (negative) the observer's local horizon, expressed in degrees.
@@ -6603,11 +6649,7 @@ def SearchAltitude(body, observer, direction, dateStart, limitDays, altitude):
         If the altitude event time is found within the specified time window,
         this function returns that time. Otherwise, it returns `None`.
     """
-    if not (-90.0 <= altitude <= +90.0):
-        raise Error('Invalid altitude: {}'.format(altitude))
-
-    context = _altitude_error_context(body, direction, observer, altitude)
-    return _InternalSearchAltitude(body, observer, direction, dateStart, limitDays, _altitude_error_func, context)
+    return _InternalSearchAltitude(body, observer, direction, startTime, limitDays, 0.0, altitude)
 
 class SeasonInfo:
     """The dates and times of changes of season for a given calendar year.
@@ -6625,13 +6667,13 @@ class SeasonInfo:
     dec_solstice : Time
         The date and time of the December solstice for the specified year.
     """
-    def __init__(self, mar_equinox, jun_solstice, sep_equinox, dec_solstice):
+    def __init__(self, mar_equinox: Time, jun_solstice: Time, sep_equinox: Time, dec_solstice: Time) -> None:
         self.mar_equinox = mar_equinox
         self.jun_solstice = jun_solstice
         self.sep_equinox = sep_equinox
         self.dec_solstice = dec_solstice
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'SeasonInfo(mar_equinox={}, jun_solstice={}, sep_equinox={}, dec_solstice={})'.format(
             repr(self.mar_equinox),
             repr(self.jun_solstice),
@@ -6639,7 +6681,7 @@ class SeasonInfo:
             repr(self.dec_solstice)
         )
 
-def _FindSeasonChange(targetLon, year, month, day):
+def _FindSeasonChange(targetLon: float, year: int, month: int, day: int) -> Time:
     startTime = Time.Make(year, month, day, 0, 0, 0)
     time = SearchSunLongitude(targetLon, startTime, 20.0)
     if time is None:
@@ -6647,7 +6689,7 @@ def _FindSeasonChange(targetLon, year, month, day):
         raise InternalError()
     return time
 
-def Seasons(year):
+def Seasons(year: int) -> SeasonInfo:
     """Finds both equinoxes and both solstices for a given calendar year.
 
     The changes of seasons are defined by solstices and equinoxes.
@@ -6696,10 +6738,10 @@ def Seasons(year):
     dec_solstice = _FindSeasonChange(270, year, 12, 10)
     return SeasonInfo(mar_equinox, jun_solstice, sep_equinox, dec_solstice)
 
-def _MoonDistance(time):
+def _MoonDistance(time: Time) -> float:
     return _CalcMoon(time).distance_au
 
-def _moon_distance_slope(direction, time):
+def _moon_distance_slope(direction: int, time: Time) -> float:
     dt = 0.001
     t1 = time.AddDays(-dt/2.0)
     t2 = time.AddDays(+dt/2.0)
@@ -6752,20 +6794,20 @@ class Apsis:
     dist_km : float
         The distance between the centers of the bodies in kilometers.
     """
-    def __init__(self, time, kind, dist_au):
+    def __init__(self, time: Time, kind: ApsisKind, dist_au: float) -> None:
         self.time = time
         self.kind = kind
         self.dist_au = dist_au
         self.dist_km = dist_au * KM_PER_AU
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Apsis({}, {}, dist_au={})'.format(
             repr(self.time),
             self.kind,
             self.dist_au
         )
 
-def SearchLunarApsis(startTime):
+def SearchLunarApsis(startTime: Time) -> Apsis:
     """Finds the time of the first lunar apogee or perigee after the given time.
 
     Given a date and time to start the search in `startTime`, this function finds
@@ -6832,7 +6874,7 @@ def SearchLunarApsis(startTime):
     raise InternalError()
 
 
-def NextLunarApsis(apsis):
+def NextLunarApsis(apsis: Apsis) -> Apsis:
     """Finds the next lunar perigee or apogee in a series.
 
     This function requires an #Apsis value obtained from a call to
@@ -6861,7 +6903,7 @@ def NextLunarApsis(apsis):
     return next_apsis
 
 
-def _planet_distance_slope(context, time):
+def _planet_distance_slope(context: Tuple[float, Body], time: Time) -> float:
     (direction, body) = context
     dt = 0.001
     t1 = time.AddDays(-dt/2.0)
@@ -6871,7 +6913,7 @@ def _planet_distance_slope(context, time):
     return direction * (dist2 - dist1) / dt
 
 
-def SearchPlanetApsis(body, startTime):
+def SearchPlanetApsis(body: Body, startTime: Time) -> Apsis:
     """Finds the next planet perihelion or aphelion, after a given time.
 
     Given a date and time to start the search in `startTime`, this function finds the
@@ -6938,7 +6980,7 @@ def SearchPlanetApsis(body, startTime):
     raise InternalError()   # should have found planet apsis within 2 planet orbits
 
 
-def NextPlanetApsis(body, apsis):
+def NextPlanetApsis(body: Body, apsis: Apsis) -> Apsis:
     """Finds the next planetary perihelion or aphelion event in a series.
 
     This function requires an #Apsis value obtained from a call
@@ -6971,9 +7013,10 @@ def NextPlanetApsis(body, apsis):
     return next_apsis
 
 
-def _PlanetExtreme(body, kind, start_time, dayspan):
+def _PlanetExtreme(body: Body, kind: ApsisKind, start_time: Time, dayspan: float) -> Apsis:
     direction = +1.0 if (kind == ApsisKind.Apocenter) else -1.0
     npoints = 10
+    best_dist = math.nan
     while True:
         interval = dayspan / (npoints - 1)
         # Iterate until uncertainty is less than one minute.
@@ -6992,7 +7035,7 @@ def _PlanetExtreme(body, kind, start_time, dayspan):
         dayspan = 2 * interval
 
 
-def _BruteSearchPlanetApsis(body, startTime):
+def _BruteSearchPlanetApsis(body: Body, startTime: Time) -> Apsis:
     # Neptune is a special case for two reasons:
     # 1. Its orbit is nearly circular (low orbital eccentricity).
     # 2. It is so distant from the Sun that the orbital period is very long.
@@ -7045,7 +7088,7 @@ def _BruteSearchPlanetApsis(body, startTime):
     raise InternalError()   # failed to find Neptune apsis
 
 
-def VectorFromSphere(sphere, time):
+def VectorFromSphere(sphere: Spherical, time: Time) -> Vector:
     """Converts spherical coordinates to Cartesian coordinates.
 
     Given spherical coordinates and a time at which they are valid,
@@ -7075,7 +7118,7 @@ def VectorFromSphere(sphere, time):
     )
 
 
-def EquatorFromVector(vec):
+def EquatorFromVector(vec: Vector) -> Equatorial:
     """Given an equatorial vector, calculates equatorial angular coordinates.
 
     Parameters
@@ -7092,7 +7135,7 @@ def EquatorFromVector(vec):
     return Equatorial(sphere.lon / 15.0, sphere.lat, sphere.dist, vec)
 
 
-def SphereFromVector(vector):
+def SphereFromVector(vector: Vector) -> Spherical:
     """Converts Cartesian coordinates to spherical coordinates.
 
     Given a Cartesian vector, returns latitude, longitude, and distance.
@@ -7111,7 +7154,7 @@ def SphereFromVector(vector):
     dist = math.sqrt(xyproj + vector.z*vector.z)
     if xyproj == 0.0:
         if vector.z == 0.0:
-            raise Exception('Zero-length vector not allowed.')
+            raise Error('Zero-length vector not allowed.')
         lon = 0.0
         if vector.z < 0.0:
             lat = -90.0
@@ -7125,7 +7168,7 @@ def SphereFromVector(vector):
     return Spherical(lat, lon, dist)
 
 
-def _ToggleAzimuthDirection(az):
+def _ToggleAzimuthDirection(az: float) -> float:
     az = 360.0 - az
     if az >= 360.0:
         az -= 360.0
@@ -7134,14 +7177,14 @@ def _ToggleAzimuthDirection(az):
     return az
 
 
-def VectorFromHorizon(sphere, time, refraction):
+def VectorFromHorizon(sphere: Spherical, time: Time, refraction: Refraction) -> Vector:
     """Given apparent angular horizontal coordinates in `sphere`, calculate horizontal vector.
 
     Parameters
     ----------
     sphere : Spherical
         A structure that contains apparent horizontal coordinates:
-        `lat` holds the refracted azimuth angle,
+        `lat` holds the refracted altitude angle,
         `lon` holds the azimuth in degrees clockwise from north,
         and `dist` holds the distance from the observer to the object in AU.
     time : Time
@@ -7161,7 +7204,7 @@ def VectorFromHorizon(sphere, time, refraction):
     return VectorFromSphere(xsphere, time)
 
 
-def HorizonFromVector(vector, refraction):
+def HorizonFromVector(vector: Vector, refraction: Refraction) -> Spherical:
     """Converts Cartesian coordinates to horizontal coordinates.
 
     Given a horizontal Cartesian vector, returns horizontal azimuth and altitude.
@@ -7195,7 +7238,7 @@ def HorizonFromVector(vector, refraction):
     return sphere
 
 
-def InverseRotation(rotation):
+def InverseRotation(rotation: RotationMatrix) -> RotationMatrix:
     """Calculates the inverse of a rotation matrix.
 
     Given a rotation matrix that performs some coordinate transform,
@@ -7218,7 +7261,7 @@ def InverseRotation(rotation):
     ])
 
 
-def CombineRotation(a, b):
+def CombineRotation(a: RotationMatrix, b: RotationMatrix) -> RotationMatrix:
     """Creates a rotation based on applying one rotation followed by another.
 
     Given two rotation matrices, returns a combined rotation matrix that is
@@ -7261,7 +7304,7 @@ def CombineRotation(a, b):
     ])
 
 
-def IdentityMatrix():
+def IdentityMatrix() -> RotationMatrix:
     """Creates an identity rotation matrix.
 
     Returns a rotation matrix that has no effect on orientation.
@@ -7281,7 +7324,7 @@ def IdentityMatrix():
     ])
 
 
-def Pivot(rotation, axis, angle):
+def Pivot(rotation: RotationMatrix, axis: int, angle: float) -> RotationMatrix:
     """Re-orients a rotation matrix by pivoting it by an angle around one of its axes.
 
     Given a rotation matrix, a selected coordinate axis, and an angle in degrees,
@@ -7329,7 +7372,7 @@ def Pivot(rotation, axis, angle):
     j = (axis + 2) % 3
     k = axis
 
-    rot = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    rot: List[List[float]] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
     rot[i][i] = c*rotation.rot[i][i] - s*rotation.rot[i][j]
     rot[i][j] = s*rotation.rot[i][i] + c*rotation.rot[i][j]
@@ -7346,7 +7389,7 @@ def Pivot(rotation, axis, angle):
     return RotationMatrix(rot)
 
 
-def RotateVector(rotation, vector):
+def RotateVector(rotation: RotationMatrix, vector: Vector) -> Vector:
     """Applies a rotation to a vector, yielding a rotated vector.
 
     This function transforms a vector in one orientation to a vector
@@ -7372,7 +7415,7 @@ def RotateVector(rotation, vector):
     )
 
 
-def RotateState(rotation, state):
+def RotateState(rotation: RotationMatrix, state: StateVector) -> StateVector:
     """Applies a rotation to a state vector, yielding a rotated state vector.
 
     This function transforms a state vector in one orientation to a
@@ -7402,8 +7445,8 @@ def RotateState(rotation, state):
     )
 
 
-def Rotation_EQJ_ECL():
-    """Calculates a rotation matrix from equatorial J2000 (EQJ) to ecliptic J2000 (ECL).
+def Rotation_EQJ_ECL() -> RotationMatrix:
+    """Calculates a rotation matrix from J2000 mean equator (EQJ) to J2000 mean ecliptic (ECL).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7425,8 +7468,8 @@ def Rotation_EQJ_ECL():
     ])
 
 
-def Rotation_ECL_EQJ():
-    """Calculates a rotation matrix from ecliptic J2000 (ECL) to equatorial J2000 (EQJ).
+def Rotation_ECL_EQJ() -> RotationMatrix:
+    """Calculates a rotation matrix from J2000 mean ecliptic (ECL) to J2000 mean equator (EQJ).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7447,8 +7490,8 @@ def Rotation_ECL_EQJ():
         [ 0, -s, +c]
     ])
 
-def Rotation_EQJ_EQD(time):
-    """Calculates a rotation matrix from equatorial J2000 (EQJ) to equatorial of-date (EQD).
+def Rotation_EQJ_EQD(time: Time) -> RotationMatrix:
+    """Calculates a rotation matrix from J2000 mean equator (EQJ) to equatorial of-date (EQD).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7470,8 +7513,54 @@ def Rotation_EQJ_EQD(time):
     return CombineRotation(prec, nut)
 
 
-def Rotation_EQD_EQJ(time):
-    """Calculates a rotation matrix from equatorial of-date (EQD) to equatorial J2000 (EQJ).
+def Rotation_EQJ_ECT(time: Time) -> RotationMatrix:
+    """Calculates a rotation matrix from J2000 mean equator (EQJ) to true ecliptic of date (ECT).
+
+    This is one of the family of functions that returns a rotation matrix
+    for converting from one orientation to another.
+    Source: EQJ = equatorial system, using equator at J2000 epoch.
+    Target: ECT = ecliptic system, using true equinox of the specified date/time.
+
+    Parameters
+    ----------
+    time : Time
+        The date and time at which the Earth's equator defines the target orientation.
+
+    Returns
+    -------
+    RotationMatrix
+        A rotation matrix that converts EQJ to ECT at `time`.
+    """
+    rot  = Rotation_EQJ_EQD(time)
+    step = Rotation_EQD_ECT(time)
+    return CombineRotation(rot, step)
+
+
+def Rotation_ECT_EQJ(time: Time) -> RotationMatrix:
+    """Calculates a rotation matrix from true ecliptic of date (ECT) to J2000 mean equator (EQJ).
+
+    This is one of the family of functions that returns a rotation matrix
+    for converting from one orientation to another.
+    Source: ECT = ecliptic system, using true equinox of the specified date/time.
+    Target: EQJ = equatorial system, using equator at J2000 epoch.
+
+    Parameters
+    ----------
+    time : Time
+        The date and time at which the Earth's equator defines the target orientation.
+
+    Returns
+    -------
+    RotationMatrix
+        A rotation matrix that converts ECT to EQJ at `time`.
+    """
+    rot  = Rotation_ECT_EQD(time)
+    step = Rotation_EQD_EQJ(time)
+    return CombineRotation(rot, step)
+
+
+def Rotation_EQD_EQJ(time: Time) -> RotationMatrix:
+    """Calculates a rotation matrix from equatorial of-date (EQD) to J2000 mean equator (EQJ).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7493,7 +7582,7 @@ def Rotation_EQD_EQJ(time):
     return CombineRotation(nut, prec)
 
 
-def Rotation_EQD_HOR(time, observer):
+def Rotation_EQD_HOR(time: Time, observer: Observer) -> RotationMatrix:
     """Calculates a rotation matrix from equatorial of-date (EQD) to horizontal (HOR).
 
     This is one of the family of functions that returns a rotation matrix
@@ -7538,7 +7627,7 @@ def Rotation_EQD_HOR(time, observer):
     ])
 
 
-def Rotation_HOR_EQD(time, observer):
+def Rotation_HOR_EQD(time: Time, observer: Observer) -> RotationMatrix:
     """Calculates a rotation matrix from horizontal (HOR) to equatorial of-date (EQD).
 
     This is one of the family of functions that returns a rotation matrix
@@ -7562,7 +7651,7 @@ def Rotation_HOR_EQD(time, observer):
     return InverseRotation(rot)
 
 
-def Rotation_HOR_EQJ(time, observer):
+def Rotation_HOR_EQJ(time: Time, observer: Observer) -> RotationMatrix:
     """Calculates a rotation matrix from horizontal (HOR) to J2000 equatorial (EQJ).
 
     This is one of the family of functions that returns a rotation matrix
@@ -7587,8 +7676,8 @@ def Rotation_HOR_EQJ(time, observer):
     return CombineRotation(hor_eqd, eqd_eqj)
 
 
-def Rotation_EQJ_HOR(time, observer):
-    """Calculates a rotation matrix from equatorial J2000 (EQJ) to horizontal (HOR).
+def Rotation_EQJ_HOR(time: Time, observer: Observer) -> RotationMatrix:
+    """Calculates a rotation matrix from J2000 mean equator (EQJ) to horizontal (HOR).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7618,8 +7707,8 @@ def Rotation_EQJ_HOR(time, observer):
     return InverseRotation(rot)
 
 
-def Rotation_EQD_ECL(time):
-    """Calculates a rotation matrix from equatorial of-date (EQD) to ecliptic J2000 (ECL).
+def Rotation_EQD_ECL(time: Time) -> RotationMatrix:
+    """Calculates a rotation matrix from equatorial of-date (EQD) to J2000 mean ecliptic (ECL).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7641,8 +7730,8 @@ def Rotation_EQD_ECL(time):
     return CombineRotation(eqd_eqj, eqj_ecl)
 
 
-def Rotation_ECL_EQD(time):
-    """Calculates a rotation matrix from ecliptic J2000 (ECL) to equatorial of-date (EQD).
+def Rotation_ECL_EQD(time: Time) -> RotationMatrix:
+    """Calculates a rotation matrix from J2000 mean ecliptic (ECL) to equatorial of-date (EQD).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7663,8 +7752,8 @@ def Rotation_ECL_EQD(time):
     return InverseRotation(rot)
 
 
-def Rotation_ECL_HOR(time, observer):
-    """Calculates a rotation matrix from ecliptic J2000 (ECL) to horizontal (HOR).
+def Rotation_ECL_HOR(time: Time, observer: Observer) -> RotationMatrix:
+    """Calculates a rotation matrix from J2000 mean ecliptic (ECL) to horizontal (HOR).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7695,8 +7784,8 @@ def Rotation_ECL_HOR(time, observer):
     return CombineRotation(ecl_eqd, eqd_hor)
 
 
-def Rotation_HOR_ECL(time, observer):
-    """Calculates a rotation matrix from horizontal (HOR) to ecliptic J2000 (ECL).
+def Rotation_HOR_ECL(time: Time, observer: Observer) -> RotationMatrix:
+    """Calculates a rotation matrix from horizontal (HOR) to J2000 mean ecliptic (ECL).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7718,8 +7807,8 @@ def Rotation_HOR_ECL(time, observer):
     rot = Rotation_ECL_HOR(time, observer)
     return InverseRotation(rot)
 
-def Rotation_EQJ_GAL():
-    """Calculates a rotation matrix from equatorial J2000 (EQJ) to galactic (GAL).
+def Rotation_EQJ_GAL() -> RotationMatrix:
+    """Calculates a rotation matrix from J2000 mean equator (EQJ) to galactic (GAL).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7740,8 +7829,8 @@ def Rotation_EQJ_GAL():
         [-0.4838000529948520, +0.7470034631630423, +0.4559861124470794]
     ])
 
-def Rotation_GAL_EQJ():
-    """Calculates a rotation matrix from galactic (GAL) to equatorial J2000 (EQJ).
+def Rotation_GAL_EQJ() -> RotationMatrix:
+    """Calculates a rotation matrix from galactic (GAL) to J2000 mean equator (EQJ).
 
     This is one of the family of functions that returns a rotation matrix
     for converting from one orientation to another.
@@ -7761,6 +7850,63 @@ def Rotation_GAL_EQJ():
         [+0.4941095946388765, -0.4447938112296831, +0.7470034631630423],
         [-0.8676668813529025, -0.1980677870294097, +0.4559861124470794]
     ])
+
+def Rotation_ECT_EQD(time: Time) -> RotationMatrix:
+    """Calculates a rotation matrix from true ecliptic of date (ECT) to equator of date (EQD).
+
+    This is one of the family of functions that returns a rotation matrix
+    for converting from one orientation to another.
+    Source: ECT = true ecliptic of date.
+    Target: EQD = equator of date.
+
+    Parameters
+    ----------
+    time : Time
+        The date and time of the ecliptic/equator conversion.
+
+    Returns
+    -------
+    RotationMatrix
+        A rotation matrix that converts ECT to EQD.
+    """
+    et = _e_tilt(time)
+    tobl = math.radians(et.tobl)
+    c = math.cos(tobl)
+    s = math.sin(tobl)
+    return RotationMatrix([
+        [1.0, 0.0, 0.0],
+        [0.0,  +c,  +s],
+        [0.0,  -s,  +c]
+    ])
+
+def Rotation_EQD_ECT(time: Time) -> RotationMatrix:
+    """Calculates a rotation matrix from equator of date (EQD) to true ecliptic of date (ECT).
+
+    This is one of the family of functions that returns a rotation matrix
+    for converting from one orientation to another.
+    Source: EQD = equator of date.
+    Target: ECT = true ecliptic of date.
+
+    Parameters
+    ----------
+    time : Time
+        The date and time of the equator/ecliptic conversion.
+
+    Returns
+    -------
+    RotationMatrix
+        A rotation matrix that converts EQD to ECT.
+    """
+    et = _e_tilt(time)
+    tobl = math.radians(et.tobl)
+    c = math.cos(tobl)
+    s = math.sin(tobl)
+    return RotationMatrix([
+        [1.0, 0.0, 0.0],
+        [0.0,  +c,  -s],
+        [0.0,  +s,  +c]
+    ])
+
 
 class ConstellationInfo:
     """Reports the constellation that a given celestial point lies within.
@@ -7782,13 +7928,13 @@ class ConstellationInfo:
     dec1875 : float
         Declination expressed in B1875 coordinates.
     """
-    def __init__(self, symbol, name, ra1875, dec1875):
+    def __init__(self, symbol: str, name: str, ra1875: float, dec1875: float) -> None:
         self.symbol = symbol
         self.name = name
         self.ra1875 = ra1875
         self.dec1875 = dec1875
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'ConstellationInfo(symbol={}, name={}, ra1875={}, dec1875={})'.format(
             repr(self.symbol),
             repr(self.name),
@@ -8253,7 +8399,7 @@ _ConstelBounds = (
 
 
 
-def Constellation(ra, dec):
+def Constellation(ra: float, dec: float) -> ConstellationInfo:
     """Determines the constellation that contains the given point in the sky.
 
     Given J2000 equatorial (EQJ) coordinates of a point in the sky, determines the
@@ -8340,7 +8486,7 @@ class EclipseKind(enum.Enum):
 
 
 class _ShadowInfo:
-    def __init__(self, time, u, r, k, p, target, direction):
+    def __init__(self, time: Time, u: float, r: float, k: float, p: float, target: Vector, direction: Vector) -> None:
         self.time = time
         self.u = u   # dot product of (heliocentric earth) and (geocentric moon): defines the shadow plane where the Moon is
         self.r = r   # km distance between center of Moon and the line passing through the centers of the Sun and Earth.
@@ -8350,7 +8496,7 @@ class _ShadowInfo:
         self.dir = direction        # vector from center of Sun to center of shadow-casting body
 
 
-def _CalcShadow(body_radius_km, time, target, sdir):
+def _CalcShadow(body_radius_km: float, time: Time, target: Vector, sdir: Vector) -> _ShadowInfo:
     u = (sdir.x*target.x + sdir.y*target.y + sdir.z*target.z) / (sdir.x*sdir.x + sdir.y*sdir.y + sdir.z*sdir.z)
     dx = (u * sdir.x) - target.x
     dy = (u * sdir.y) - target.y
@@ -8361,58 +8507,45 @@ def _CalcShadow(body_radius_km, time, target, sdir):
     return _ShadowInfo(time, u, r, k, p, target, sdir)
 
 
-def _EarthShadow(time):
-    e = _CalcEarth(time)
+def _EarthShadow(time: Time) -> _ShadowInfo:
+    # This function helps find when the Earth's shadow falls upon the Moon.
+    # Light-travel and aberration corrected vector from the Earth to the Sun.
+    # The negative vector -s is thus the path of sunlight through the center of the Earth.
+    s = GeoVector(Body.Sun, time, True)
     m = GeoMoon(time)
-    return _CalcShadow(_EARTH_ECLIPSE_RADIUS_KM, time, m, e)
+    return _CalcShadow(_EARTH_ECLIPSE_RADIUS_KM, time, m, -s)
 
 
-def _MoonShadow(time):
-    # This is a variation on the logic in _EarthShadow().
-    # Instead of a heliocentric Earth and a geocentric Moon,
-    # we want a heliocentric Moon and a lunacentric Earth.
-    h = _CalcEarth(time)    # heliocentric Earth
+def _MoonShadow(time: Time) -> _ShadowInfo:
+    s = GeoVector(Body.Sun, time, True)
     m = GeoMoon(time)       # geocentric Moon
-    # Calculate lunacentric Earth.
-    e = Vector(-m.x, -m.y, -m.z, m.t)
-    # Convert geocentric moon to heliocentric Moon.
-    m.x += h.x
-    m.y += h.y
-    m.z += h.z
-    return _CalcShadow(_MOON_MEAN_RADIUS_KM, time, e, m)
+    # -m  = lunacentric Earth
+    # m-s = heliocentric Moon
+    return _CalcShadow(_MOON_MEAN_RADIUS_KM, time, -m, m-s)
 
 
-def _LocalMoonShadow(time, observer):
+def _LocalMoonShadow(time: Time, observer: Observer) -> _ShadowInfo:
     # Calculate observer's geocentric position.
-    # For efficiency, do this first, to populate the earth rotation parameters in 'time'.
-    # That way they can be recycled instead of recalculated.
     pos = _geo_pos(time, observer)
-    h = _CalcEarth(time)     # heliocentric Earth
+    s = GeoVector(Body.Sun, time, True)
     m = GeoMoon(time)        # geocentric Moon
     # Calculate lunacentric location of an observer on the Earth's surface.
-    o = Vector(pos[0] - m.x, pos[1] - m.y, pos[2] - m.z, time)
-    # Convert geocentric moon to heliocentric Moon.
-    m.x += h.x
-    m.y += h.y
-    m.z += h.z
-    return _CalcShadow(_MOON_MEAN_RADIUS_KM, time, o, m)
+    lo = Vector(pos[0] - m.x, pos[1] - m.y, pos[2] - m.z, time)
+    # m-s = heliocentric Moon
+    return _CalcShadow(_MOON_MEAN_RADIUS_KM, time, lo, m-s)
 
 
-def _PlanetShadow(body, planet_radius_km, time):
+def _PlanetShadow(body: Body, planet_radius_km: float, time: Time) -> _ShadowInfo:
     # Calculate light-travel-corrected vector from Earth to planet.
-    g = GeoVector(body, time, False)
+    p = GeoVector(body, time, True)
     # Calculate light-travel-corrected vector from Earth to Sun.
-    e = GeoVector(Body.Sun, time, False)
-    # Deduce light-travel-corrected vector from Sun to planet.
-    p = Vector(g.x - e.x, g.y - e.y, g.z - e.z, time)
-    # Calcluate Earth's position from the planet's point of view.
-    e.x = -g.x
-    e.y = -g.y
-    e.z = -g.z
-    return _CalcShadow(planet_radius_km, time, e, p)
+    s = GeoVector(Body.Sun, time, True)
+    # -p  = planetocentric Earth
+    # p-s = heliocentric planet
+    return _CalcShadow(planet_radius_km, time, -p, p-s)
 
 
-def _ShadowDistanceSlope(shadowfunc, time):
+def _ShadowDistanceSlope(shadowfunc: Callable[[Time], _ShadowInfo], time: Time) -> float:
     dt = 1.0 / 86400.0
     t1 = time.AddDays(-dt)
     t2 = time.AddDays(+dt)
@@ -8421,7 +8554,7 @@ def _ShadowDistanceSlope(shadowfunc, time):
     return (shadow2.r - shadow1.r) / dt
 
 
-def _PlanetShadowSlope(context, time):
+def _PlanetShadowSlope(context: Tuple[Body, float], time: Time) -> float:
     (body, planet_radius_km) = context
     dt = 1.0 / 86400.0
     shadow1 = _PlanetShadow(body, planet_radius_km, time.AddDays(-dt))
@@ -8429,44 +8562,52 @@ def _PlanetShadowSlope(context, time):
     return (shadow2.r - shadow1.r) / dt
 
 
-def _PeakEarthShadow(search_center_time):
+def _PeakEarthShadow(search_center_time: Time) -> _ShadowInfo:
     window = 0.03        # initial search window, in days, before/after given time
     t1 = search_center_time.AddDays(-window)
     t2 = search_center_time.AddDays(+window)
     tx = Search(_ShadowDistanceSlope, _EarthShadow, t1, t2, 1.0)
+    if tx is None:
+        raise InternalError()
     return _EarthShadow(tx)
 
 
-def _PeakMoonShadow(search_center_time):
+def _PeakMoonShadow(search_center_time: Time) -> _ShadowInfo:
     window = 0.03        # initial search window, in days, before/after given time
     t1 = search_center_time.AddDays(-window)
     t2 = search_center_time.AddDays(+window)
     tx = Search(_ShadowDistanceSlope, _MoonShadow, t1, t2, 1.0)
+    if tx is None:
+        raise InternalError()
     return _MoonShadow(tx)
 
-def _PeakLocalMoonShadow(search_center_time, observer):
+def _PeakLocalMoonShadow(search_center_time: Time, observer: Observer) -> _ShadowInfo:
     # Search for the time near search_center_time that the Moon's shadow comes
     # closest to the given observer.
     window = 0.2
     t1 = search_center_time.AddDays(-window)
     t2 = search_center_time.AddDays(+window)
     tx = Search(_ShadowDistanceSlope, lambda time: _LocalMoonShadow(time, observer), t1, t2, 1.0)
+    if tx is None:
+        raise InternalError()
     return _LocalMoonShadow(tx, observer)
 
-def _PeakPlanetShadow(body, planet_radius_km, search_center_time):
+def _PeakPlanetShadow(body: Body, planet_radius_km: float, search_center_time: Time) -> _ShadowInfo:
     # Search for when the body's shadow is closest to the center of the Earth.
     window = 1.0     # days before/after inferior conjunction to search for minimum shadow distance.
     t1 = search_center_time.AddDays(-window)
     t2 = search_center_time.AddDays(+window)
     tx = Search(_PlanetShadowSlope, (body, planet_radius_km), t1, t2, 1.0)
+    if tx is None:
+        raise InternalError()
     return _PlanetShadow(body, planet_radius_km, tx)
 
 class _ShadowDiffContext:
-    def __init__(self, radius_limit, direction):
+    def __init__(self, radius_limit: float, direction: float) -> None:
         self.radius_limit = radius_limit
         self.direction = direction
 
-def _ShadowDiff(context, time):
+def _ShadowDiff(context: _ShadowDiffContext, time: Time) -> float:
     return context.direction * (_EarthShadow(time).r - context.radius_limit)
 
 
@@ -8484,6 +8625,12 @@ class LunarEclipseInfo:
     The `kind` field thus holds one of the values `EclipseKind.Penumbral`, `EclipseKind.Partial`,
     or `EclipseKind.Total`, depending on the kind of lunar eclipse found.
 
+    The `obscuration` field holds a value in the range [0, 1] that indicates what fraction
+    of the Moon's apparent disc area is covered by the Earth's umbra at the eclipse's peak.
+    This indicates how dark the peak eclipse appears. For penumbral eclipses, the obscuration
+    is 0, because the Moon does not pass through the Earth's umbra. For partial eclipses,
+    the obscuration is somewhere between 0 and 1. For total lunar eclipses, the obscuration is 1.
+
     Field `peak` holds the date and time of the peak of the eclipse, when it is at its peak.
 
     Fields `sd_penum`, `sd_partial`, and `sd_total` hold the semi-duration of each phase
@@ -8496,6 +8643,8 @@ class LunarEclipseInfo:
     ----------
     kind : EclipseKind
          The type of lunar eclipse found.
+    obscuration : float
+        The peak fraction of the Moon's apparent disc that is covered by the Earth's umbra.
     peak : Time
          The time of the eclipse at its peak.
     sd_penum : float
@@ -8505,16 +8654,18 @@ class LunarEclipseInfo:
     sd_total : float
          The semi-duration of the penumbral phase in minutes, or 0.0 if none.
     """
-    def __init__(self, kind, peak, sd_penum, sd_partial, sd_total):
+    def __init__(self, kind: EclipseKind, obscuration: float, peak: Time, sd_penum: float, sd_partial: float, sd_total: float) -> None:
         self.kind = kind
+        self.obscuration = obscuration
         self.peak = peak
         self.sd_penum = sd_penum
         self.sd_partial = sd_partial
         self.sd_total = sd_total
 
-    def __repr__(self):
-        return 'LunarEclipseInfo({}, peak={}, sd_penum={}, sd_partial={}, sd_total={})'.format(
+    def __repr__(self) -> str:
+        return 'LunarEclipseInfo({}, obscuration={}, peak={}, sd_penum={}, sd_partial={}, sd_total={})'.format(
             self.kind,
+            self.obscuration,
             repr(self.peak),
             self.sd_penum,
             self.sd_partial,
@@ -8545,10 +8696,23 @@ class GlobalSolarEclipseInfo:
     If `kind` has any other value, `latitude` and `longitude` are undefined and should
     not be used.
 
+    For total or annular eclipses, the `obscuration` field holds the fraction (0, 1]
+    of the Sun's apparent disc area that is blocked from view by the Moon's silhouette,
+    as seen by an observer located at the geographic coordinates `latitude`, `longitude`
+    at the darkest time `peak`. The value will always be 1 for total eclipses, and less than
+    1 for annular eclipses.
+    For partial eclipses, `obscuration` holds the value `None`.
+    This is because there is little practical use for an obscuration value of
+    a partial eclipse without supplying a particular observation location.
+    Developers who wish to find an obscuration value for partial solar eclipses should therefore use
+    #SearchLocalSolarEclipse and provide the geographic coordinates of an observer.
+
     Attributes
     ----------
     kind : EclipseKind
         The type of solar eclipse: `EclipseKind.Partial`, `EclipseKind.Annular`, or `EclipseKind.Total`.
+    obscuration : float or `None`
+        The peak fraction of the Sun's apparent disc area obscured by the Moon (total and annular eclipses only).
     peak : Time
         The date and time when the solar eclipse is darkest.
         This is the instant when the axis of the Moon's shadow cone passes closest to the Earth's center.
@@ -8559,16 +8723,18 @@ class GlobalSolarEclipseInfo:
     longitude : float
         The geographic longitude at the center of the peak eclipse shadow.
     """
-    def __init__(self, kind, peak, distance, latitude, longitude):
+    def __init__(self, kind: EclipseKind, obscuration: Optional[float], peak: Time, distance: float, latitude: float, longitude: float) -> None:
         self.kind = kind
+        self.obscuration = obscuration
         self.peak = peak
         self.distance = distance
         self.latitude = latitude
         self.longitude = longitude
 
-    def __repr__(self):
-        return 'GlobalSolarEclipseInfo({}, peak={}, distance={}, latitude={}, longitude={})'.format(
+    def __repr__(self) -> str:
+        return 'GlobalSolarEclipseInfo({}, obscuration={}, peak={}, distance={}, latitude={}, longitude={})'.format(
             self.kind,
+            self.obscuration,
             repr(self.peak),
             self.distance,
             self.latitude,
@@ -8598,11 +8764,11 @@ class EclipseEvent:
         The angular altitude of the center of the Sun above/below the horizon, at `time`,
         corrected for atmospheric refraction and expressed in degrees.
     """
-    def __init__(self, time, altitude):
+    def __init__(self, time: Time, altitude: float) -> None:
         self.time = time
         self.altitude = altitude
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'EclipseEvent({}, altitude={})'.format(
             repr(self.time),
             self.altitude
@@ -8625,6 +8791,13 @@ class LocalSolarEclipseInfo:
     A total eclipse occurs when the Moon is close enough to the Earth and aligned with the
     Sun just right to completely block all sunlight from reaching the observer.
 
+    The `obscuration` field reports what fraction of the Sun's disc appears blocked
+    by the Moon when viewed by the observer at the peak eclipse time.
+    This is a value that ranges from 0 (no blockage) to 1 (total eclipse).
+    The obscuration value will be between 0 and 1 for partial eclipses and annular eclipses.
+    The value will be exactly 1 for total eclipses. Obscuration gives an indication
+    of how dark the eclipse appears.
+
     There are 5 "event" fields, each of which contains a time and a solar altitude.
     Field `peak` holds the date and time of the center of the eclipse, when it is at its peak.
     The fields `partial_begin` and `partial_end` are always set, and indicate when
@@ -8638,28 +8811,32 @@ class LocalSolarEclipseInfo:
     ----------
     kind : EclipseKind
         The type of solar eclipse: `EclipseKind.Partial`, `EclipseKind.Annular`, or `EclipseKind.Total`.
+    obscuration : float
+        The fraction of the Sun's apparent disc area obscured by the Moon at the eclipse peak.
     partial_begin : EclipseEvent
         The time and Sun altitude at the beginning of the eclipse.
-    total_begin : EclipseEvent
+    total_begin : EclipseEvent or `None`
         If this is an annular or a total eclipse, the time and Sun altitude when annular/total phase begins; otherwise `None`.
     peak : EclipseEvent
         The time and Sun altitude when the eclipse reaches its peak.
-    total_end : EclipseEvent
+    total_end : EclipseEvent or `None`
         If this is an annular or a total eclipse, the time and Sun altitude when annular/total phase ends; otherwise `None`.
     partial_end : EclipseEvent
         The time and Sun altitude at the end of the eclipse.
     """
-    def __init__(self, kind, partial_begin, total_begin, peak, total_end, partial_end):
+    def __init__(self, kind: EclipseKind, obscuration: float, partial_begin: EclipseEvent, total_begin: Optional[EclipseEvent], peak: EclipseEvent, total_end: Optional[EclipseEvent], partial_end: EclipseEvent) -> None:
         self.kind = kind
+        self.obscuration = obscuration
         self.partial_begin = partial_begin
         self.total_begin = total_begin
         self.peak = peak
         self.total_end = total_end
         self.partial_end = partial_end
 
-    def __repr__(self):
-        return 'LocalSolarEclipseInfo({}, partial_begin={}, total_begin={}, peak={}, total_end={}, partial_end={})'.format(
+    def __repr__(self) -> str:
+        return 'LocalSolarEclipseInfo({}, obscuration={}, partial_begin={}, total_begin={}, peak={}, total_end={}, partial_end={})'.format(
             self.kind,
+            self.obscuration,
             repr(self.partial_begin),
             repr(self.total_begin),
             repr(self.peak),
@@ -8668,7 +8845,7 @@ class LocalSolarEclipseInfo:
         )
 
 
-def _EclipseKindFromUmbra(k):
+def _EclipseKindFromUmbra(k: float) -> EclipseKind:
     # The umbra radius tells us what kind of eclipse the observer sees.
     # If the umbra radius is positive, this is a total eclipse. Otherwise, it's annular.
     # HACK: I added a tiny bias (14 meters) to match Espenak test data.
@@ -8677,18 +8854,18 @@ def _EclipseKindFromUmbra(k):
     return EclipseKind.Annular
 
 class _LocalTransitionContext:
-    def __init__(self, observer, direction, func):
+    def __init__(self, observer: Observer, direction: float, func: Callable[[_ShadowInfo], float]) -> None:
         self.observer = observer
         self.direction = direction
         self.func = func
 
 
-def _LocalTransitionFunc(context, time):
+def _LocalTransitionFunc(context: _LocalTransitionContext, time: Time) -> float:
     shadow = _LocalMoonShadow(time, context.observer)
     return context.direction * context.func(shadow)
 
 
-def _LocalEclipseTransition(observer, direction, func, t1, t2):
+def _LocalEclipseTransition(observer: Observer, direction: float, func: Callable[[_ShadowInfo], float], t1: Time, t2: Time) -> EclipseEvent:
     context = _LocalTransitionContext(observer, direction, func)
     search = Search(_LocalTransitionFunc, context, t1, t2, 1.0)
     if search is None:
@@ -8696,28 +8873,28 @@ def _LocalEclipseTransition(observer, direction, func, t1, t2):
     return _CalcEvent(observer, search)
 
 
-def _CalcEvent(observer, time):
+def _CalcEvent(observer: Observer, time: Time) -> EclipseEvent:
     altitude = _SunAltitude(time, observer)
     return EclipseEvent(time, altitude)
 
 
-def _SunAltitude(time, observer):
+def _SunAltitude(time: Time, observer: Observer) -> float:
     equ = Equator(Body.Sun, time, observer, True, True)
     hor = Horizon(time, observer, equ.ra, equ.dec, Refraction.Normal)
     return hor.altitude
 
 
-def _local_partial_distance(shadow):
-    # Must take the absolute value of the umbra radius 'k'
-    # because it can be negative for an annular eclipse.
+def _local_partial_distance(shadow: _ShadowInfo) -> float:
     return shadow.p - shadow.r
 
 
-def _local_total_distance(shadow):
+def _local_total_distance(shadow: _ShadowInfo) -> float:
+    # Must take the absolute value of the umbra radius 'k'
+    # because it can be negative for an annular eclipse.
     return abs(shadow.k) - shadow.r
 
 
-def _LocalEclipse(shadow, observer):
+def _LocalEclipse(shadow: _ShadowInfo, observer: Observer) -> LocalSolarEclipseInfo:
     PARTIAL_WINDOW = 0.2
     TOTAL_WINDOW = 0.01
     peak = _CalcEvent(observer, shadow.time)
@@ -8725,6 +8902,8 @@ def _LocalEclipse(shadow, observer):
     t2 = shadow.time.AddDays(+PARTIAL_WINDOW)
     partial_begin = _LocalEclipseTransition(observer, +1.0, _local_partial_distance, t1, shadow.time)
     partial_end   = _LocalEclipseTransition(observer, -1.0, _local_partial_distance, shadow.time, t2)
+    total_begin: Optional[EclipseEvent]
+    total_end: Optional[EclipseEvent]
     if shadow.r < abs(shadow.k):    # take absolute value of 'k' to handle annular eclipses too.
         t1 = shadow.time.AddDays(-TOTAL_WINDOW)
         t2 = shadow.time.AddDays(+TOTAL_WINDOW)
@@ -8732,13 +8911,14 @@ def _LocalEclipse(shadow, observer):
         total_end   = _LocalEclipseTransition(observer, -1.0, _local_total_distance, shadow.time, t2)
         kind = _EclipseKindFromUmbra(shadow.k)
     else:
+        kind = EclipseKind.Partial
         total_begin = None
         total_end = None
-        kind = EclipseKind.Partial
-    return LocalSolarEclipseInfo(kind, partial_begin, total_begin, peak, total_end, partial_end)
+    obscuration = 1.0 if (kind == EclipseKind.Total) else _SolarEclipseObscuration(shadow.dir, shadow.target)
+    return LocalSolarEclipseInfo(kind, obscuration, partial_begin, total_begin, peak, total_end, partial_end)
 
 
-def _GeoidIntersect(shadow):
+def _GeoidIntersect(shadow: _ShadowInfo) -> GlobalSolarEclipseInfo:
     kind = EclipseKind.Partial
     peak = shadow.time
     distance = shadow.r
@@ -8770,6 +8950,8 @@ def _GeoidIntersect(shadow):
     B = -2.0 * (v.x*e.x + v.y*e.y + v.z*e.z)
     C = (e.x*e.x + e.y*e.y + e.z*e.z) - R*R
     radic = B*B - 4*A*C
+
+    obscuration: Optional[float]
 
     if radic > 0.0:
         # Calculate the closer of the two intersection points.
@@ -8825,11 +9007,16 @@ def _GeoidIntersect(shadow):
             raise Error('Unexpected shadow distance from geoid intersection = {}'.format(surface.r))
 
         kind = _EclipseKindFromUmbra(surface.k)
+        obscuration = 1.0 if (kind == EclipseKind.Total) else _SolarEclipseObscuration(shadow.dir, o)
+    else:
+        # This is a partial solar eclipse. It does not make practical sense to calculate obscuration.
+        # Anyone who wants obscuration should use SearchLocalSolarEclipse for a specific location on the Earth.
+        obscuration = None
 
-    return GlobalSolarEclipseInfo(kind, peak, distance, latitude, longitude)
+    return GlobalSolarEclipseInfo(kind, obscuration, peak, distance, latitude, longitude)
 
 
-def _ShadowSemiDurationMinutes(center_time, radius_limit, window_minutes):
+def _ShadowSemiDurationMinutes(center_time: Time, radius_limit: float, window_minutes: float) -> float:
     # Search backwards and forwards from the center time until shadow axis distance crosses radius limit.
     window = window_minutes / (24.0 * 60.0)
     before = center_time.AddDays(-window)
@@ -8841,12 +9028,75 @@ def _ShadowSemiDurationMinutes(center_time, radius_limit, window_minutes):
     return (t2.ut - t1.ut) * ((24.0 * 60.0) / 2.0)   # convert days to minutes and average the semi-durations.
 
 
-def _MoonEclipticLatitudeDegrees(time):
+def _MoonEclipticLatitudeDegrees(time: Time) -> float:
     moon = _CalcMoon(time)
     return math.degrees(moon.geo_eclip_lat)
 
+def _Obscuration(a: float, b: float, c: float) -> float:
+    # a = radius of first disc
+    # b = radius of second disc
+    # c = distance between the centers of the discs
+    if a <= 0.0:
+        raise Error('Radius of first disc must be positive.')
 
-def SearchLunarEclipse(startTime):
+    if b <= 0.0:
+        raise Error('Radius of second disc must be positive.')
+
+    if c < 0.0:
+        raise Error('Distance between discs is not allowed to be negative.')
+
+    if c >= a + b:
+        # The discs are too far apart to have any overlapping area
+        return 0.0
+
+    if c == 0.0:
+        # The discs have a common center. Therefore, one disc is inside the other.
+        return 1.0 if (a <= b) else (b*b)/(a*a)
+
+    x = (a*a - b*b + c*c) / (2.0*c)
+    radicand = a*a - x*x
+    if radicand <= 0.0:
+        # The circumferences do not intersect, or are tangent.
+        # We already ruled out the case of non-overlapping discs.
+        # Therefore, one disc is inside the other.
+        return 1.0 if (a <= b) else (b*b)/(a*a)
+
+    # The discs overlap fractionally in a pair of lens-shaped areas.
+    y = math.sqrt(radicand)
+
+    # Return the overlapping fractional area.
+    # There are two lens-shaped areas, one to the left of x, the other to the right of x.
+    # Each part is calculated by subtracting a triangular area from a sector's area.
+    lens1 = a*a*math.acos(x/a) - x*y
+    lens2 = b*b*math.acos((c-x)/b) - (c-x)*y
+
+    # Find the fractional area with respect to the first disc.
+    return (lens1 + lens2) / (math.pi*a*a)
+
+
+def _SolarEclipseObscuration(hm: Vector, lo: Vector) -> float:
+    # hm = heliocentric Moon
+    # lo = lunacentric observer
+    # Find heliocentric observer
+    ho = hm + lo
+    # Calculate the apparent angular radius of the Sun for the observer.
+    sun_radius = math.asin(_SUN_RADIUS_AU / ho.Length())
+
+    # Calculate the apparent angular radius of the Moon for the observer.
+    moon_radius = math.asin(_MOON_POLAR_RADIUS_AU / lo.Length())
+
+    # Calculate the apparent angular separation between the Sun's center and the Moon's center.
+    sun_moon_separation = math.radians(AngleBetween(lo, ho))
+
+    # Find the fraction of the Sun's apparent disc area that is covered by the Moon.
+    obscuration = _Obscuration(sun_radius, moon_radius, sun_moon_separation)
+
+    # HACK: In marginal cases, we need to clamp obscuration to less than 1.0.
+    # This function is never called for total eclipses, so it should never return 1.0.
+    return min(0.9999, obscuration)
+
+
+def SearchLunarEclipse(startTime: Time) -> LunarEclipseInfo:
     """Searches for a lunar eclipse.
 
     This function finds the first lunar eclipse that occurs after `startTime`.
@@ -8884,6 +9134,7 @@ def SearchLunarEclipse(startTime):
             if shadow.r < shadow.p + _MOON_MEAN_RADIUS_KM:
                 # This is at least a penumbral eclipse. We will return a result.
                 kind = EclipseKind.Penumbral
+                obscuration = 0.0
                 sd_total = 0.0
                 sd_partial = 0.0
                 sd_penum = _ShadowSemiDurationMinutes(shadow.time, shadow.p + _MOON_MEAN_RADIUS_KM, 200.0)
@@ -8896,9 +9147,12 @@ def SearchLunarEclipse(startTime):
                     if shadow.r + _MOON_MEAN_RADIUS_KM < shadow.k:
                         # This is a total eclipse.
                         kind = EclipseKind.Total
+                        obscuration = 1.0
                         sd_total = _ShadowSemiDurationMinutes(shadow.time, shadow.k - _MOON_MEAN_RADIUS_KM, sd_partial)
+                    else:
+                        obscuration = _Obscuration(_MOON_MEAN_RADIUS_KM, shadow.k, shadow.r)
 
-                return LunarEclipseInfo(kind, shadow.time, sd_penum, sd_partial, sd_total)
+                return LunarEclipseInfo(kind, obscuration, shadow.time, sd_penum, sd_partial, sd_total)
 
         # We didn't find an eclipse on this full moon, so search for the next one.
         fmtime = fullmoon.AddDays(10)
@@ -8907,7 +9161,7 @@ def SearchLunarEclipse(startTime):
     raise Error('Failed to find lunar eclipse within 12 full moons.')
 
 
-def NextLunarEclipse(prevEclipseTime):
+def NextLunarEclipse(prevEclipseTime: Time) -> LunarEclipseInfo:
     """Searches for the next lunar eclipse in a series.
 
      After using #SearchLunarEclipse to find the first lunar eclipse
@@ -8929,7 +9183,7 @@ def NextLunarEclipse(prevEclipseTime):
     return SearchLunarEclipse(startTime)
 
 
-def SearchGlobalSolarEclipse(startTime):
+def SearchGlobalSolarEclipse(startTime: Time) -> GlobalSolarEclipseInfo:
     """Searches for a solar eclipse visible anywhere on the Earth's surface.
 
     This function finds the first solar eclipse that occurs after `startTime`.
@@ -8976,7 +9230,7 @@ def SearchGlobalSolarEclipse(startTime):
     raise Error('Failed to find solar eclipse within 12 full moons.')
 
 
-def NextGlobalSolarEclipse(prevEclipseTime):
+def NextGlobalSolarEclipse(prevEclipseTime: Time) -> GlobalSolarEclipseInfo:
     """Searches for the next global solar eclipse in a series.
 
     After using #SearchGlobalSolarEclipse to find the first solar eclipse
@@ -8998,7 +9252,7 @@ def NextGlobalSolarEclipse(prevEclipseTime):
     return SearchGlobalSolarEclipse(startTime)
 
 
-def SearchLocalSolarEclipse(startTime, observer):
+def SearchLocalSolarEclipse(startTime: Time, observer: Observer) -> LocalSolarEclipseInfo:
     """Searches for a solar eclipse visible at a specific location on the Earth's surface.
     This function finds the first solar eclipse that occurs after `startTime`.
     A solar eclipse may be partial, annular, or total.
@@ -9053,7 +9307,7 @@ def SearchLocalSolarEclipse(startTime, observer):
         nmtime = newmoon.AddDays(10.0)
 
 
-def NextLocalSolarEclipse(prevEclipseTime, observer):
+def NextLocalSolarEclipse(prevEclipseTime: Time, observer: Observer) -> LocalSolarEclipseInfo:
     """Searches for the next local solar eclipse in a series.
 
     After using #SearchLocalSolarEclipse to find the first solar eclipse
@@ -9101,13 +9355,13 @@ class TransitInfo:
         The minimum angular separation, in arcminutes, between the centers of the Sun and the planet.
         This angle pertains to the time stored in `peak`.
     """
-    def __init__(self, start, peak, finish, separation):
+    def __init__(self, start: Time, peak: Time, finish: Time, separation: float) -> None:
         self.start = start
         self.peak = peak
         self.finish = finish
         self.separation = separation
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'TransitInfo(start={}, peak={}, finish={}, separation={})'.format(
             repr(self.start),
             repr(self.peak),
@@ -9116,13 +9370,13 @@ class TransitInfo:
         )
 
 
-def _PlanetShadowBoundary(context, time):
+def _PlanetShadowBoundary(context: Tuple[Body, float, float], time: Time) -> float:
     (body, planet_radius_km, direction) = context
     shadow = _PlanetShadow(body, planet_radius_km, time)
     return direction * (shadow.r - shadow.p)
 
 
-def _PlanetTransitBoundary(body, planet_radius_km, t1, t2, direction):
+def _PlanetTransitBoundary(body: Body, planet_radius_km: float, t1: Time, t2: Time, direction: float) -> Time:
     # Search for the time the planet's penumbra begins/ends making contact with the center of the Earth.
     # context = new SearchContext_PlanetShadowBoundary(body, planet_radius_km, direction);
     tx = Search(_PlanetShadowBoundary, (body, planet_radius_km, direction), t1, t2, 1.0)
@@ -9131,7 +9385,7 @@ def _PlanetTransitBoundary(body, planet_radius_km, t1, t2, direction):
     return tx
 
 
-def SearchTransit(body, startTime):
+def SearchTransit(body: Body, startTime: Time) -> TransitInfo:
     """Searches for the first transit of Mercury or Venus after a given date.
 
     Finds the first transit of Mercury or Venus after a specified date.
@@ -9160,7 +9414,7 @@ def SearchTransit(body, startTime):
     elif body == Body.Venus:
         planet_radius_km = 6051.8
     else:
-        raise InvalidBodyError()
+        raise InvalidBodyError(body)
 
     search_time = startTime
     while True:
@@ -9191,7 +9445,7 @@ def SearchTransit(body, startTime):
         search_time = conj.AddDays(10.0)
 
 
-def NextTransit(body, prevTransitTime):
+def NextTransit(body: Body, prevTransitTime: Time) -> TransitInfo:
     """Searches for another transit of Mercury or Venus.
 
     After calling #SearchTransit to find a transit of Mercury or Venus,
@@ -9240,19 +9494,19 @@ class NodeEventInfo:
     time : Time
         The time when the body passes through the ecliptic plane.
     """
-    def __init__(self, kind, time):
+    def __init__(self, kind: NodeEventKind, time: Time) -> None:
         self.kind = kind
         self.time = time
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'NodeEventInfo({}, {})'.format(self.kind, repr(self.time))
 
 _MoonNodeStepDays = +10.0   # a safe number of days to step without missing a Moon node
 
-def _MoonNodeSearchFunc(direction, time):
+def _MoonNodeSearchFunc(direction: float, time: Time) -> float:
     return direction * EclipticGeoMoon(time).lat
 
-def SearchMoonNode(startTime):
+def SearchMoonNode(startTime: Time) -> NodeEventInfo:
     """Searches for a time when the Moon's center crosses through the ecliptic plane.
 
     Searches for the first ascending or descending node of the Moon after `startTime`.
@@ -9292,7 +9546,7 @@ def SearchMoonNode(startTime):
         eclip1 = eclip2
 
 
-def NextMoonNode(prevNode):
+def NextMoonNode(prevNode: NodeEventInfo) -> NodeEventInfo:
     """Searches for the next time when the Moon's center crosses through the ecliptic plane.
 
     Call #SearchMoonNode to find the first of a series of nodes.
@@ -9341,7 +9595,7 @@ class LibrationInfo:
     diam_deg : float
         The apparent angular diameter of the Moon as seen from the center of the Earth.
     """
-    def __init__(self, elat, elon, mlat, mlon, dist_km, diam_deg):
+    def __init__(self, elat: float, elon: float, mlat: float, mlon: float, dist_km: float, diam_deg: float) -> None:
         self.elat = elat
         self.elon = elon
         self.mlat = mlat
@@ -9349,7 +9603,7 @@ class LibrationInfo:
         self.dist_km = dist_km
         self.diam_deg = diam_deg
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'LibrationInfo(elat={}, elon={}, mlat={}, mlon={}, dist_km={}, diam_deg={})'.format(
             self.elat,
             self.elon,
@@ -9360,7 +9614,7 @@ class LibrationInfo:
         )
 
 
-def Libration(time):
+def Libration(time: Time) -> LibrationInfo:
     """Calculates the Moon's libration angles at a given moment in time.
 
     Libration is an observed back-and-forth wobble of the portion of the
@@ -9369,7 +9623,7 @@ def Libration(time):
     of orbit around the Earth.
 
     This function calculates a pair of perpendicular libration angles,
-    one representing rotation of the Moon in eclitpic longitude `elon`, the other
+    one representing rotation of the Moon in ecliptic longitude `elon`, the other
     in ecliptic latitude `elat`, both relative to the Moon's mean Earth-facing position.
 
     This function also returns the geocentric position of the Moon
@@ -9507,7 +9761,7 @@ class AxisInfo:
     [Report of the IAU Working Group on Cartographic Coordinates and Rotational Elements: 2015](https://astropedia.astrogeology.usgs.gov/download/Docs/WGCCRE/WGCCRE2015reprint.pdf).
 
     The field `north` is a unit vector pointing in the direction of the body's north pole.
-    It is expressed in the equatorial J2000 system (EQJ).
+    It is expressed in the J2000 mean equator system (EQJ).
 
     Attributes
     ----------
@@ -9520,13 +9774,13 @@ class AxisInfo:
     north : Vector
         A J2000 dimensionless unit vector pointing in the direction of the body's north pole.
     """
-    def __init__(self, ra, dec, spin, north):
+    def __init__(self, ra: float, dec: float, spin: float, north: Vector) -> None:
         self.ra = ra
         self.dec = dec
         self.spin = spin
         self.north = north
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'AxisInfo(ra={}, dec={}, spin={}, north={})'.format(
             self.ra,
             self.dec,
@@ -9535,7 +9789,7 @@ class AxisInfo:
         )
 
 
-def _EarthRotationAxis(time):
+def _EarthRotationAxis(time: Time) -> AxisInfo:
     # Unlike the other planets, we have a model of precession and nutation
     # for the Earth's axis that provides a north pole vector.
     # So calculate the vector first, then derive the (RA,DEC) angles from the vector.
@@ -9556,7 +9810,7 @@ def _EarthRotationAxis(time):
     return AxisInfo(equ.ra, equ.dec, spin, north)
 
 
-def RotationAxis(body, time):
+def RotationAxis(body: Body, time: Time) -> AxisInfo:
     """Calculates information about a body's rotation axis at a given time.
 
     Calculates the orientation of a body's rotation axis, along with
@@ -9742,7 +9996,7 @@ def RotationAxis(body, time):
         w = 302.695 + 56.3625225*d
 
     else:
-        raise InvalidBodyError()
+        raise InvalidBodyError(body)
 
     # Calculate the north pole vector using the given angles.
     radlat = math.radians(dec)
@@ -9757,7 +10011,7 @@ def RotationAxis(body, time):
     return AxisInfo(ra/15.0, dec, w, north)
 
 
-def LagrangePoint(point, time, major_body, minor_body):
+def LagrangePoint(point: int, time: Time, major_body: Body, minor_body: Body) -> StateVector:
     """Calculates one of the 5 Lagrange points for a pair of co-orbiting bodies.
 
     Given a more massive "major" body and a much less massive "minor" body,
@@ -9772,7 +10026,7 @@ def LagrangePoint(point, time, major_body, minor_body):
     5 = the Lagrange point 60 degrees behind the minor body's orbital position.
 
     The function returns the state vector for the selected Lagrange point
-    in equatorial J2000 coordinates (EQJ), with respect to the center of the
+    in J2000 mean equator coordinates (EQJ), with respect to the center of the
     major body.
 
     To calculate Sun/Earth Lagrange points, pass in `Body.Sun` for `major_body`
@@ -9823,7 +10077,7 @@ def LagrangePoint(point, time, major_body, minor_body):
     )
 
 
-def LagrangePointFast(point, major_state, major_mass, minor_state, minor_mass):
+def LagrangePointFast(point: int, major_state: StateVector, major_mass: float, minor_state: StateVector, minor_mass: float) -> StateVector:
     """Calculates one of the 5 Lagrange points from body masses and state vectors.
 
     Given a more massive "major" body and a much less massive "minor" body,
@@ -10011,7 +10265,7 @@ class GravitySimulator:
     time steps.
     """
 
-    def __init__(self, originBody, time, bodyStates):
+    def __init__(self, originBody: Body, time: Time, bodyStates: List[StateVector]) -> None:
         """Creates a gravity simulation object.
 
         Parameters
@@ -10036,7 +10290,7 @@ class GravitySimulator:
             of the small bodies to be simulated.
             The caller must know the positions and velocities of the small bodies at an initial moment in time.
             Their positions and velocities are expressed with respect to `originBody`,
-            using equatorial J2000 orientation (EQJ).
+            using J2000 mean equator orientation (EQJ).
             Positions are expressed in astronomical units (AU).
             Velocities are expressed in AU/day.
             All the times embedded within the state vectors must exactly match `time`,
@@ -10050,7 +10304,7 @@ class GravitySimulator:
 
         # Create a stub list of small body states that we will append to later.
         # We just need the stub to put into `self.curr`
-        smallBodyList = []
+        smallBodyList: List[_body_grav_calc_t] = []
 
         # Calculate the states of the Sun and planets at the initial time.
         largeBodyDict = _CalcSolarSystem(time)
@@ -10072,7 +10326,7 @@ class GravitySimulator:
         # To prepare for a possible swap operation, duplicate the current state into the previous state.
         self.prev = self._Duplicate()
 
-    def Time(self):
+    def GetTime(self) -> Time:
         """The time represented by the current step of the gravity simulation.
 
         Returns
@@ -10081,7 +10335,7 @@ class GravitySimulator:
         """
         return self.curr.time
 
-    def OriginBody(self):
+    def OriginBody(self) -> Body:
         """The origin of the reference frame. See constructor for more info.
 
         Returns
@@ -10090,7 +10344,7 @@ class GravitySimulator:
         """
         return self._originBody
 
-    def Update(self, time):
+    def Update(self, time: Time) -> List[StateVector]:
         """Advances the gravity simulation by a small time step.
 
         Updates the simulation of the user-supplied small bodies
@@ -10190,7 +10444,7 @@ class GravitySimulator:
         return bodyStates
 
 
-    def Swap(self):
+    def Swap(self) -> None:
         """Exchange the current time step with the previous time step.
 
         Sometimes it is helpful to "explore" various times near a given
@@ -10216,7 +10470,7 @@ class GravitySimulator:
         """
         (self.curr, self.prev) = (self.prev, self.curr)
 
-    def SolarSystemBodyState(self, body):
+    def SolarSystemBodyState(self, body: Body) -> StateVector:
         """Get the position and velocity of a Solar System body included in the simulation.
 
         In order to simulate the movement of small bodies through the Solar System,
@@ -10244,14 +10498,14 @@ class GravitySimulator:
         ostate = self._InternalBodyState(self._originBody)
         return _ExportState(bstate - ostate, self.curr.time)
 
-    def _InternalBodyState(self, body):
+    def _InternalBodyState(self, body: Body) -> _body_state_t:
         if body == Body.SSB:
             return _body_state_t(self.curr.time.tt, _TerseVector.zero(), _TerseVector.zero())
         if body in self.curr.gravitators:
             return self.curr.gravitators[body]
         raise Error('Invalid body: {}'.format(body))
 
-    def _CalcBodyAccelerations(self):
+    def _CalcBodyAccelerations(self) -> None:
         for b in self.curr.bodies:
             b.a = _TerseVector.zero()
             _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Sun    ].r, _SUN_GM)
@@ -10264,7 +10518,7 @@ class GravitySimulator:
             _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Uranus ].r, _URANUS_GM)
             _AddAcceleration(b.a, b.r, self.curr.gravitators[Body.Neptune].r, _NEPTUNE_GM)
 
-    def _Duplicate(self):
+    def _Duplicate(self) -> "_GravSimEndpoint":
         # Copy the current stateinto the previous state, so that both become the same moment in time.
         gravitators = {}
         for body, grav in self.curr.gravitators.items():
@@ -10277,13 +10531,13 @@ class GravitySimulator:
         return _GravSimEndpoint(self.curr.time, gravitators, bodies)
 
 class _GravSimEndpoint:
-    def __init__(self, time, gravitators, bodies):
+    def __init__(self, time: Time, gravitators: Dict[Body, _body_state_t], bodies: List[_body_grav_calc_t]):
         self.time = time
         self.gravitators = gravitators
         self.bodies = bodies
 
-def _CalcSolarSystem(time):
-    d = {}
+def _CalcSolarSystem(time: Time) -> Dict[Body, _body_state_t]:
+    d: Dict[Body, _body_state_t] = {}
     # Start with the SSB at zero position and velocity.
     ssb = _body_state_t(time.tt, _TerseVector.zero(), _TerseVector.zero())
 
@@ -10307,7 +10561,7 @@ def _CalcSolarSystem(time):
     d[Body.Sun] = _body_state_t(time.tt, -1.0 * ssb.r, -1.0 * ssb.v)
     return d
 
-def _AddAcceleration(acc, smallPos, majorPos, gm):
+def _AddAcceleration(acc: _TerseVector, smallPos: _TerseVector, majorPos: _TerseVector, gm: float) -> None:
     dx = majorPos.x - smallPos.x
     dy = majorPos.y - smallPos.y
     dz = majorPos.z - smallPos.z

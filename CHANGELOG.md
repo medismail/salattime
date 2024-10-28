@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.1
+### Added
+- New Moon date
+### Changed
+- Sun/Moon infos
+### Fixed
+- New Address API
+- Version string
+
 ## 0.6.0
 ### Added
 - Add New main page style and layout

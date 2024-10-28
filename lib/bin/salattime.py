@@ -113,8 +113,10 @@ def main(args):
         print('{:0.2f}'.format(hor.azimuth))
         print('{:0.2f}'.format(hor.altitude))
 
-    newmoon = SearchMoonPhase(0, time, 40)
+    nextnewmoon = SearchMoonPhase(0, time, 40)
+    newmoon = SearchMoonPhase(0, nextnewmoon.AddDays(-40), 20)
     print(newmoon)
+    print(nextnewmoon)
 
     return 0
 

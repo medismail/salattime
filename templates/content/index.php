@@ -69,13 +69,14 @@
     <!-- Moon and Sun Section -->
     <section id="moon-sun">
         <h2>Moon and Sun Information</h2>
-        <p><?php echo $l->t('Moon\'s illuminated fraction'); ?>: &emsp;<span id="moon-illuminated-fraction"><?php echo $_['IlluminatedFraction']; ?>%</span></p>
-        <p><?php echo $l->t('Moon Phase'); ?>: &emsp;<span id="moon-phase"><?php echo $_['MoonPhase']; ?></span></p>
-        <p><?php echo $l->t('Moon\'s ecliptic phase angle'); ?>: &emsp;<span id="moon-phase-angle"><?php echo $_['MoonPhaseAngle']; ?> <?php echo $l->t('degrees'); ?></span></p>
-        <p><?php echo $l->t('Next new moon'); ?>: <span id="new-moon"><?php echo $_['NewMoon']; ?></span></p>
-        <p><?php echo $l->t('Sun Position'), " ", $l->t('Azimuth'); ?>: &emsp;<span id="sun-azimuth"><?php echo $_['SunAzimuth']; ?></span>, <?php echo $l->t('Altitude'); ?>: &emsp;<span id="sun-altitude"><?php echo $_['SunAltitude']; ?></span></p>
-        <p><?php echo $l->t('Moon Position'), " ", $l->t('Azimuth'); ?>: &emsp;<span id="moon-azimuth"><?php echo $_['MoonAzimuth']; ?></span>, <?php echo $l->t('Altitude'); ?>: &emsp;<span id="moon-altitude"><?php echo $_['MoonAltitude']; ?></span></p>
-        <p><?php echo $l->t('Qibla direction'), " ", $l->t('Azimuth'); ?>: &emsp;<span id="qibla-direction"><?php echo $_['QiblaDirection']; ?></span></p>
+        <p><?php echo $l->t('Moon\'s illuminated fraction'); ?>: &emsp;<span id="moon-illuminated-fraction" style="float:right;"><?php echo $_['IlluminatedFraction']; ?>%</span></p>
+        <p><?php echo $l->t('Moon Phase'); ?>: &emsp;<span id="moon-phase" style="float:right;"><?php echo $_['MoonPhase']; ?></span></p>
+        <p><?php echo $l->t('Moon\'s ecliptic phase angle'); ?>: &emsp;<span id="moon-phase-angle" style="float:right;"><?php echo $_['MoonPhaseAngle']; ?> <?php echo $l->t('degrees'); ?></span></p>
+        <p><?php echo $l->t('New moon'); ?>: <span id="new-moon" style="float:right;"><?php echo $_['NewMoon']; ?></span></p>
+        <p><?php echo $l->t('Next new moon'); ?>: <span id="new-moon" style="float:right;"><?php echo $_['NextNewMoon']; ?></span></p>
+        <p><?php echo $l->t('Sun Position'), "<p> &emsp; ", $l->t('Azimuth'); ?>: &emsp;<span id="sun-azimuth" style="float:right;"><?php echo $_['SunAzimuth']; ?></span></p><p> &emsp;  <?php echo $l->t('Altitude'); ?>: &emsp;<span id="sun-altitude" style="float:right;"><?php echo $_['SunAltitude']; ?></span></p></p>
+        <p><?php echo $l->t('Moon Position'), "<p> &emsp; ", $l->t('Azimuth'); ?>: &emsp;<span id="moon-azimuth" style="float:right;"><?php echo $_['MoonAzimuth']; ?></span></p><p> &emsp; <?php echo $l->t('Altitude'); ?>: &emsp;<span id="moon-altitude" style="float:right;"><?php echo $_['MoonAltitude']; ?></span></p></p>
+        <p><?php echo $l->t('Qibla direction'), " ", $l->t('Azimuth'); ?>: &emsp;<span id="qibla-direction" style="float:right;"><?php echo $_['QiblaDirection']; ?></span></p>
     </section>
   </div>
 </div>

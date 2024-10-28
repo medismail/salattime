@@ -62,7 +62,7 @@ class Helper {
 		return \OC::$server->getAppManager()->getAppPath(self::APP_ID);
 	}
 
-	public static function getVersion(): array {
+	public static function getVersion(): string {
 		return \OC::$server->getAppManager()->getAppVersion(self::APP_ID);
 	}
 }

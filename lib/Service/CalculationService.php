@@ -213,6 +213,7 @@ class CalculationService {
 			$sunMoonTimes['MoonAzimuth'] = $output[9];
 			$sunMoonTimes['MoonAltitude'] = $output[10];
 			$sunMoonTimes['NewMoon'] = $this->timeConversion($output[11], $udtz, 'Y-m-d ' . $textFormat_12_24);
+			$sunMoonTimes['NextNewMoon'] = $this->timeConversion($output[12], $udtz, 'Y-m-d ' . $textFormat_12_24);
 		} else {
 			if ($dayoffset) {
 				$date = new DateTime('today +1 day', $udtz);
@@ -357,13 +358,14 @@ class CalculationService {
 	 */
 	private function searchForAddress(string $address): array {
 		$params = [
+			'q' => $address,
 			'format' => 'json',
 			'addressdetails' => '1',
 			'extratags' => '1',
 			'namedetails' => '1',
 			'limit' => '1',
 		];
-		$url = 'https://nominatim.openstreetmap.org/search/' . $address;
+		$url = 'https://nominatim.openstreetmap.org/search';
 		$results = $this->requestJSON($url, $params);
 		if (count($results) > 0) {
 			return $results[0];
