@@ -72,6 +72,7 @@ OC.L10N.register(
     "Moon Phase" : "Phase de lune",
     "Moon's ecliptic phase angle" : "Angle de phase écliptique de la lune",
     "degrees" : "degrés",
+    "New moon" : "Nouvelle lune",
     "Next new moon" : "Prochaine nouvelle lune",
     "Sun Position" : "Position du soleil",
     "Azimuth" : "Azimut",

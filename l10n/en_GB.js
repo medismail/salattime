@@ -72,6 +72,7 @@ OC.L10N.register(
     "Moon Phase" : "Moon Phase",
     "Moon's ecliptic phase angle" : "Moon's ecliptic phase angle",
     "degrees" : "degrees",
+    "New moon" : "New moon",
     "Next new moon" : "Next new moon",
     "Sun Position" : "Sun Position",
     "Azimuth" : "Azimuth",
