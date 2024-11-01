@@ -72,6 +72,7 @@ OC.L10N.register(
     "Moon Phase" : "Céim na Gealaí",
     "Moon's ecliptic phase angle" : "Uillinn chéim ecliptic na gealaí",
     "degrees" : "céimeanna",
+    "New moon" : "Gealach nua",
     "Next new moon" : "An ghealach nua seo chugainn",
     "Sun Position" : "Seasamh na Gréine",
     "Azimuth" : "Azimuth",
