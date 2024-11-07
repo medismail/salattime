@@ -50,16 +50,16 @@ class BackgroundJob extends TimedJob {
 		$PrayerTime = new \DateTime();
 		$salawat = array(CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
 		$offset = [CalculationService::FAJR => 0, 'Dhuhr' => 0, 'Asr' => 0, 'Maghrib' => 0, 'Isha' => 0];
-		$times = $this->calculationService->getPrayerTimesFromDate($uid, $PrayerTime, 1);
+		$times = $this->calculationService->getPrayerTimesFromDateByDays($uid, $PrayerTime, -1)[0];
 		if ($times['Salat'] == CalculationService::FAJR) {
 			$Fajrdate = new \DateTime();
 			$Fajrdate->setTimestamp(strtotime($times[CalculationService::FAJR]));
 			if ($PrayerTime > $Fajrdate) {
-				$times = $this->calculationService->getPrayerTimesFromDate($uid, $PrayerTime->modify('+1 day'), 0);
+				$times = $this->calculationService->getPrayerTimesFromDateByDays($uid, $PrayerTime->modify('+1 day'), 0)[0];
 				$offset = [CalculationService::FAJR => 1, 'Dhuhr' => 1, 'Asr' => 1, 'Maghrib' => 1, 'Isha' => 1];
 			}
 		} else {
-			$tomorowTimes = $this->calculationService->getPrayerTimesFromDate($uid, $PrayerTime->modify('+1 day'), 0);
+			$tomorowTimes = $this->calculationService->getPrayerTimesFromDateByDays($uid, $PrayerTime->modify('+1 day'), 0)[0];
 			$salawat_id = [CalculationService::FAJR => 0, 'Dhuhr' => 1, 'Asr' => 2, 'Maghrib' => 3, 'Isha' => 4];
 			$id = $salawat_id[$times['Salat']];
 			while ($id > 0) {

@@ -54,7 +54,7 @@ class Notifier implements \OCP\Notification\INotifier {
 					//Not time yet
 					throw new \InvalidArgumentException();
 				} else {
-					$notification->setParsedSubject($l->t('Adhan for salat ') . $l->t($notification->getObjectId()) . '.')
+					$notification->setParsedSubject($l->t('Adhan for salat') . ' ' . $l->t($notification->getObjectId()) . '.')
 							->setParsedMessage($l->t('Please do not delay your salat.'));
 					$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 					return $notification;

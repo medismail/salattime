@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0
+### Added
+- Calendar Inetgration to NextCloud
+### Changed
+- Update Calculation methods
+- Update Notfication
+
 ## 0.6.1
 ### Added
 - New Moon date

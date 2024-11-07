@@ -29,6 +29,8 @@ use OCP\ICache;
 use OCP\IL10N;
 use DateTime;
 use DateTimezone;
+use DateInterval;
+use DatePeriod;
 
 class CalculationService {
 	/** @var IMSAK name */
@@ -276,6 +278,14 @@ class CalculationService {
 		return $this->configService->getAllUsersNotification();
 	}
 
+	public function getUserCalendar(string $userId): string {
+		return $this->configService->getUserCalendar($userId);
+	}
+
+	public function getUserTimeZone(string $userId): string {
+		return $this->configService->getUserTimeZone($userId);
+	}
+
 	/**
 	 * setConfigSettings set settingss values in database
 	 * @param string userId
@@ -306,6 +316,66 @@ class CalculationService {
 	 */
 	public function setConfigAdjustments(string $userId, string $adjustments) {
 		$this->configService->setUserValue($userId, 'adjustments', $adjustments);
+	}
+
+	/**
+	 * get Prayers times from known date
+	 *
+	 * @param string userId
+	 * @param DateTime startDate
+	 * @param DateTime endDate
+	 * @return array Full paryers times for multidays in specific date
+	 */
+	public function getPrayerTimesFromDate(string $userId, DateTime $startDate, DateTime $endDate, string $dateFormat = null): array {
+		$p_settings = $this->configService->getSettingsValue($userId);
+		$adjustments = $this->configService->getAdjustmentsValue($userId);
+
+		// Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
+		$pt = new PrayerTimes($p_settings['method']); // new PrayerTimes($method, $asrJuristicMethod, $asrShadowFactor);
+		$pt->tune($imsak = 0, $fajr = $adjustments['Fajr'], $sunrise = 0, $dhuhr = $adjustments['Dhuhr'], $asr = $adjustments['Asr'], $maghrib = $adjustments['Maghrib'], $sunset = 0, $isha = $adjustments['Isha'], $midnight = 0);
+
+		$interval = DateInterval::createFromDateString('1 day');
+		$dateRange = new DatePeriod($startDate, $interval, $endDate, DatePeriod::INCLUDE_END_DATE);
+
+		if ($dateFormat == null) {
+			$dateFormat = $p_settings['format_12_24'];
+		}
+		$times = [];
+		foreach ($dateRange as $curDate) {
+			$curTime = $pt->getTimes($curDate, $p_settings['latitude'], $p_settings['longitude'], $p_settings['elevation'], $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $dateFormat);
+			$times[] = $curTime;
+		}
+		return $times;
+	}
+
+	/**
+	 * get Prayers times from known date by number of days
+	 *
+	 * @param string userId
+	 * @param DateTime startDate
+	 * @param int days
+	 * @return array Full paryers times for multidays in specific date
+	 */
+	public function getPrayerTimesFromDateByDays(string $userId, DateTime $startDate, int $days): array {
+		if ($days == -1) {
+			$p_settings = $this->configService->getSettingsValue($userId);
+			$adjustments = $this->configService->getAdjustmentsValue($userId);
+
+			$pt = new PrayerTimes($p_settings['method']);
+			$pt->tune($imsak = 0, $fajr = $adjustments['Fajr'], $sunrise = 0, $dhuhr = $adjustments['Dhuhr'], $asr = $adjustments['Asr'], $maghrib = $adjustments['Maghrib'], $sunset = 0, $isha = $adjustments['Isha'], $midnight = 0);
+			$curTimes = $pt->getTimes($startDate, $p_settings['latitude'], $p_settings['longitude'], $p_settings['elevation'], $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $p_settings['format_12_24']);
+
+			//$curTimes['DayLength'] = $this->getDayLength($curTimes[PrayerTimes::SUNRISE], $curTimes[PrayerTimes::SUNSET]);
+			$next = $pt->getNextPrayer($curTimes);
+			$curTimes[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
+			$curTimes[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
+			$times[] = $curTimes;
+		} else {
+			$endDate = clone $startDate;
+			$endDate->modify("+$days days");
+			$times = $this->getPrayerTimesFromDate($userId, $startDate, $endDate);
+		}
+		return $times;
 	}
 
 	/**
@@ -374,7 +444,7 @@ class CalculationService {
 	}
 
 
-	public function getNameFromGeo(string $lat, string $lon): string {
+	private function getNameFromGeo(string $lat, string $lon): string {
 		$city_name = null;
 		$opts = array(
 			'http' => array(
@@ -464,7 +534,7 @@ class CalculationService {
 	 * @param string $address Any approximative or exact address
 	 * @return array with success state and address information (coordinates and formatted address)
 	 */
-	public function getGeoCode(string $address): array {
+	private function getGeoCode(string $address): array {
 		$addressInfo = $this->searchForAddress($address);
 		if (isset($addressInfo['display_name']) && isset($addressInfo['lat']) && isset($addressInfo['lon'])) {
 			// get altitude
@@ -556,35 +626,5 @@ class CalculationService {
 			$logger->warning($url . 'API error : ' . $e, ['app' => Application::APP_ID]);
 			return ['error' => $e->getMessage()];
 		}
-	}
-
-	/**
-	 * get Prayers times from known date
-	 *
-	 * @param string userId
-	 * @param DateTime date
-	 * @param DateTime days
-	 * @return array Full paryers times for multidays in specific date
-	 */
-	public function getPrayerTimesFromDate(string $userId, DateTime $date, int $days): array {
-		$p_settings = $this->configService->getSettingsValue($userId);
-		$adjustments = $this->configService->getAdjustmentsValue($userId);
-		// Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
-
-		$pt = new PrayerTimes($p_settings['method']); // new PrayerTimes($method, $asrJuristicMethod, $asrShadowFactor);
-
-		$pt->tune($imsak = 0, $fajr = $adjustments['Fajr'], $sunrise = 0, $dhuhr = $adjustments['Dhuhr'], $asr = $adjustments['Asr'], $maghrib = $adjustments['Maghrib'], $sunset = 0, $isha = $adjustments['Isha'], $midnight = 0);
-
-		$times = $pt->getTimes($date, $p_settings['latitude'], $p_settings['longitude'], $p_settings['elevation'], $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $p_settings['format_12_24']);
-
-		//$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
-
-		if ($days == 1) {
-			$next = $pt->getNextPrayer($times);
-			$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
-			$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
-		}
-
-		return $times;
 	}
 }

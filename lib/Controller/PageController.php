@@ -53,7 +53,8 @@ class PageController extends Controller {
 		$sunmoon = $this->calculationService->getSunMoonCalc($this->userId, $times['DayOffset']);
 		$relative_url = ['rurl' => $this->urlGenerator->imagePath(Application::APP_ID, '')];
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
-		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($times, $sunmoon, $relative_url, $notification));
+		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
+		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($times, $sunmoon, $relative_url, $notification, $calendar));
 	}
 
 	 /**
@@ -64,7 +65,8 @@ class PageController extends Controller {
 		$templateName = 'settings';  // will use templates/settings.php
 		$parameters = $this->calculationService->getConfigSettings($this->userId);
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
-		return new TemplateResponse($this->appName, $templateName, array_merge($parameters, $notification));
+		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
+		return new TemplateResponse($this->appName, $templateName, array_merge($parameters, $notification, $calendar));
 	}
 
 	 /**
@@ -76,7 +78,8 @@ class PageController extends Controller {
 		$confSettings = $this->calculationService->getConfigSettings($this->userId);
 		$confAdjustments = $this->calculationService->getConfigAdjustments($this->userId);
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
-		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($confSettings, $confAdjustments, $notification));
+		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
+		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($confSettings, $confAdjustments, $notification, $calendar));
 	}
 
 	 /**
@@ -103,7 +106,8 @@ class PageController extends Controller {
 		$templateName = 'adjustments';  // will use templates/adjustments.php
 		$parameters = $this->calculationService->getConfigAdjustments($this->userId);
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
-		return new TemplateResponse($this->appName, $templateName, array_merge($parameters, $notification));
+		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
+		return new TemplateResponse($this->appName, $templateName, array_merge($parameters, $notification, $calendar));
 	}
 
 	 /**

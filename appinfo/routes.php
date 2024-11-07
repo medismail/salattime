@@ -18,5 +18,7 @@ return [
            ['name' => 'widget#getWidgetContent', 'url' => '/widget-content', 'verb' => 'GET'],
            ['name' => 'notification#addjob',  'url' => '/notification/addjob',   'verb' => 'POST'],
            ['name' => 'notification#removejob', 'url' => '/notification/removejob', 'verb' => 'POST'],
+           ['name' => 'calendar#addcalendar',  'url' => '/calendar/addcalendar',   'verb' => 'POST'],
+           ['name' => 'calendar#removecalendar', 'url' => '/calendar/removecalendar', 'verb' => 'POST'],
     ]
 ];

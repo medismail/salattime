@@ -112,4 +112,16 @@ class ConfigService {
 	public function getAllUsersNotification() {
 		return $this->config->getUsersForUserValue(Application::APP_ID, 'notification', 'true');
 	}
+
+	public function setUserCalendar($userId) {
+		$this->config->setUserValue($userId, Application::APP_ID, 'calendar', 'true');
+	}
+
+	public function unsetUserCalendar($userId) {
+		$this->config->setUserValue($userId, Application::APP_ID, 'calendar', 'false');
+	}
+
+	public function getUserCalendar($userId) {
+		return $this->config->getUserValue($userId, Application::APP_ID, 'calendar');
+	}
 }

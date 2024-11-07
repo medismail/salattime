@@ -163,7 +163,7 @@ appstore:
 
 .PHONY: fixcode
 fixcode:
-	.tools/coding-standard/vendor/bin/php-cs-fixer fix lib
+	.tools/coding-standard/vendor/bin/php-cs-fixer fix lib -vv
 
 .PHONY: test
 test: composer

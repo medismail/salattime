@@ -26,6 +26,10 @@ class Method {
 	public const METHOD_TUNISIA = 'TUNISIA'; // 16
 	public const METHOD_INDONESIA = 'INDONESIA'; // 17
 	public const METHOD_MOROCCO = 'MOROCCO'; // 18
+	public const METHOD_JAKIM = 'JAKIM'; //19
+	public const METHOD_ALGERIA = 'ALGERIA'; //20
+	public const METHOD_PORTUGAL = 'PORTUGAL'; //21
+	public const METHOD_JORDAN = 'JORDAN'; //22
 	public const METHOD_CUSTOM = 'CUSTOM'; // 99
 
 	/**
@@ -280,10 +284,9 @@ class Method {
 					'shafaq' => Isha::SHAFAQ_GENERAL
 				]
 			],
-
 			self::METHOD_TUNISIA => [
 				'id' => 16,
-				'name' => '',
+				'name' => 'Tunisia',
 				'params' => [
 					PrayerTimes::FAJR => 18,
 					PrayerTimes::ISHA => 18
@@ -296,9 +299,9 @@ class Method {
 			],
 			self::METHOD_INDONESIA => [
 				'id' => 17,
-				'name' => '',
+				'name' => 'Kementerian Agama Republik Indonesia',
 				'params' => [
-					PrayerTimes::FAJR => 18,
+					PrayerTimes::FAJR => 20,
 					PrayerTimes::ISHA => 18
 				],
 				'location' => [ // Jakarta, Indonesia
@@ -309,7 +312,7 @@ class Method {
 			],
 			self::METHOD_MOROCCO => [
 				'id' => 18,
-				'name' => '',
+				'name' => 'Morocco',
 				'params' => [
 					PrayerTimes::FAJR => 18,
 					PrayerTimes::ISHA => 17
@@ -319,6 +322,56 @@ class Method {
 					'longitude' => -6.8496529
 				]
 
+			],
+			self::METHOD_JAKIM => [
+				'id' => 19,
+				'name' => 'Jabatan Kemajuan Islam Malaysia (JAKIM)',
+				'params' => [
+					PrayerTimes::FAJR => 20,
+					PrayerTimes::ISHA => 18,
+				],
+				'location' => [ // Kuala Lumpur, Malaysia
+					'latitude' => 3.139003,
+					'longitude' => 101.686855
+				]
+			],
+			self::METHOD_ALGERIA => [
+				'id' => 20,
+				'name' => 'Algeria',
+				'params' => [
+					PrayerTimes::FAJR => 18,
+					PrayerTimes::ISHA => 17,
+				],
+				'location' => [ // Algiers, Algeria
+					'latitude' => 36.753768,
+					'longitude' => 3.0587561
+				]
+			],
+			self::METHOD_PORTUGAL => [
+				'id' => 21,
+				'name' => 'Comunidade Islamica de Lisboa',
+				'params' => [
+					PrayerTimes::FAJR => 18,
+					PrayerTimes::MAGHRIB => '3 min',
+					PrayerTimes::ISHA => '77 min',
+				],
+				'location' => [ // Lisbon, Portugal
+					'latitude' => 38.7222524,
+					'longitude' => -9.1393366
+				]
+			],
+			self::METHOD_JORDAN => [
+				'id' => 22,
+				'name' => 'Ministry of Awqaf, Islamic Affairs and Holy Places, Jordan',
+				'params' => [
+					PrayerTimes::FAJR => 18,
+					PrayerTimes::MAGHRIB => '5 min',
+					PrayerTimes::ISHA => 18,
+				],
+				'location' => [ // Amman, Jordan
+					'latitude' => 31.9461222,
+					'longitude' => 35.923844
+				]
 			],
 			self::METHOD_CUSTOM => [
 				'id' => 99

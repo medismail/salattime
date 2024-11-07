@@ -9,17 +9,22 @@
  * Hijri date
  * Qibla direction
  * Adhan notification
+ * DAV Calendar Integration
+ * Widget on Dashboard
  * and many others useful informations.]]></description>
-    <version>0.6.1</version>
+    <version>0.7.0</version>
     <licence>agpl</licence>
     <author mail="imejri@hotmail.com" >Mohamed</author>
     <website>https://github.com/medismail/salattime</website>
     <namespace>SalatTime</namespace>
+    <types>
+        <dav/>
+    </types>
     <category>tools</category>
     <bugs>https://github.com/medismail/salattime/issues</bugs>
     <screenshot>https://raw.githubusercontent.com/medismail/salattime/main/img/salattime.png</screenshot>
     <dependencies>
-        <nextcloud min-version="28" max-version="29"/>
+        <nextcloud min-version="28" max-version="30"/>
     </dependencies>
     <navigations>
         <navigation>
@@ -27,4 +32,9 @@
             <route>salattime.page.index</route>
         </navigation>
     </navigations>
+    <sabre>
+        <calendar-plugins>
+            <plugin>OCA\SalatTime\DAV\CalendarPlugin</plugin>
+        </calendar-plugins>
+    </sabre>
 </info>

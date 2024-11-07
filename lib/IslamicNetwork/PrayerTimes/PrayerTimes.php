@@ -204,7 +204,7 @@ class PrayerTimes {
 	 * @param $latitude
 	 * @param $longitude
 	 * @param $timezone
-	 * @param null $elevation
+	 * @param $elevation
 	 * @param string $latitudeAdjustmentMethod
 	 * @param null $midnightMode
 	 * @param string $format
@@ -505,13 +505,35 @@ class PrayerTimes {
 	}
 
 	/**
+	 * An Addendum to the PHP method to return a float with the fraction of the day instead of an int.
+	 * See https://www.php.net/manual/en/function.gregoriantojd.php.
+	 * @param int $month
+	 * @param int $day
+	 * @param int $year
+	 * @return float
+	 */
+	private function gregorianToJulianDate(): float {
+		//$julianDate = gregoriantojd($this->date->format('n'), $this->date->format('d'), $this->date->format('Y'));
+		$julianDate = $this->julianDate($this->date->format('Y'), $this->date->format('n'), $this->date->format('d'));
+
+		//correct for half-day offset
+		$dayfrac = $this->date->format('G') / 24 - .5;
+		if ($dayfrac < 0) {
+			$dayfrac += 1;
+		}
+
+		//now set the fraction of a day
+		$frac = $dayfrac + ($this->date->format('i') + $this->date->format('s') / 60) / 60 / 24;
+
+		return ($julianDate + $frac);
+	}
+	/**
 	 * @param $factor
 	 * @param $time
 	 * @return mixed
 	 */
 	private function asrTime($factor, $time) {
-		//$julianDate = GregorianToJD($this->date->format('n'), $this->date->format('d'), $this->date->format('Y'));
-		$julianDate = $this->julianDate($this->date->format('Y'), $this->date->format('n'), $this->date->format('d'));
+		$julianDate = $this->gregorianToJulianDate();
 
 		$decl = $this->sunPosition($julianDate + $time)->declination;
 
