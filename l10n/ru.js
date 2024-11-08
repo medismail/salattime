@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "at" : "в",
     "New Moon" : "Новолуние",
     "Time" : "Время",
     "No result." : "Нет результатов",

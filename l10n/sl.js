@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "at" : "ob",
     "Time" : "Čas",
     "No result." : "Ni zadetkov",
     "Error" : "Napaka",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "at" : "στις",
     "1st Day of Ramadan" : "Πρώτη Ημέρα του Ραμαζανιού",
     "Unknown city" : "Άγνωστη πόλη",
     "New Moon" : "Νέο Φεγγάρι",

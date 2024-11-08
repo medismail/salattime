@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "at" : "다음 시간/위치에: ",
     "Time" : "시간",
     "No result." : "결과 없음",
     "Error" : "오류",

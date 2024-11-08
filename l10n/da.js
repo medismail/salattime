@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "at" : "ved",
     "Time" : "Tid",
     "No result." : "Intet resultat",
     "Error" : "Fejl",
