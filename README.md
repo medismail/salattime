@@ -3,6 +3,8 @@
  * Hijri date
  * Qibla direction 
  * Adhan notification
+ * DAV Calendar Integration
+ * Widget on Dashboard
  * and many others useful informations.
 
 ![](img/salattime.png)

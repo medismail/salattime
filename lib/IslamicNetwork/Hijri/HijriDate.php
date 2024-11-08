@@ -9,7 +9,7 @@
  * Copyright 2013 | Faiz Shukri
  *
  * @date     2022
- * Copyright 2022 | Mohamed Ismail MEJRI
+ * Copyright 2022 | Mohamed Ismail MEJRI <imejri@hotmail.com>
  * Released under the MIT license
  */
 

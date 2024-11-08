@@ -12,30 +12,36 @@ use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
 
 // Instantiate the class with your chosen method, Juristic School for Asr and if you want or own Asr factor, make the juristic school null and pass your own Asr shadow factor as the third parameter. Note that all parameters are optional.
 
-if ($_['latitude'] != "")
-    $latitude = $_['latitude'];
-else
-    $latitude = 21.3890824;
-if ($_['longitude'] != "")
-    $longitude = $_['longitude'];
-else
-    $longitude = 39.8579118;
-if ($_['timezone'] != "")
-    $timezone = $_['timezone'];
-else
-    $timezone = '+0300';
-if ($_['elevation'] != "")
-    $elevation = $_['elevation'];
-else
-    $elevation = null;
-if ($_['method'] != "")
-    $method = $_['method'];
-else
-    $method = 'MWL';
-if ($_['format_12_24'] != "")
-    $format_12_24  = $_['format_12_24'];
-else
-    $format_12_24 = PrayerTimes::TIME_FORMAT_12H;
+if ($_['latitude'] != "") {
+	$latitude = $_['latitude'];
+} else {
+	$latitude = 21.3890824;
+}
+if ($_['longitude'] != "") {
+	$longitude = $_['longitude'];
+} else {
+	$longitude = 39.8579118;
+}
+if ($_['timezone'] != "") {
+	$timezone = $_['timezone'];
+} else {
+	$timezone = '+0300';
+}
+if ($_['elevation'] != "") {
+	$elevation = $_['elevation'];
+} else {
+	$elevation = null;
+}
+if ($_['method'] != "") {
+	$method = $_['method'];
+} else {
+	$method = 'MWL';
+}
+if ($_['format_12_24'] != "") {
+	$format_12_24 = $_['format_12_24'];
+} else {
+	$format_12_24 = PrayerTimes::TIME_FORMAT_12H;
+}
 
 $pt = new PrayerTimes($method); // new PrayerTimes($method, $asrJuristicMethod, $asrShadowFactor);
 
@@ -44,8 +50,9 @@ $pt->tune($imsak = 0, $fajr = $_['Fajr'], $sunrise = 0, $dhuhr = $_['Dhuhr'], $a
 $date = new DateTime(null, new DateTimezone($timezone));
 $curtime = strtotime($date->format('d-m-Y H:i:s'));
 $hijri = new HijriDate($curtime, $l);
-if ($_['day'] != "")
-   $hijri->tune($_['day']);
+if ($_['day'] != "") {
+	$hijri->tune($_['day']);
+}
 
 echo "<div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">",  $hijri->get_day_name() . ' ' . $hijri->get_day() . ' ' . $hijri->get_month_name() . ' ' . $hijri->get_year() . $l->t('H'), '</h2>';
 
@@ -53,8 +60,9 @@ echo "<br><table id=\"salat\">
 <thead>
 <tr>
 <th>", $l->t('Day'), "</th>";
-if ( $hijri->get_month() == 9) //Ramadhane
-    echo "<th>", $l->t('Imsak'), "</th>";
+if ($hijri->get_month() == 9) { //Ramadhane
+	echo "<th>", $l->t('Imsak'), "</th>";
+}
 echo "<th>", $l->t('Fajr'), "</th>
 <th>", $l->t('Sunrise'), "</th>
 <th>", $l->t('Dhuhr'), "</th>
@@ -66,22 +74,24 @@ echo "<th>", $l->t('Fajr'), "</th>
 <tbody>";
 
 $start_date = new DateTime('today -3 day', new DateTimezone($timezone)); //date_create("2022-03-17");
-$end_date   = new DateTime('today +12 day', new DateTimezone($timezone)); //date_create("2022-03-29"); // If you want to include this date, add 1 day
+$end_date = new DateTime('today +12 day', new DateTimezone($timezone)); //date_create("2022-03-29"); // If you want to include this date, add 1 day
 
 $interval = DateInterval::createFromDateString('1 day');
-$daterange = new DatePeriod($start_date, $interval ,$end_date);
+$daterange = new DatePeriod($start_date, $interval, $end_date);
 
-foreach($daterange as $date1){
-   //$date1->setTimezone(new DateTimezone($timezone));
-   $times = $pt->getTimes($date1, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format_12_24);
-   $curtime = strtotime($date1->format('d-m-Y H:i:s'));
-   $hijri = new HijriDate($curtime, $l);
-   if ($_['day'] != "")
-       $hijri->tune($_['day']);
-   echo "<tr><td scope=\"row\">", $hijri->get_day_name(), " ", $hijri->get_year(), "-", $hijri->get_month(), "-", $hijri->get_day(), "</td>";
-   if ( $hijri->get_month() == 9)
-       echo "<td>", $times['Imsak'], "</td>";
-   echo "<td>", $times['Fajr'], "</td>
+foreach ($daterange as $date1) {
+	//$date1->setTimezone(new DateTimezone($timezone));
+	$times = $pt->getTimes($date1, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format_12_24);
+	$curtime = strtotime($date1->format('d-m-Y H:i:s'));
+	$hijri = new HijriDate($curtime, $l);
+	if ($_['day'] != "") {
+		$hijri->tune($_['day']);
+	}
+	echo "<tr><td scope=\"row\">", $hijri->get_day_name(), " ", $hijri->get_year(), "-", $hijri->get_month(), "-", $hijri->get_day(), "</td>";
+	if ($hijri->get_month() == 9) {
+		echo "<td>", $times['Imsak'], "</td>";
+	}
+	echo "<td>", $times['Fajr'], "</td>
          <td>", $times['Sunrise'], "</td>
          <td>", $times['Dhuhr'], "</td>
          <td>", $times['Asr'], "</td>
@@ -94,4 +104,3 @@ echo "</tbody>
 
 //echo "latitude: ", $_['latitude'], " ",$_['longitude'], " ",$_['timezone'], " ",$_['day'];
 //echo "Date", $date->format('d-m-Y H:i:s');
-?>

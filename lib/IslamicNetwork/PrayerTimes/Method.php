@@ -98,6 +98,13 @@ class Method {
 			self::METHOD_TURKEY,
 			self::METHOD_RUSSIA,
 			self::METHOD_MOONSIGHTING,
+			self::METHOD_TUNISIA,
+			self::METHOD_INDONESIA,
+			self::METHOD_MOROCCO,
+			self::METHOD_JAKIM,
+			self::METHOD_ALGERIA,
+			self::METHOD_PORTUGAL,
+			self::METHOD_JORDAN,
 			self::METHOD_CUSTOM,
 		];
 	}

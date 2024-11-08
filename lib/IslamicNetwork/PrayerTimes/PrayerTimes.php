@@ -3,6 +3,7 @@
  * PrayTimes.js: Prayer Times Calculator (ver 2.3)
  * Copyright (C) 2007-2011 PrayTimes.org
  * Copyright (C) 2015-2017 AlAdhan.com
+ * @copyright Copyright (c) 2022-2024 Mohamed-Ismail MEJRI <imejri@hotmail.com>
  *
  * Developed in JavaScript by Hamid Zarrabi-Zadeh
  * Ported to PHP by Meezaan-ud-Din Abdu Dhil-Jalali Wal-Ikram

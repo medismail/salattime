@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SunCalc is a PHP library for calculating sun/moon position and light phases.
  * https://github.com/gregseth/suncalc-php
@@ -20,7 +21,6 @@
  * Calculations for moon rise/set times are based on
  * http://www.stargazing.net/kepler/moonrise.html article.
  */
-
 
 namespace OCA\SalatTime\IslamicNetwork\SunMoonCalc;
 
