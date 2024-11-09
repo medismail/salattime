@@ -8,6 +8,11 @@ OC.L10N.register(
     "Day" : "Jorn",
     "Next" : "Seguent",
     "after" : "aprèp",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Koweit",
+    "Tunisia" : "Tunisia",
+    "Morocco" : "Marròc",
+    "Algeria" : "Algeria",
     "Settings" : "Paramètres"
 },
 "nplurals=2; plural=(n > 1);");

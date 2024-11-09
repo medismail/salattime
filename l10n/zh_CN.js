@@ -15,6 +15,11 @@ OC.L10N.register(
     "Altitude" : "海拔",
     "Use 24 hours format" : "使用24小时制",
     "Timezone:" : "时区：",
+    "Qatar" : "卡塔尔",
+    "Kuwait" : "科威特",
+    "Tunisia" : "突尼斯",
+    "Morocco" : "摩洛哥",
+    "Algeria" : "阿尔及利亚",
     "Settings" : "设置"
 },
 "nplurals=1; plural=0;");

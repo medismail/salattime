@@ -18,6 +18,11 @@ OC.L10N.register(
     "Manual settings:" : "Ручні налаштування:",
     "Timezone:" : "Часовий пояс:",
     "Calculation method:" : "Метод розрахунку:",
+    "Qatar" : "Катар",
+    "Kuwait" : "Кувейт",
+    "Tunisia" : "Туніс",
+    "Morocco" : "Марокко",
+    "Algeria" : "Алжир",
     "Union of Islamic Organizations of France (UOIF)" : "Союз ісламських організацій Франції (UOIF)",
     "Settings" : "Налаштування"
 },

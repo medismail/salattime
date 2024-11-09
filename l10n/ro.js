@@ -11,6 +11,11 @@ OC.L10N.register(
     "Sunrise" : "Răsărit",
     "Sunset" : "Apus",
     "Timezone:" : "Fus Orar:",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunisia",
+    "Morocco" : "Morocco",
+    "Algeria" : "Algeria",
     "Settings" : "Setări"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

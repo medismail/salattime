@@ -11,6 +11,11 @@ OC.L10N.register(
     "Sunrise" : "日の出",
     "Sunset" : "日の入り",
     "Timezone:" : "タイムゾーン：",
+    "Qatar" : "カタール",
+    "Kuwait" : "クウェート",
+    "Tunisia" : "チュニジア",
+    "Morocco" : "モロッコ",
+    "Algeria" : "アルジェリア民主人民共和国",
     "Settings" : "設定"
 },
 "nplurals=1; plural=0;");

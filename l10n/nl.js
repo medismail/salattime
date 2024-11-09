@@ -12,6 +12,11 @@ OC.L10N.register(
     "Sunset" : "Zonsondergang",
     "Altitude" : "Hoogte",
     "Timezone:" : "Tijdzone:",
+    "Qatar" : "Katar",
+    "Kuwait" : "Koeweit",
+    "Tunisia" : "Tunisië",
+    "Morocco" : "Marokko",
+    "Algeria" : "Algerije",
     "Adjustments" : "Aanpassingen",
     "Settings" : "Instellingen"
 },

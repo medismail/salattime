@@ -10,6 +10,11 @@ OC.L10N.register(
     "after" : "setelah",
     "Sunrise" : "Matahari Terbit",
     "Sunset" : "Matahari terbenam",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunisia",
+    "Morocco" : "Maroko",
+    "Algeria" : "Aljazair",
     "Settings" : "Setelan"
 },
 "nplurals=1; plural=0;");

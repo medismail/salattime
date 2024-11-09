@@ -1,8 +1,11 @@
 { "translations": {
     "Salat Time" : "Salat Time",
     "Salat" : "Salat",
+    "Adhan for salat" : "Adhan for salat",
     "at" : "at",
+    "end Time" : "end Time",
     "Please do not delay your salat." : "Please do not delay your salat.",
+    "Prayer's Time" : "Prayer's Time",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
@@ -49,6 +52,7 @@
     "No result." : "No result.",
     "Error" : "Error",
     "Show 5 times prayer." : "Show 5 times prayer.",
+    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations.",
     "Salat time content is unavailable" : "Salat time content is unavailable",
     "Day" : "Day",
     "Fajr" : "Fajr",
@@ -95,17 +99,16 @@
     "Diyanet İşleri Başkanlığı, Turkey" : "Diyanet İşleri Başkanlığı, Turkey",
     "Institute of Geophysics, University of Tehran" : "Institute of Geophysics, University of Tehran",
     "Egyptian General Authority of Survey" : "Egyptian General Authority of Survey",
-    "QATAR" : "QATAR",
-    "KUWAIT" : "KUWAIT",
-    "TUNISIA" : "TUNISIA",
-    "INDONESIA" : "INDONESIA",
-    "MOROCCO" : "MOROCCO",
+    "Qatar" : "Qatar",
+    "Tunisia" : "Tunisia",
+    "Algeria" : "Algeria",
     "Spiritual Administration of Muslims of Russia" : "Spiritual Administration of Muslims of Russia",
     "Union of Islamic Organizations of France (UOIF)" : "Union of Islamic Organizations of France (UOIF)",
     "Majlis Ugama Islam Singapura, Singapore" : "Majlis Ugama Islam Singapura, Singapore",
     "Prayer Time" : "Prayer Time",
     "Adjustments" : "Adjustments",
     "Settings" : "Settings",
-    "Enable notification" : "Enable notification"
+    "Enable notification" : "Enable notification",
+    "Enable Calendar" : "Enable Calendar"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

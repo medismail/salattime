@@ -12,6 +12,7 @@ OC.L10N.register(
     "Sunrise" : "Solskin",
     "Sunset" : "Solnedgang",
     "Timezone:" : "Tidszone:",
+    "Algeria" : "Algeriet",
     "Settings" : "Indstillinger"
 },
 "nplurals=2; plural=(n != 1);");

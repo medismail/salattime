@@ -48,11 +48,6 @@ OC.L10N.register(
     "University of Islamic Sciences, Karachi" : "Universidá de Ciencies Islámiques, Karachi",
     "Islamic Society of North America (ISNA)" : "Sociedá Islámica d'América del Norte (ISNA)",
     "Institute of Geophysics, University of Tehran" : "Institutu de Xeofísica, Universidá de Teḥrán",
-    "QATAR" : "QATAR",
-    "KUWAIT" : "KUWAIT",
-    "TUNISIA" : "TUNICIA",
-    "INDONESIA" : "INDONESIA",
-    "MOROCCO" : "MARRUECOS",
     "Spiritual Administration of Muslims of Russia" : "Alministración Espiritual de Musulmanes de Rusia",
     "Union of Islamic Organizations of France (UOIF)" : "Xunión d'Organizaciones Islámiques de Francia (OUIF)",
     "Settings" : "Configuración"

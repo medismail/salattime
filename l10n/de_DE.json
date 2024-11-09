@@ -1,8 +1,11 @@
 { "translations": {
     "Salat Time" : "Gebetszeit",
     "Salat" : "Gebet",
+    "Adhan for salat" : "Adhen für das Gebet",
     "at" : "um",
+    "end Time" : "Endzeit",
     "Please do not delay your salat." : "Bitte zögern Sie Ihr Gebet nicht hinaus.",
+    "Prayer's Time" : "Gebetszeit",
     "Ashura" : "Aschura",
     "Mawlid al-Nabi" : "Geburtstag des Propheten",
     "Lailat-ul-Miraj" : "Himmelfahrt Mohammeds",
@@ -49,6 +52,7 @@
     "No result." : "Kein Ergebnis.",
     "Error" : "Fehler",
     "Show 5 times prayer." : "Fünf mal Gebet anzeigen.",
+    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "# Gebetszeit\n* 5 muslimische tägliche Gebetszeiten\n* Hijri-Datum\n* Qibla-Richtung\n* Adhan-Benachrichtigung\n* DAV-Kalenderintegration\n* Widget auf dem Dashboard\n* und viele andere nützliche Informationen.",
     "Salat time content is unavailable" : "Gebetszeit-Inhalt ist nicht verfügbar",
     "Day" : "Tag",
     "Fajr" : "Fadjr",
@@ -95,17 +99,16 @@
     "Diyanet İşleri Başkanlığı, Turkey" : "Präsidentschaft für religiöse Angelegenheiten, Türkei",
     "Institute of Geophysics, University of Tehran" : "Institut für Geophysik, Universität Teheran",
     "Egyptian General Authority of Survey" : "Allgemeine Ägyptische Vermessungsbehörde",
-    "QATAR" : "KATAR",
-    "KUWAIT" : "KUWAIT",
-    "TUNISIA" : "TUNESIEN",
-    "INDONESIA" : "INDONESIEN",
-    "MOROCCO" : "MAROKKO",
+    "Qatar" : "Katar",
+    "Tunisia" : "Tunesien",
+    "Algeria" : "Algerien",
     "Spiritual Administration of Muslims of Russia" : "Geistliche Verwaltung der Muslime Russlands",
     "Union of Islamic Organizations of France (UOIF)" : "Union der islamischen Organisationen Frankreichs (UOIF)",
     "Majlis Ugama Islam Singapura, Singapore" : "Islamischer Religionsrat von Singapur, Singapur",
     "Prayer Time" : "Gebetsstunde",
     "Adjustments" : "Anpassungen",
     "Settings" : "Einstellungen",
-    "Enable notification" : "Benachrichtigung aktivieren"
+    "Enable notification" : "Benachrichtigung aktivieren",
+    "Enable Calendar" : "Kalender aktivieren"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

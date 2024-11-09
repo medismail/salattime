@@ -12,6 +12,11 @@ OC.L10N.register(
     "Sunset" : "Auringonlasku",
     "Altitude" : "Korkeus",
     "Timezone:" : "Aikavyöhyke:",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunisia",
+    "Morocco" : "Marokko",
+    "Algeria" : "Algeria",
     "Settings" : "Asetukset"
 },
 "nplurals=2; plural=(n != 1);");

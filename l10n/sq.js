@@ -8,6 +8,11 @@ OC.L10N.register(
     "after" : "pas",
     "Sunrise" : "Lindja e diellit",
     "Sunset" : "Perëndimi i diellit",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuvajti",
+    "Tunisia" : "Tunizia",
+    "Morocco" : "Maroku",
+    "Algeria" : "Algjeria",
     "Settings" : "Rregullimet"
 },
 "nplurals=2; plural=(n != 1);");

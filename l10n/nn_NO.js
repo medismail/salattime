@@ -8,6 +8,7 @@ OC.L10N.register(
     "after" : "etter",
     "Sunrise" : "Soloppgang",
     "Sunset" : "Solnedgang",
+    "Kuwait" : "Kuwait",
     "Settings" : "Innstillingar"
 },
 "nplurals=2; plural=(n != 1);");

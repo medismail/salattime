@@ -9,6 +9,9 @@ OC.L10N.register(
     "after" : "post",
     "Sunrise" : "Sunleviĝo",
     "Sunset" : "Sunsubiro",
+    "Qatar" : "Kataro",
+    "Tunisia" : "Tunizio",
+    "Algeria" : "Alĝerio",
     "Settings" : "Agordoj"
 },
 "nplurals=2; plural=(n != 1);");

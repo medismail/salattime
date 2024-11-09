@@ -12,6 +12,11 @@ OC.L10N.register(
     "Sunrise" : "Nascer do Sol",
     "Sunset" : "Pôr do Sol",
     "Timezone:" : "Fuso horário:",
+    "Qatar" : "Quatar ",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunísia",
+    "Morocco" : "Marrocos",
+    "Algeria" : "Argélia",
     "Adjustments" : "Ajustes",
     "Settings" : "Configurações",
     "Enable notification" : "Ativar notificações"

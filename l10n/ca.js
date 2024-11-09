@@ -11,6 +11,7 @@ OC.L10N.register(
     "Sunrise" : "Sortida del sol",
     "Sunset" : "Posta de sol",
     "Timezone:" : "Zona horària:",
+    "Algeria" : "Algèria",
     "Settings" : "Paràmetres"
 },
 "nplurals=2; plural=(n != 1);");

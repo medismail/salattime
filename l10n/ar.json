@@ -1,7 +1,11 @@
 { "translations": {
     "Salat Time" : "وقت الصلاة",
     "Salat" : "صلاة",
+    "Adhan for salat" : "الآذان",
+    "at" : "عند",
+    "end Time" : "نهاية الوقت",
     "Please do not delay your salat." : "لا تُؤجِّل صَلَاتَك من فضلك",
+    "Prayer's Time" : "وقت الصلاة",
     "Ashura" : "عاشوراء",
     "Mawlid al-Nabi" : "المولد النبوي الشريف",
     "Lailat-ul-Miraj" : "ليلة المعراج",
@@ -48,6 +52,7 @@
     "No result." : "لا توجد أي نتيجة",
     "Error" : "خطأ",
     "Show 5 times prayer." : "عرض أوقات الصلوات الـ 5.",
+    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "ِ# وقت الصلاة\n* مواعيد الصلوات الـ 5 للمسلم\n* بالتاريخ الهجري\n* إتجاه القبلة\n* إشعار بالآذان\n* مكاملة مع تقويم المواعيد\n* ودجة على لوحة المعلومات\n* و معلومات أخرى مفيدة",
     "Salat time content is unavailable" : "محتويات وقت الصلاة غير متوفرة",
     "Day" : "اليوم",
     "Fajr" : "الفجر",
@@ -94,17 +99,13 @@
     "Diyanet İşleri Başkanlığı, Turkey" : "Diyanet İşleri Başkanlığı، تركيا",
     "Institute of Geophysics, University of Tehran" : "معهد الجيوفيزياء بجامعة طهران",
     "Egyptian General Authority of Survey" : "الهيئة المصرية العامة للمساحة",
-    "QATAR" : "دولة قطر",
-    "KUWAIT" : "دولة الكويت",
-    "TUNISIA" : "تونس",
-    "INDONESIA" : "إندونيسيا",
-    "MOROCCO" : "المغرب",
     "Spiritual Administration of Muslims of Russia" : "الإدارة الروحية لمسلمي روسيا",
     "Union of Islamic Organizations of France (UOIF)" : "اتحاد المنظمات الإسلامية بفرنسا (UOIF)",
     "Majlis Ugama Islam Singapura, Singapore" : "Majlis Ugama Islam Singapura، سنغافورة",
     "Prayer Time" : "وقت الصلاة",
     "Adjustments" : "الفروقات",
     "Settings" : "الإعدادات",
-    "Enable notification" : "مكن الإشعارات"
+    "Enable notification" : "مكن الإشعارات",
+    "Enable Calendar" : "تمكين التقويم"
 },"pluralForm" :"nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;"
 }

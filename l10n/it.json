@@ -40,8 +40,11 @@
     "Longitude:" : "Longitudine:",
     "Timezone:" : "Fuso orario:",
     "Altitude:" : "Altitudine:",
-    "QATAR" : "QATAR",
-    "KUWAIT" : "KUWAIT",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunisia",
+    "Morocco" : "Marocco",
+    "Algeria" : "Algeria",
     "Adjustments" : "Regolazioni",
     "Settings" : "Impostazioni"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"

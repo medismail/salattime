@@ -15,6 +15,11 @@ OC.L10N.register(
     "Altitude" : "Nadmorská výška",
     "Location address:" : "Adresa miesta:",
     "Timezone:" : "Časové pásmo:",
+    "Qatar" : "Katar",
+    "Kuwait" : "Kuvajt",
+    "Tunisia" : "Tunisko",
+    "Morocco" : "Maroko",
+    "Algeria" : "Alžírsko",
     "Adjustments" : "Úpravy",
     "Settings" : "Nastavenia"
 },

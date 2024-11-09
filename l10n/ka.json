@@ -8,6 +8,11 @@
     "Sunrise" : "Sunrise",
     "Sunset" : "Sunset",
     "Altitude" : "Altitude",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunisia",
+    "Morocco" : "Morocco",
+    "Algeria" : "Algeria",
     "Settings" : "Settings"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

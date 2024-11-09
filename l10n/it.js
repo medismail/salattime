@@ -42,8 +42,11 @@ OC.L10N.register(
     "Longitude:" : "Longitudine:",
     "Timezone:" : "Fuso orario:",
     "Altitude:" : "Altitudine:",
-    "QATAR" : "QATAR",
-    "KUWAIT" : "KUWAIT",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunisia",
+    "Morocco" : "Marocco",
+    "Algeria" : "Algeria",
     "Adjustments" : "Regolazioni",
     "Settings" : "Impostazioni"
 },

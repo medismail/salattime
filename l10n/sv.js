@@ -11,6 +11,11 @@ OC.L10N.register(
     "Sunrise" : "Soluppgång",
     "Sunset" : "Solnedgång",
     "Timezone:" : "Tidszon:",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunisien",
+    "Morocco" : "Marocko",
+    "Algeria" : "Algeriet",
     "Settings" : "Inställningar"
 },
 "nplurals=2; plural=(n != 1);");

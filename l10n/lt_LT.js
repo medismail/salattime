@@ -18,7 +18,16 @@ OC.L10N.register(
     "after" : "po",
     "Sunrise" : "Saulėtekis",
     "Sunset" : "Saulėlydis",
+    "Manual settings:" : "Rankiniai nustatymai:",
+    "Latitude:" : "Platuma:",
+    "Longitude:" : "Ilguma:",
     "Timezone:" : "Laiko juosta:",
-    "Settings" : "Nustatymai"
+    "Qatar" : "Kataras",
+    "Kuwait" : "Kuveitas",
+    "Tunisia" : "Tunisas",
+    "Morocco" : "Marokas",
+    "Algeria" : "Alžyras",
+    "Settings" : "Nustatymai",
+    "Enable Calendar" : "Įjungti kalendorių"
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");

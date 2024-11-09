@@ -12,6 +12,11 @@ OC.L10N.register(
     "Sunset" : "日落時間",
     "Altitude" : "海拔",
     "Timezone:" : "時區：",
+    "Qatar" : "卡達",
+    "Kuwait" : "科威特",
+    "Tunisia" : "突尼西亞",
+    "Morocco" : "摩洛哥",
+    "Algeria" : "阿爾及利亞",
     "Settings" : "設定"
 },
 "nplurals=1; plural=0;");
