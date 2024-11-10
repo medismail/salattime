@@ -11,6 +11,10 @@ OC.L10N.register(
     "Sunrise" : "Sortida del sol",
     "Sunset" : "Posta de sol",
     "Timezone:" : "Zona horària:",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunísia",
+    "Morocco" : "Marroc",
     "Algeria" : "Algèria",
     "Settings" : "Paràmetres"
 },

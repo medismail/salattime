@@ -7,6 +7,11 @@
     "after" : "na",
     "Sunrise" : "Sonsopkoms",
     "Sunset" : "Sondergang",
+    "Qatar" : "Katar",
+    "Kuwait" : "Koeweit",
+    "Tunisia" : "Tunisië",
+    "Morocco" : "Marokko",
+    "Algeria" : "Algerië",
     "Settings" : "Instellings"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

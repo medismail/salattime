@@ -12,6 +12,10 @@ OC.L10N.register(
     "Sunrise" : "Solskin",
     "Sunset" : "Solnedgang",
     "Timezone:" : "Tidszone:",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunesien",
+    "Morocco" : "Marokko",
     "Algeria" : "Algeriet",
     "Settings" : "Indstillinger"
 },
