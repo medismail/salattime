@@ -311,6 +311,16 @@ class CalculationService {
 		return $this->configService->getUserTimeZone($userId);
 	}
 
+	public function getUserTimeFormat(string $userId): string {
+		$p_settings = $this->configService->getSettingsValue($userId);
+		if ($p_settings['format_12_24'] == PrayerTimes::TIME_FORMAT_12H) {
+			$textFormat_12_24 = 'g:i a';
+		} else {
+			$textFormat_12_24 = 'G:i';
+		}
+		return $textFormat_12_24;
+	}
+
 	/**
 	 * setConfigSettings set settingss values in database
 	 * @param string userId
@@ -328,6 +338,13 @@ class CalculationService {
 				}
 				$p_settings['2'] = $this->configService->getUserTimeZone($userId);
 				$p_settings['6'] = $addressInfo['city'];
+			}
+		} elseif (($p_settings['0'] == "0") && ($p_settings['1'] == "0")) {
+			$op_settings = $this->configService->getSettingsValue($userId);
+			$p_settings['0'] = $op_settings['0'];
+			$p_settings['1'] = $op_settings['1'];
+			if ($p_settings['2'] == "") {
+				$p_settings['2'] = $op_settings['2'];
 			}
 		}
 		$settings = implode(":", $p_settings);
@@ -469,7 +486,7 @@ class CalculationService {
 	}
 
 
-	private function getNameFromGeo(string $lat, string $lon): string {
+	private function getNameFromGeo(string $lat, string $lon):?string {
 		$city_name = null;
 		$opts = array(
 			'http' => array(

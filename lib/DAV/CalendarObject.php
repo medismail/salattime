@@ -119,9 +119,10 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 			$event->UID = $name;
 			$event->DTSTAMP = $eDate;   //gmdate('Ymd\\THis\\Z');
 			$event->DTSTART = $eDate;
-			$event->DURATION = "PT10M";
+			$event->DURATION = $this->calendar->getEventDuration($Data[1], $Data[0]);
 			$event->SUMMARY = $this->calendar->getEventSummary($Data[1], $Data[0]);
 			$event->DESCRIPTION = $this->calendar->getEventDescription($Data[1], $Data[0]);
+			$event->LOCATION = $this->calendar->getEventLocation($Data[1], $Data[0]);
 
 			$calendar->add($event);
 		}

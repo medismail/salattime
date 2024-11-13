@@ -190,28 +190,33 @@ class Calendar extends ExternalCalendar {
 		return null;
 	}
 
-	public function getEventDate(int $date, string $salat) {
+	public function getEventDate(int $date, string $salat): string {
 		return $this->objectData[$date][$salat]['DTStart'];
 	}
 
-	public function getEventSummary(int $date, string $salat) {
+	public function getEventSummary(int $date, string $salat): string {
 		return $this->objectData[$date][$salat]['Summary'];
 	}
 
-	public function getEventDescription(int $date, string $salat) {
+	public function getEventDescription(int $date, string $salat): string {
 		return $this->objectData[$date][$salat]['Description'];
 	}
 
-	public function getEventLocation(int $date, string $salat) {
+	public function getEventLocation(int $date, string $salat): string {
 		return $this->objectData[$date][$salat]['Location'];
 	}
 
-	private function getCalendarObjectsFromTimeRange(\DateTime $startDateTime, \DateTime $endDateTime) {
+	public function getEventDuration(int $date, string $salat): string {
+		return $this->objectData[$date][$salat]['Duration'];
+	}
+
+	private function getCalendarObjectsFromTimeRange(\DateTime $startDateTime, \DateTime $endDateTime): array {
 		$extendStartDateTime = new \DateTime('', new \DateTimezone('UTC'));
 		$extendEndDateTime = new \DateTime('', new \DateTimezone('UTC'));
 		$extendStartDateTime->setTimestamp($startDateTime->getTimestamp() - self::HOURS_13_TO_SECONDS);
 		$extendEndDateTime->setTimestamp($endDateTime->getTimestamp() + self::HOURS_13_TO_SECONDS);
 		$timeZone = $this->calculationService->getUserTimeZone(basename($this->principalUri));
+		$timeFormat = $this->calculationService->getUserTimeFormat(basename($this->principalUri));
 		$times = $this->calculationService->getPrayerTimesFromDate(basename($this->principalUri), $extendStartDateTime, $extendEndDateTime, self::TIME_FORMAT_ISO8601);
 		$salawat = array(CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
 		$salatEndTime = array('Sunrise', 'Asr', 'Maghrib', 'Isha', 'Lastthird');
@@ -223,11 +228,11 @@ class Calendar extends ExternalCalendar {
 				if ($lastId < 3) {
 					if (($eDate > $startDateTime) && ($eDate < $endDateTime)) {
 						$endDate = new \DateTime($dayTime[$salatEndTime[$in]]);
-						$co[] = $this->fillCalendarObjectData($salat, $eDate, $endDate, $timeZone);
+						$co[] = $this->fillCalendarObjectData($salat, $eDate, $endDate, $timeZone, $timeFormat);
 					}
 				} elseif (($id < $lastId) && (($id > 1) || ($eDate > $startDateTime)) || (($id >= $lastId) && ($eDate < $endDateTime))) {
 					$endDate = new \DateTime($dayTime[$salatEndTime[$in]]);
-					$co[] = $this->fillCalendarObjectData($salat, $eDate, $endDate, $timeZone);
+					$co[] = $this->fillCalendarObjectData($salat, $eDate, $endDate, $timeZone, $timeFormat);
 				}
 			}
 		}
@@ -239,14 +244,15 @@ class Calendar extends ExternalCalendar {
 		return $co;
 	}
 
-	private function fillCalendarObjectData(string $salat, \DateTime $eDate, \DateTime $endDate, string $timeZone) {
+	private function fillCalendarObjectData(string $salat, \DateTime $eDate, \DateTime $endDate, string $timeZone, string $timeFormat): string {
 		$date = $eDate->format('Ymd');
 		$this->objectData[$date][$salat]['DTStart'] = $eDate->format('Ymd\THis\Z');
 		$this->objectData[$date][$salat]['Summary'] = $this->l10n->t('Salat') . ' ' . $this->l10n->t($salat);
 		$endDate->setTimezone(new \DateTimeZone($timeZone));
 		$eDate->setTimezone(new \DateTimeZone($timeZone));
-		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('Adhan for salat') . ' ' . $this->l10n->t($salat) . ' ' . $this->l10n->t('at') . ': ' . $eDate->format('H:i') . ' ' . $this->l10n->t('end Time') . ' ' . $endDate->format('H:i') . ' 
+		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('Adhan for salat') . ' ' . $this->l10n->t($salat) . ' ' . $this->l10n->t('at') . ': ' . $eDate->format($timeFormat) . ' ' . $this->l10n->t('end time') . ' ' . $this->l10n->t('at') . ': ' . $endDate->format($timeFormat) . ' 
 ' .  $this->l10n->t('Please do not delay your salat.');
+		$this->objectData[$date][$salat]['Duration'] = "PT10M";
 		$this->objectData[$date][$salat]['Location'] = "";
 		return "{$salat}_{$date}.ics";
 	}
@@ -302,14 +308,14 @@ class Calendar extends ExternalCalendar {
 		return null;
 	}
 
-	private function getCalendarName(string $calendarUri) {
+	private function getCalendarName(string $calendarUri):?string {
 		if ($calendarUri == self::prayertimeCalendar) {
 			return $this->l10n->t('Prayer\'s Time');
 		}
 		return null;
 	}
 
-	private function getCalendarColor(string $calendarUri) {
+	private function getCalendarColor(string $calendarUri):?string {
 		if ($calendarUri == self::prayertimeCalendar) {
 			return '#01834b';
 		}

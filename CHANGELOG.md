@@ -6,6 +6,8 @@
 ### Changed
 - Update Calculation methods
 - Update Notfication
+### Fixed
+- Fix crash when empty address
 
 ## 0.6.1
 ### Added
