@@ -1,8 +1,10 @@
 { "translations": {
     "Salat Time" : "Gebetszeit",
     "Salat" : "Gebet",
+    "Adhan for salat" : "Adhen für das Gebet",
     "at" : "um",
     "Please do not delay your salat." : "Bitte zögere dein Gebet nicht hinaus.",
+    "Prayer's Time" : "Gebetszeit",
     "Ashura" : "Aschura",
     "Mawlid al-Nabi" : "Geburtstag des Propheten",
     "Lailat-ul-Miraj" : "Himmelfahrt Mohammeds",
@@ -49,6 +51,7 @@
     "No result." : "Kein Ergebnis.",
     "Error" : "Fehler",
     "Show 5 times prayer." : "Fünf mal Gebet anzeigen.",
+    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "# Gebetszeit\n* 5 muslimische tägliche Gebetszeiten\n* Hijri-Datum\n* Qibla-Richtung\n* Adhan-Benachrichtigung\n* DAV-Kalenderintegration\n* Widget auf dem Dashboard\n* und viele andere nützliche Informationen.",
     "Salat time content is unavailable" : "Gebetszeit-Inhalt ist nicht verfügbar",
     "Day" : "Tag",
     "Fajr" : "Fadjr",
@@ -98,14 +101,19 @@
     "Qatar" : "Katar",
     "Kuwait" : "Kuwait",
     "Tunisia" : "Tunesien",
+    "Kementerian Agama Republik Indonesia" : "Religionsministerium der Republik Indonesien",
     "Morocco" : "Marokko",
+    "Jabatan Kemajuan Islam Malaysia (JAKIM)" : "Abteilung für islamische Entwicklung Malaysia (JAKIM)",
+    "Ministry of Awqaf, Islamic Affairs and Holy Places, Jordan" : "Ministerium für religiöse Stiftungen (Awqaf), islamische Angelegenheiten und heilige Stätten, Jordanien",
     "Algeria" : "Algerien",
     "Spiritual Administration of Muslims of Russia" : "Geistliche Verwaltung der Muslime Russlands",
     "Union of Islamic Organizations of France (UOIF)" : "Union der islamischen Organisationen Frankreichs (UOIF)",
+    "Comunidade Islamica de Lisboa" : "Islamische Gemeinschaft von Lissabon",
     "Majlis Ugama Islam Singapura, Singapore" : "Islamischer Religionsrat von Singapur, Singapur",
     "Prayer Time" : "Gebetszeit",
     "Adjustments" : "Anpassungen",
     "Settings" : "Einstellungen",
-    "Enable notification" : "Benachrichtigung aktivieren"
+    "Enable notification" : "Benachrichtigung aktivieren",
+    "Enable Calendar" : "Kalender aktivieren"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

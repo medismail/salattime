@@ -10,7 +10,9 @@ OC.L10N.register(
     "Sunrise" : "Sunleviĝo",
     "Sunset" : "Sunsubiro",
     "Qatar" : "Kataro",
+    "Kuwait" : "Kuvajto",
     "Tunisia" : "Tunizio",
+    "Morocco" : "Maroko",
     "Algeria" : "Alĝerio",
     "Settings" : "Agordoj"
 },

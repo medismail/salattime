@@ -5,7 +5,6 @@ OC.L10N.register(
     "Salat" : "Gebet",
     "Adhan for salat" : "Adhen für das Gebet",
     "at" : "um",
-    "end Time" : "Endzeit",
     "Please do not delay your salat." : "Bitte zögern Sie Ihr Gebet nicht hinaus.",
     "Prayer's Time" : "Gebetszeit",
     "Ashura" : "Aschura",

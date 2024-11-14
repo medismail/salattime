@@ -1,8 +1,10 @@
 { "translations": {
     "Salat Time" : "Hora do Salat",
     "Salat" : "Salat",
+    "Adhan for salat" : "Adhan para salada",
     "at" : "em",
     "Please do not delay your salat." : "Por favor, não atrase seu salada.",
+    "Prayer's Time" : "Tempo de Oração",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
@@ -98,14 +100,19 @@
     "Qatar" : "Catar",
     "Kuwait" : "Kuwait",
     "Tunisia" : "Tunísia",
+    "Kementerian Agama Republik Indonesia" : "Ministério da Religião da República da Indonésia",
     "Morocco" : "Marrocos",
+    "Jabatan Kemajuan Islam Malaysia (JAKIM)" : "Departamento de Desenvolvimento Islâmico da Malásia (JAKIM)",
+    "Ministry of Awqaf, Islamic Affairs and Holy Places, Jordan" : "Ministério de Awqaf, Assuntos Islâmicos e Lugares Sagrados, Jordânia",
     "Algeria" : "Algéria",
     "Spiritual Administration of Muslims of Russia" : "Administração Espiritual dos Muçulmanos da Rússia",
     "Union of Islamic Organizations of France (UOIF)" : "União das Organizações Islâmicas da França (UOIF)",
+    "Comunidade Islamica de Lisboa" : "Comunidade Islamica de Lisboa",
     "Majlis Ugama Islam Singapura, Singapore" : "Majlis Ugama Islam Singapura, Singapore",
     "Prayer Time" : "Horário da oração",
     "Adjustments" : "Ajustes",
     "Settings" : "Configurações",
-    "Enable notification" : "Habilitar notificação"
+    "Enable notification" : "Habilitar notificação",
+    "Enable Calendar" : "Ativar calendário"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

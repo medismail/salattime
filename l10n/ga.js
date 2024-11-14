@@ -5,7 +5,6 @@ OC.L10N.register(
     "Salat" : "Salainn",
     "Adhan for salat" : "Adhan do salat",
     "at" : "ag",
-    "end Time" : "deireadh Am",
     "Please do not delay your salat." : "Ná cuir moill ar do sailéad.",
     "Prayer's Time" : "Am Urnaí",
     "Ashura" : "Ashura",
