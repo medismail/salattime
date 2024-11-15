@@ -5,6 +5,7 @@ OC.L10N.register(
     "Salat" : "Salat",
     "Adhan for salat" : "Adhan for salat",
     "at" : "at",
+    "end time" : "end time",
     "Please do not delay your salat." : "Please do not delay your salat.",
     "Prayer's Time" : "Prayer's Time",
     "Ashura" : "Ashura",
