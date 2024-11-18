@@ -5,7 +5,7 @@
 - Calendar Inetgration to NextCloud
 ### Changed
 - Update Calculation methods
-- Update Notfication
+- Update Notification Message
 ### Fixed
 - Fix crash when empty address
 

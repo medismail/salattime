@@ -88,6 +88,9 @@ class CalculationService {
 	/** @var MOONSET name */
 	public const MOONSET = PrayerTimes::MOONSET;
 
+	/** @const TIME_FORMAT_12H */
+	public const TIME_FORMAT_12H = PrayerTimes::TIME_FORMAT_12H;
+
 	/** @var ConfigService */
 	private $configService;
 
@@ -305,20 +308,6 @@ class CalculationService {
 
 	public function getUserCalendar(string $userId): string {
 		return $this->configService->getUserCalendar($userId);
-	}
-
-	public function getUserTimeZone(string $userId): string {
-		return $this->configService->getUserTimeZone($userId);
-	}
-
-	public function getUserTimeFormat(string $userId): string {
-		$p_settings = $this->configService->getSettingsValue($userId);
-		if ($p_settings['format_12_24'] == PrayerTimes::TIME_FORMAT_12H) {
-			$textFormat_12_24 = 'g:i a';
-		} else {
-			$textFormat_12_24 = 'G:i';
-		}
-		return $textFormat_12_24;
 	}
 
 	/**

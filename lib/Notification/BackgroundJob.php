@@ -73,8 +73,12 @@ class BackgroundJob extends TimedJob {
 	 */
 	protected function sendSalatNotifications($uid) {
 		$PrayerTime = new \DateTime();
+		$PrayerTimeEnd = new \DateTime();
 		$salawat = array(CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
+		$endTimes = array(CalculationService::SUNRISE, 'Asr', 'Maghrib', 'Isha', 'Lastthird');
 		$offset = [CalculationService::FAJR => 0, 'Dhuhr' => 0, 'Asr' => 0, 'Maghrib' => 0, 'Isha' => 0];
+		$pSettings = $this->calculationService->getConfigSettings($uid);
+		$timeFormat = $this->getTimeFormat($pSettings['format_12_24']);
 		$times = $this->calculationService->getPrayerTimesFromDateByDays($uid, $PrayerTime, -1)[0];
 		if ($times['Salat'] == CalculationService::FAJR) {
 			$Fajrdate = new \DateTime();
@@ -90,21 +94,26 @@ class BackgroundJob extends TimedJob {
 			while ($id > 0) {
 				$id = $id - 1;
 				$times[$salawat[$id]] = $tomorowTimes[$salawat[$id]];
+				$times[$endTimes[$id]] = $tomorowTimes[$endTimes[$id]];
 				$offset[$salawat[$id]] = 1;
 			}
 		}
-		foreach ($salawat as $salat) {
+		foreach ($salawat as $id => $salat) {
 			$notification = $this->notificationManager->createNotification();
 			if ($offset[$salat] == 1) {
 				$PrayerTime->setTimestamp(strtotime('+1 day', strtotime($times[$salat])));
+				$PrayerTimeEnd->setTimestamp(strtotime('+1 day', strtotime($times[$endTimes[$id]])));
 			} else {
 				$PrayerTime->setTimestamp(strtotime($times[$salat]));
+				$PrayerTimeEnd->setTimestamp(strtotime($times[$endTimes[$id]]));
 			}
+			$PrayerTime->setTimezone(new \DateTimeZone($pSettings['timezone']));
+			$PrayerTimeEnd->setTimezone(new \DateTimeZone($pSettings['timezone']));
 			try {
 				$notification->setApp('salattime')
 					->setDateTime($PrayerTime)
 					->setObject('Adhan', $salat)
-					->setSubject('Adhan for salat');
+					->setSubject('Adhan for salat', [$PrayerTime->format($timeFormat), $PrayerTimeEnd->format($timeFormat)]);
 				$notification->setUser($uid);
 				$this->notificationManager->notify($notification);
 			} catch (\InvalidArgumentException $e) {
@@ -131,5 +140,18 @@ class BackgroundJob extends TimedJob {
 			}
 			$this->notificationManager->markProcessed($notification);
 		}
+	}
+
+	/**
+	 * get TimeFormat
+	 * @param string $format_12_24
+	 */
+	private function getTimeFormat(string $format_12_24): string {
+		if ($format_12_24 == CalculationService::TIME_FORMAT_12H) {
+			$timeFormat = 'g:i a';
+		} else {
+			$timeFormat = 'G:i';
+		}
+		return $timeFormat;
 	}
 }
