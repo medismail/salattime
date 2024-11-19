@@ -1,7 +1,6 @@
 OC.L10N.register(
     "salattime",
     {
-    "at" : "kellonaika",
     "Time" : "Aika",
     "No result." : "Ei tulosta.",
     "Error" : "Virhe",

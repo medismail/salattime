@@ -3,8 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "heure de prière",
     "Salat" : "Prière",
-    "at" : "le",
-    "Please do not delay your salat." : "S'il vous plaît ne retardez pas votre prière.",
     "Ashura" : "Asura",
     "Mawlid al-Nabi" : "Mawlid du Prophète",
     "Lailat-ul-Miraj" : "Nuit du Voyage Nocturne",

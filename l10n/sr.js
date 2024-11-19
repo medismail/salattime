@@ -3,10 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "Салат време",
     "Salat" : "Салат",
-    "Adhan for salat" : "Адхан за салат",
-    "at" : "у",
-    "end time" : "време завршетка",
-    "Please do not delay your salat." : "Молимо вас да не касните свој салат.",
     "Prayer's Time" : "Време молитве",
     "Ashura" : "Ашура",
     "Mawlid al-Nabi" : "Малид ал-Наби",

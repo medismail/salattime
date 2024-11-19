@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "Czas Salat",
     "Salat" : "Salat",
-    "at" : "o",
     "Ashura" : "Aszura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",

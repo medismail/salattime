@@ -1,7 +1,6 @@
 OC.L10N.register(
     "salattime",
     {
-    "at" : "na",
     "Unknown city" : "Neznáme mesto",
     "New Moon" : "Nov",
     "Time" : "Čas",

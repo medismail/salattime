@@ -3,10 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "Am Sailéad",
     "Salat" : "Salainn",
-    "Adhan for salat" : "Adhan do salat",
-    "at" : "ag",
-    "end time" : "am deiridh",
-    "Please do not delay your salat." : "Ná cuir moill ar do sailéad.",
     "Prayer's Time" : "Am Urnaí",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",

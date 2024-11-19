@@ -1,7 +1,6 @@
 OC.L10N.register(
     "salattime",
     {
-    "at" : "klukkan",
     "Time" : "Tími",
     "No result." : "Engar niðurstöður.",
     "Error" : "Villa",

@@ -1,7 +1,6 @@
 OC.L10N.register(
     "salattime",
     {
-    "at" : ",",
     "New Moon" : "Jaunatis (Naujas mėnulis)",
     "Waxing Crescent Moon" : "Jaunatis (Pilnėjantis pusmėnulis)",
     "First Quarter Moon" : "Priešpilnis (Pirmo ketvirčio mėnulis)",

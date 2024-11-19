@@ -1,7 +1,6 @@
 OC.L10N.register(
     "salattime",
     {
-    "at" : "在",
     "Time" : "時間",
     "No result." : "無結果。",
     "Error" : "錯誤",

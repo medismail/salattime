@@ -3,9 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "Gebetszeit",
     "Salat" : "Gebet",
-    "Adhan for salat" : "Adhen für das Gebet",
-    "at" : "um",
-    "Please do not delay your salat." : "Bitte zögere dein Gebet nicht hinaus.",
     "Prayer's Time" : "Gebetszeit",
     "Ashura" : "Aschura",
     "Mawlid al-Nabi" : "Geburtstag des Propheten",

@@ -3,8 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "Salat Time",
     "Salat" : "Salat",
-    "at" : "a las",
-    "Please do not delay your salat." : "Por favor, no retrases tu salat.",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",

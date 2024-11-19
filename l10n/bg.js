@@ -3,8 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "Часове за ежедневна мюсулманска молитва\nПеткратен намаз",
     "Salat" : "Намаз",
-    "at" : "в",
-    "Please do not delay your salat." : "Моля, не закъснявайте за вашият намаз.",
     "Ashura" : "Денят Ашуре",
     "Mawlid al-Nabi" : "Мевлид",
     "Lailat-ul-Miraj" : "Нощта Мирадж",

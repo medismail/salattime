@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat" : "Salat",
-    "at" : "alle",
     "Ashura" : "Ashura",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
     "Lailat-ul-Bara'at" : "Lailat-ul-Bara'at",

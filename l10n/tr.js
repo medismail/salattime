@@ -3,8 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "Namaz saati",
     "Salat" : "Namaz",
-    "at" : "şu saatte",
-    "Please do not delay your salat." : "Lütfen namaza geç kalmayın.",
     "Ashura" : "Aşura",
     "Mawlid al-Nabi" : "Mevlid Kandili",
     "Lailat-ul-Miraj" : "Miraç Kandili",

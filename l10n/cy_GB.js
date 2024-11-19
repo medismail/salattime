@@ -1,7 +1,6 @@
 OC.L10N.register(
     "salattime",
     {
-    "at" : "am",
     "Time" : "Amser",
     "Error" : "Gwall",
     "Day" : "Diwrnod",
