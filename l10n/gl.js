@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Salat Time" : "Hora da oración",
     "Salat" : "Oración (salat)",
+    "am" : "am",
+    "pm" : "pm",
     "Prayer's Time" : "Tempo de oración",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid do profeta",

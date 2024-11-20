@@ -3,6 +3,12 @@ OC.L10N.register(
     {
     "Salat Time" : "Salat Time",
     "Salat" : "Salat",
+    "The Adhan for salat" : "The Adhan for salat",
+    "is at" : "is at",
+    "the prayer time ends at" : "the prayer time ends at",
+    "Performing prayers is a duty on the believers at the appointed times." : "Performing prayers is a duty on the believers at the appointed times.",
+    "am" : "am",
+    "pm" : "pm",
     "Prayer's Time" : "Prayer's Time",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
