@@ -281,7 +281,7 @@ class Calendar extends ExternalCalendar {
 
 	public function getUserTimeFormat(string $format_12_24): array {
 		if ($format_12_24 == CalculationService::TIME_FORMAT_12H) {
-			$timeFormat['suffixes'] = [ 'am' => $this->l10n->t('am'), 'pm' => $this->l10n->t('pm') ];
+			$timeFormat['suffixes'] = [ 'am' => $this->l10n->t('AM'), 'pm' => $this->l10n->t('PM') ];
 			$timeFormat['textFormat_12_24'] = 'g:i';
 		} else {
 			$timeFormat['suffixes'] = [ 'am' => '', 'pm' => '' ];
