@@ -7,8 +7,6 @@ OC.L10N.register(
     "is at" : "atá ag",
     "the prayer time ends at" : "críochnaíonn an t-am paidir ag",
     "Performing prayers is a duty on the believers at the appointed times." : "Tá sé de dhualgas ar na creidmhigh ag na hamanna ceaptha paidreacha a dhéanamh.",
-    "am" : "r.n.",
-    "pm" : "i.n.",
     "Prayer's Time" : "Am Urnaí",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
