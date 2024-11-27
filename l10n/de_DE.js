@@ -7,6 +7,8 @@ OC.L10N.register(
     "is at" : "ist um",
     "the prayer time ends at" : "Die Gebetszeit endet um",
     "Performing prayers is a duty on the believers at the appointed times." : "Für Gläubige ist es verpflichtend, zu den vorgeschriebenen Zeiten zu beten.",
+    "AM" : "AM",
+    "PM" : "PM",
     "Prayer's Time" : "Gebetszeit",
     "Ashura" : "Aschura",
     "Mawlid al-Nabi" : "Geburtstag des Propheten",

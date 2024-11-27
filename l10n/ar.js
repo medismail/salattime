@@ -7,6 +7,8 @@ OC.L10N.register(
     "is at" : "في ",
     "the prayer time ends at" : "وقت الصلاة ينتهي في",
     "Performing prayers is a duty on the believers at the appointed times." : "\"إنّ الصلاة كانت على المؤمنين كتاباً موقوتاً\"",
+    "AM" : "صباحاً",
+    "PM" : "مساءً",
     "Prayer's Time" : "وقت الصلاة",
     "Ashura" : "عاشوراء",
     "Mawlid al-Nabi" : "المولد النبوي الشريف",
