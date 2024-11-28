@@ -262,7 +262,7 @@ class Calendar extends ExternalCalendar {
 		$this->objectData[$date][$salat]['Summary'] = $this->l10n->t('Salat %s', [$tSalat]);
 		$endDate->setTimezone(new \DateTimeZone($config['TimeZone']));
 		$eDate->setTimezone(new \DateTimeZone($config['TimeZone']));
-		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('The Adhan for salat %s is at %s, the prayer time ends at %s.%sPerforming prayers is a duty on the believers at the appointed times.', [$tSalat, $eDate->format($config['TimeFormat']) . $config['suffixes'][$eDate->format('a')], $endDate->format($config['TimeFormat']) . $config['suffixes'][$endDate->format('a')], chr(0x0D).chr(0x0A)]);
+		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('The Adhan for salat %s is at %s, the prayer time ends at %s.', [$tSalat, $eDate->format($config['TimeFormat']) . $config['suffixes'][$eDate->format('a')], $endDate->format($config['TimeFormat']) . $config['suffixes'][$endDate->format('a')]]) .chr(0x0D).chr(0x0A). $this->l10n->t('Performing prayers is a duty on the believers at the appointed times.');
 		$this->objectData[$date][$salat]['Duration'] = "PT10M";
 		$this->objectData[$date][$salat]['Location'] = $config['Location'];
 		$this->objectData[$date][$salat]['Geo'] = 'GEO:' . $config['Geo'];
