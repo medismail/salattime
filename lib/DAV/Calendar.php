@@ -142,9 +142,13 @@ class Calendar extends ExternalCalendar {
 	public function calendarQuery(array $filters) {
 		$timeRange = $this->extractTimeRange($filters);
 		$startDateTime = new \DateTime('', new \DateTimezone('UTC'));
-		$endDateTime = new \DateTime('', new \DateTimezone('UTC'));
-		$startDateTime->setTimestamp($timeRange['start']->getTimestamp());
-		$endDateTime->setTimestamp($timeRange['end']->getTimestamp());
+		$endDateTime = new \DateTime('next year', new \DateTimezone('UTC'));
+		if ($timeRange['start']) {
+			$startDateTime->setTimestamp($timeRange['start']->getTimestamp());
+		}
+		if ($timeRange['end']) {
+			$endDateTime->setTimestamp($timeRange['end']->getTimestamp());
+		}
 		$co = $this->getCalendarObjectsFromTimeRange($startDateTime, $endDateTime);
 		return $co;
 	}
@@ -253,14 +257,12 @@ class Calendar extends ExternalCalendar {
 
 	private function fillCalendarObjectData(string $salat, \DateTime $eDate, \DateTime $endDate, array $config): string {
 		$date = $eDate->format('Ymd');
+		$tSalat = $this->l10n->t($salat);
 		$this->objectData[$date][$salat]['DTStart'] = $eDate->format('Ymd\THis\Z');
-		$this->objectData[$date][$salat]['Summary'] = $this->l10n->t('Salat') . ' ' . $this->l10n->t($salat);
+		$this->objectData[$date][$salat]['Summary'] = $this->l10n->t('Salat %s', [$tSalat]);
 		$endDate->setTimezone(new \DateTimeZone($config['TimeZone']));
 		$eDate->setTimezone(new \DateTimeZone($config['TimeZone']));
-		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('The Adhan for salat') . ' ' . $this->l10n->t($salat) . ' '
-			. $this->l10n->t('is at') . ' ' . $eDate->format($config['TimeFormat']) . $config['suffixes'][$eDate->format('a')] . ', '
-			. $this->l10n->t('the prayer time ends at') . ' ' . $endDate->format($config['TimeFormat']) . $config['suffixes'][$endDate->format('a')] . '. 
-' . $this->l10n->t('Performing prayers is a duty on the believers at the appointed times.');
+		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('The Adhan for salat %s is at %s, the prayer time ends at %s.%sPerforming prayers is a duty on the believers at the appointed times.', [$tSalat, $eDate->format($config['TimeFormat']) . $config['suffixes'][$eDate->format('a')], $endDate->format($config['TimeFormat']) . $config['suffixes'][$endDate->format('a')], chr(0x0D).chr(0x0A)]);
 		$this->objectData[$date][$salat]['Duration'] = "PT10M";
 		$this->objectData[$date][$salat]['Location'] = $config['Location'];
 		$this->objectData[$date][$salat]['Geo'] = 'GEO:' . $config['Geo'];

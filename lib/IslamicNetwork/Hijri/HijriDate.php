@@ -174,7 +174,8 @@ class HijriDate {
 	}
 
 	private function HijriToGregorian($m, $d, $y) {
-		return jd_to_cal(CAL_GREGORIAN, $this->HijriToJD($m, $d, $y));
+		//return jd_to_cal(CAL_GREGORIAN, $this->HijriToJD($m, $d, $y));
+		return $this->JDToGregorian($this->HijriToJD($m, $d, $y));
 	}
 
 	// Julian Day Count To Hijri
@@ -218,5 +219,31 @@ class HijriDate {
 		  F = 30.6001x(M+1)
 		  JD= C+D+E+F-1524.5*/
 		return (2 - (int)($Year / 100) + (int)($Year / 400) + $Day + (int)(365.25 * ($Year + 4716)) + (int)(30.6001 * ($Month + 1)) - 1524.5);
+	}
+
+	private function JDToGregorian($julian) {
+		$julian = $julian - 1721119;
+		$calc1 = 4 * $julian - 1;
+		$year = floor($calc1 / 146097);
+		$julian = floor($calc1 - 146097 * $year);
+		$day = floor($julian / 4);
+		$calc2 = 4 * $day + 3;
+		$julian = floor($calc2 / 1461);
+		$day = $calc2 - 1461 * $julian;
+		$day = floor(($day + 4) / 4);
+		$calc3 = 5 * $day - 3;
+		$month = floor($calc3 / 153);
+		$day = $calc3 - 153 * $month;
+		$day = floor(($day + 5) / 5);
+		$year = 100 * $year + $julian;
+
+		if ($month < 10) {
+			$month = $month + 3;
+		} else {
+			$month = $month - 9;
+			$year = $year + 1;
+		}
+
+		return array($month, $day, $year);
 	}
 }
