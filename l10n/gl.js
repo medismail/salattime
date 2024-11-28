@@ -7,6 +7,8 @@ OC.L10N.register(
     "is at" : "é ás",
     "the prayer time ends at" : "o tempo de oración remata ás",
     "Performing prayers is a duty on the believers at the appointed times." : "Realizar as oracións é un deber dos crentes nos momentos sinalados.",
+    "AM" : "a.m.",
+    "PM" : "p.m.",
     "Prayer's Time" : "Tempo de oración",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid do profeta",
