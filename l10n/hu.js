@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Szalát idő",
-    "Salat" : "Szalát",
     "Ashura" : "Ásúrá",
     "Mawlid al-Nabi" : "Maulid",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
@@ -44,6 +43,7 @@ OC.L10N.register(
     "Moonrise" : "Holdkelte",
     "Moonset" : "Holdnyugta",
     "DayLength" : "NapHossz",
+    "Salat" : "Szalát",
     "Time" : "Idő",
     "No result." : "Nincs találat.",
     "Error" : "Hiba",

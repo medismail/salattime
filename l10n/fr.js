@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "heure de prière",
-    "Salat" : "Prière",
     "Ashura" : "Asura",
     "Mawlid al-Nabi" : "Mawlid du Prophète",
     "Lailat-ul-Miraj" : "Nuit du Voyage Nocturne",
@@ -45,6 +44,7 @@ OC.L10N.register(
     "Moonrise" : "Lever de la lune",
     "Moonset" : "Coucher de la lune",
     "DayLength" : "Durée de jour",
+    "Salat" : "Prière",
     "Time" : "Heure",
     "No result." : "Aucun résultat.",
     "Error" : "Erreur",

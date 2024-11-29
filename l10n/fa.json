@@ -1,6 +1,5 @@
 { "translations": {
     "Salat Time" : "اوقات شرعی",
-    "Salat" : "نماز",
     "Ashura" : "عاشورا",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
@@ -43,6 +42,7 @@
     "Moonrise" : "طلوع ماه",
     "Moonset" : "غروب ماه",
     "DayLength" : "DayLength",
+    "Salat" : "نماز",
     "Time" : "زمان",
     "No result." : "بدون نتیجه.",
     "Error" : "خطا",

@@ -2,10 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "وقت الصلاة",
-    "Salat" : "الصلاة",
-    "The Adhan for salat" : "الأذان ",
-    "is at" : "في ",
-    "the prayer time ends at" : "وقت الصلاة ينتهي في",
     "Performing prayers is a duty on the believers at the appointed times." : "\"إنّ الصلاة كانت على المؤمنين كتاباً موقوتاً\"",
     "AM" : "صباحاً",
     "PM" : "مساءً",
@@ -52,6 +48,7 @@ OC.L10N.register(
     "Moonrise" : "طلوع القمر",
     "Moonset" : "غروب القمر",
     "DayLength" : "طول النهار",
+    "Salat" : "الصلاة",
     "Time" : "الوقت",
     "No result." : "لا توجد أي نتيجة",
     "Error" : "خطأ",

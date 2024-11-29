@@ -2,10 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Hora da oración",
-    "Salat" : "Oración (salat)",
-    "The Adhan for salat" : "A chamada á oración (azán)",
-    "is at" : "é ás",
-    "the prayer time ends at" : "o tempo de oración remata ás",
     "Performing prayers is a duty on the believers at the appointed times." : "Realizar as oracións é un deber dos crentes nos momentos sinalados.",
     "AM" : "a.m.",
     "PM" : "p.m.",
@@ -52,6 +48,7 @@ OC.L10N.register(
     "Moonrise" : "Saída da lúa",
     "Moonset" : "Posta da lúa",
     "DayLength" : "Duración do día",
+    "Salat" : "Oración (salat)",
     "Time" : "Hora",
     "No result." : "Sen resultados.",
     "Error" : "Erro",

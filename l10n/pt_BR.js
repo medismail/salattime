@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Hora do Salat",
-    "Salat" : "Salat",
     "Prayer's Time" : "Tempo de Oração",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
@@ -46,6 +45,7 @@ OC.L10N.register(
     "Moonrise" : "Nascer da lua",
     "Moonset" : "Pôr da lua",
     "DayLength" : "Duração do dia",
+    "Salat" : "Salat",
     "Time" : "Horário",
     "No result." : "Sem resultado.",
     "Error" : "Erro",

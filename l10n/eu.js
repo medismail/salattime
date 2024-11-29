@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Salat Ordua",
-    "Salat" : "Salat",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
@@ -45,6 +44,7 @@ OC.L10N.register(
     "Moonrise" : "Ilargiaren agertzea",
     "Moonset" : "Ilargiaren desagertzea",
     "DayLength" : "DayLength",
+    "Salat" : "Salat",
     "Time" : "Noiz",
     "No result." : "Emaitzarik ez.",
     "Error" : "Errorea",

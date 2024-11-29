@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Часове за ежедневна мюсулманска молитва\nПеткратен намаз",
-    "Salat" : "Намаз",
     "Ashura" : "Денят Ашуре",
     "Mawlid al-Nabi" : "Мевлид",
     "Lailat-ul-Miraj" : "Нощта Мирадж",
@@ -45,6 +44,7 @@ OC.L10N.register(
     "Moonrise" : "Изгряване на Луната",
     "Moonset" : "Залязване на Луната",
     "DayLength" : "Дължина на деня",
+    "Salat" : "Намаз",
     "Time" : "Час",
     "No result." : "Няма резултат.",
     "Error" : "Грешка",

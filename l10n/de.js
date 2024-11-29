@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Gebetszeit",
-    "Salat" : "Gebet",
     "Prayer's Time" : "Gebetszeit",
     "Ashura" : "Aschura",
     "Mawlid al-Nabi" : "Geburtstag des Propheten",
@@ -46,6 +45,7 @@ OC.L10N.register(
     "Moonrise" : "Mondaufgang",
     "Moonset" : "Monduntergang",
     "DayLength" : "Tageslänge",
+    "Salat" : "Gebet",
     "Time" : "Zeit",
     "No result." : "Kein Ergebnis.",
     "Error" : "Fehler",

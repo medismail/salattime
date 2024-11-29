@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Salat Time",
-    "Salat" : "Salat",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
@@ -45,6 +44,7 @@ OC.L10N.register(
     "Moonrise" : "Salida de la luna",
     "Moonset" : "Puesta de la luna",
     "DayLength" : "Duración del día",
+    "Salat" : "Salat",
     "Time" : "Hora",
     "No result." : "Sin resultados.",
     "Error" : "Error",

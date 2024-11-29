@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Namaz saati",
-    "Salat" : "Namaz",
     "Ashura" : "Aşura",
     "Mawlid al-Nabi" : "Mevlid Kandili",
     "Lailat-ul-Miraj" : "Miraç Kandili",
@@ -45,6 +44,7 @@ OC.L10N.register(
     "Moonrise" : "Ayın doğuşu",
     "Moonset" : "Ayın batışı",
     "DayLength" : "Gündüz",
+    "Salat" : "Namaz",
     "Time" : "Saat",
     "No result." : "Herhangi bir sonuç yok.",
     "Error" : "Hata",

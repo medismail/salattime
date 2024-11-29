@@ -2,7 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Салат време",
-    "Salat" : "Салат",
     "Prayer's Time" : "Време молитве",
     "Ashura" : "Ашура",
     "Mawlid al-Nabi" : "Малид ал-Наби",
@@ -46,6 +45,7 @@ OC.L10N.register(
     "Moonrise" : "Излазак месеца",
     "Moonset" : "Залазак месеца",
     "DayLength" : "Дужина обданице",
+    "Salat" : "Салат",
     "Time" : "Време",
     "No result." : "Нема резултата.",
     "Error" : "Грешка",

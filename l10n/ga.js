@@ -2,10 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Am Sailéad",
-    "Salat" : "Salainn",
-    "The Adhan for salat" : "An Adhan do salat",
-    "is at" : "atá ag",
-    "the prayer time ends at" : "críochnaíonn an t-am paidir ag",
     "Performing prayers is a duty on the believers at the appointed times." : "Tá sé de dhualgas ar na creidmhigh ag na hamanna ceaptha paidreacha a dhéanamh.",
     "AM" : "R.N.",
     "PM" : "I.N.",
@@ -52,6 +48,7 @@ OC.L10N.register(
     "Moonrise" : "Éirí na gealaí",
     "Moonset" : "Gealach",
     "DayLength" : "Fad Lae",
+    "Salat" : "Salainn",
     "Time" : "Am",
     "No result." : "Gan toradh.",
     "Error" : "Earráid",

@@ -2,10 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Gebetszeit",
-    "Salat" : "Gebet",
-    "The Adhan for salat" : "Der Adhan zum Gebet",
-    "is at" : "ist um",
-    "the prayer time ends at" : "Die Gebetszeit endet um",
     "Performing prayers is a duty on the believers at the appointed times." : "Für Gläubige ist es verpflichtend, zu den vorgeschriebenen Zeiten zu beten.",
     "AM" : "AM",
     "PM" : "PM",
@@ -52,6 +48,7 @@ OC.L10N.register(
     "Moonrise" : "Mondaufgang",
     "Moonset" : "Monduntergang",
     "DayLength" : "Tageslänge",
+    "Salat" : "Gebet",
     "Time" : "Zeit",
     "No result." : "Kein Ergebnis.",
     "Error" : "Fehler",
