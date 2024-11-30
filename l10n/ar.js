@@ -2,6 +2,8 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "وقت الصلاة",
+    "Salat %s" : "صلاة %s",
+    "The Adhan for salat %s is at %s, the prayer time ends at %s." : "موعد آذان %s عند %s, وينتهي وقت الصلاة عند %s.",
     "Performing prayers is a duty on the believers at the appointed times." : "\"إنّ الصلاة كانت على المؤمنين كتاباً موقوتاً\"",
     "AM" : "صباحاً",
     "PM" : "مساءً",
@@ -35,6 +37,7 @@ OC.L10N.register(
     "Shawwal" : "شوال",
     "Dhu al-Qadah" : "ذو القعدة",
     "Dhu al-Hijjah" : "ذو الحجة",
+    "The Adhan for salat %s." : "موعد آذان %s.",
     "H" : "هـ",
     "Unknown city" : "مدينة غير معروفة",
     "New Moon" : "مُحاق",

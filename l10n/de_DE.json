@@ -1,5 +1,7 @@
 { "translations": {
     "Salat Time" : "Gebetszeit",
+    "Salat %s" : "Gebet %s",
+    "The Adhan for salat %s is at %s, the prayer time ends at %s." : "Der Adhan zum Gebet %s ist um %s, die Gebetszeit endet um %s.",
     "Performing prayers is a duty on the believers at the appointed times." : "Für Gläubige ist es verpflichtend, zu den vorgeschriebenen Zeiten zu beten.",
     "AM" : "AM",
     "PM" : "PM",
@@ -33,6 +35,7 @@
     "Shawwal" : "Schawwal",
     "Dhu al-Qadah" : "Dhu l-qaʿda",
     "Dhu al-Hijjah" : "Dhū l-Hiddscha",
+    "The Adhan for salat %s." : "Der Adhan zum Gebet %s.",
     "H" : "H",
     "Unknown city" : "Unbekannte Stadt",
     "New Moon" : "Neumond",
