@@ -80,9 +80,9 @@ class Notifier implements \OCP\Notification\INotifier {
 					throw new \InvalidArgumentException();
 				} else {
 					$params = $notification->getSubjectParameters();
-                    $tSalat = $l->t($notification->getObjectId());
+					$tSalat = $l->t($notification->getObjectId());
 					$notification->setParsedSubject($l->t('The Adhan for salat %s.', [$tSalat]))
-                            ->setParsedMessage($l->t('The Adhan for salat %s is at %s, the prayer time ends at %s.', [$tSalat, $params[0], $params[1]]) .chr(0x0D).chr(0x0A). $l->t('Performing prayers is a duty on the believers at the appointed times.'));
+							->setParsedMessage($l->t('The Adhan for salat %s is at %s, the prayer time ends at %s.', [$tSalat, $params[0], $params[1]]) .chr(0x0D).chr(0x0A). $l->t('Performing prayers is a duty on the believers at the appointed times.'));
 					$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 					return $notification;
 				}

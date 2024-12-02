@@ -31,6 +31,7 @@ use OCA\SalatTime\AppInfo\Application;
 use OCA\SalatTime\Service\CalculationService;
 use OCA\DAV\CalDAV\Integration\ExternalCalendar;
 use OCA\DAV\CalDAV\Integration\ICalendarProvider;
+use OCP\ICacheFactory;
 use OCP\IL10N;
 
 class CalendarPlugin implements ICalendarProvider {
@@ -40,11 +41,15 @@ class CalendarPlugin implements ICalendarProvider {
 	/** @var CalculationService */
 	protected $calculationService;
 
+	/** @var ICache */
+	private $cache;
+
 	/** @var IL10N */
 	private $l10n;
 
-	public function __construct(CalculationService $calculationService, IL10N $l) {
+	public function __construct(CalculationService $calculationService, ICacheFactory $cacheFactory, IL10N $l) {
 		$this->calculationService = $calculationService;
+		$this->cache = $cacheFactory->createLocal(self::prayertimeCalendar);
 		$this->l10n = $l;
 	}
 
@@ -55,7 +60,7 @@ class CalendarPlugin implements ICalendarProvider {
 	public function fetchAllForCalendarHome(string $principalUri): array {
 		if ($this->calculationService->getUserCalendar(basename($principalUri)) == "true") {
 			return [
-				new Calendar($principalUri, self::prayertimeCalendar, $this->calculationService, $this->l10n),
+				new Calendar($principalUri, self::prayertimeCalendar, $this->calculationService, $this->cache, $this->l10n),
 			];
 		}
 
@@ -72,7 +77,7 @@ class CalendarPlugin implements ICalendarProvider {
 
 	public function getCalendarInCalendarHome(string $principalUri, string $calendarUri): ?ExternalCalendar {
 		if ($this->hasCalendarInCalendarHome($principalUri, $calendarUri)) {
-			return new Calendar($principalUri, $calendarUri, $this->calculationService, $this->l10n);
+			return new Calendar($principalUri, $calendarUri, $this->calculationService, $this->cache, $this->l10n);
 		}
 
 		return null;

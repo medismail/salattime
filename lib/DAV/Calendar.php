@@ -31,6 +31,7 @@ use OCA\SalatTime\AppInfo\Application;
 use OCA\SalatTime\Service\CalculationService;
 use OCA\DAV\CalDAV\Integration\ExternalCalendar;
 use OCA\DAV\CalDAV\Plugin;
+use OCP\ICache;
 use OCP\IL10N;
 use Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet;
 use Sabre\DAV\PropPatch;
@@ -63,6 +64,9 @@ class Calendar extends ExternalCalendar {
 	/** @var string */
 	private $calendarColor;
 
+	/** @var ICache */
+	private $cache;
+
 	/** @var IL10N */
 	private $l10n;
 
@@ -72,14 +76,16 @@ class Calendar extends ExternalCalendar {
 	 * @param string $principalUri
 	 * @param string $calendarUri
 	 * @param CalculationService $calculationService
+	 * @param ICache $cache
 	 * @param IL10N $l
 	 */
-	public function __construct(string $principalUri, string $calendarUri, CalculationService $calculationService, IL10N $l) {
+	public function __construct(string $principalUri, string $calendarUri, CalculationService $calculationService, ICache $cache, IL10N $l) {
 		parent::__construct(Application::APP_ID, $calendarUri);
 
 		$this->principalUri = $principalUri;
 		$this->calendarUri = $calendarUri;
 		$this->calculationService = $calculationService;
+		$this->cache = $cache;
 		$this->l10n = $l;
 		$this->calendarName = $this->getCalendarName($calendarUri);
 		$this->calendarColor = $this->getCalendarColor($calendarUri);
@@ -172,11 +178,19 @@ class Calendar extends ExternalCalendar {
 	public function childExists($name) {
 		//return preg_match('/^salat_\d{4}-\d{2}-\d{2}\.ics$/', $name);
 		$parts = explode('_', substr($name, 0, -4));
-		if ((count($parts) === 2) && ($this->objectData) && ($this->objectData[$parts[1]])) {
+		if ((count($parts) === 2) && ($this->objectData) && (isset($this->objectData[$parts[1]]))) {
 			return true;
+		} else {
+			$cacheKey = $this->principalUri . '/' . $parts[1];
+			$cacheValue = $this->cache->get($cacheKey);
+			if ($cacheValue !== null) {
+				$this->objectData[$parts[1]] = $cacheValue;
+				return true;
+			}
 		}
+
 		$logger = \OC::$server->getLogger();
-		$logger->error("Child name={$name}.", ['app' => 'salattime']);
+		$logger->error("Child name={$name}, user={$this->principalUri}.", ['app' => 'salattime']);
 		return false;
 	}
 
@@ -197,30 +211,6 @@ class Calendar extends ExternalCalendar {
 	public function getEventData(int $date, string $salat): array {
 		return $this->objectData[$date][$salat];
 	}
-
-	/*public function getEventDate(int $date, string $salat): string {
-		return $this->objectData[$date][$salat]['DTStart'];
-	}
-
-	public function getEventSummary(int $date, string $salat): string {
-		return $this->objectData[$date][$salat]['Summary'];
-	}
-
-	public function getEventDescription(int $date, string $salat):?string {
-		return $this->objectData[$date][$salat]['Description'];
-	}
-
-	public function getEventLocation(int $date, string $salat):?string {
-		return $this->objectData[$date][$salat]['Location'];
-	}
-
-	public function getEventDuration(int $date, string $salat):?string {
-		return $this->objectData[$date][$salat]['Duration'];
-	}
-
-	public function getEventGeo(int $date, string $salat):?string {
-		return $this->objectData[$date][$salat]['Geo'];
-	}*/
 
 	private function getCalendarObjectsFromTimeRange(\DateTime $startDateTime, \DateTime $endDateTime): array {
 		$extendStartDateTime = new \DateTime('', new \DateTimezone('UTC'));
@@ -247,6 +237,7 @@ class Calendar extends ExternalCalendar {
 				}
 			}
 		}
+		$this->updateCache();
 
 		$logger = \OC::$server->getLogger();
 		$logger->error("Extracted Time Range: Start={$startDateTime->format('Y-m-d H:i:s')} and End={$endDateTime->format('Y-m-d H:i:s')}.", ['app' => 'salattime']);
@@ -265,7 +256,7 @@ class Calendar extends ExternalCalendar {
 		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('The Adhan for salat %s is at %s, the prayer time ends at %s.', [$tSalat, $eDate->format($config['TimeFormat']) . $config['suffixes'][$eDate->format('a')], $endDate->format($config['TimeFormat']) . $config['suffixes'][$endDate->format('a')]]) .chr(0x0D).chr(0x0A). $this->l10n->t('Performing prayers is a duty on the believers at the appointed times.');
 		$this->objectData[$date][$salat]['Duration'] = "PT10M";
 		$this->objectData[$date][$salat]['Location'] = $config['Location'];
-		$this->objectData[$date][$salat]['Geo'] = 'GEO:' . $config['Geo'];
+		$this->objectData[$date][$salat]['Geo'] = $config['Geo'];
 		return "{$salat}_{$date}.ics";
 	}
 
@@ -341,6 +332,13 @@ class Calendar extends ExternalCalendar {
 			}
 		}
 		return null;
+	}
+
+	private function updateCache() {
+		foreach ($this->objectData as $eDate => $eData) {
+			$cacheKey = $this->principalUri . '/' . $eDate;
+			$this->cache->set($cacheKey, $eData, 3600);
+		}
 	}
 
 	private function getCalendarName(string $calendarUri):?string {
