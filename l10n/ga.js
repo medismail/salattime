@@ -2,6 +2,8 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Am Sailéad",
+    "Salat %s" : "Salat %s",
+    "The Adhan for salat %s is at %s, the prayer time ends at %s." : "Tá an Adhan do salat%s ag %s, críochnaíonn an t-am urnaí ag %s.",
     "Performing prayers is a duty on the believers at the appointed times." : "Tá sé de dhualgas ar na creidmhigh ag na hamanna ceaptha paidreacha a dhéanamh.",
     "AM" : "R.N.",
     "PM" : "I.N.",
@@ -35,6 +37,7 @@ OC.L10N.register(
     "Shawwal" : "Shawwal",
     "Dhu al-Qadah" : "Dhu al-Qadah",
     "Dhu al-Hijjah" : "Dhu al-Hijjah",
+    "The Adhan for salat %s." : "An Adhan do salat %s.",
     "H" : "H",
     "Unknown city" : "Cathair anaithnid",
     "New Moon" : "Gealach nua",

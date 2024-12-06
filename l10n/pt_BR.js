@@ -2,6 +2,7 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "Hora do Salat",
+    "Salat %s" : "Salat %s",
     "Prayer's Time" : "Tempo de Oração",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
