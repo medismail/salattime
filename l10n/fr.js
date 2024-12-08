@@ -2,6 +2,8 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "heure de prière",
+    "AM" : "AM",
+    "PM" : "PM",
     "Ashura" : "Asura",
     "Mawlid al-Nabi" : "Mawlid du Prophète",
     "Lailat-ul-Miraj" : "Nuit du Voyage Nocturne",
