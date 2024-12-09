@@ -2,6 +2,7 @@ OC.L10N.register(
     "salattime",
     {
     "Salat Time" : "heure de prière",
+    "Salat %s" : "Salat %s",
     "AM" : "AM",
     "PM" : "PM",
     "Ashura" : "Asura",
@@ -108,6 +109,7 @@ OC.L10N.register(
     "Prayer Time" : "Temps de prière",
     "Adjustments" : "Ajustements",
     "Settings" : "Paramètres",
-    "Enable notification" : "Activer les notifications"
+    "Enable notification" : "Activer les notifications",
+    "Enable Calendar" : "Activer Agenda"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
