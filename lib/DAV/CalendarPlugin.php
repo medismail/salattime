@@ -38,6 +38,9 @@ class CalendarPlugin implements ICalendarProvider {
 	/** @const prayertimeCalendar */
 	private const prayertimeCalendar = 'prayertime-cal';
 
+	/** @const hijriCalendar */
+	private const hijriCalendar = 'hijri-cal';
+
 	/** @var CalculationService */
 	protected $calculationService;
 
@@ -60,6 +63,7 @@ class CalendarPlugin implements ICalendarProvider {
 	public function fetchAllForCalendarHome(string $principalUri): array {
 		if ($this->calculationService->getUserCalendar(basename($principalUri)) == "true") {
 			return [
+				new Calendar($principalUri, self::hijriCalendar, $this->calculationService, $this->cache, $this->l10n),
 				new Calendar($principalUri, self::prayertimeCalendar, $this->calculationService, $this->cache, $this->l10n),
 			];
 		}
@@ -69,7 +73,7 @@ class CalendarPlugin implements ICalendarProvider {
 
 	public function hasCalendarInCalendarHome(string $principalUri, string $calendarUri): bool {
 		if ($this->calculationService->getUserCalendar(basename($principalUri)) == "true") {
-			return $calendarUri === self::prayertimeCalendar;
+			return $calendarUri === self::prayertimeCalendar || $calendarUri === self::hijriCalendar;
 		}
 
 		return false;

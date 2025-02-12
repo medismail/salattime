@@ -117,11 +117,13 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 			$eData = $this->calendar->getEventData($Data[1], $Data[0]);
 			$event = $calendar->createComponent('VEVENT');
 			$event->UID = $name;
-			$event->DTSTAMP = $eData['DTStart'];   //gmdate('Ymd\\THis\\Z');
+			$event->DTSTAMP = $eData['DTStamp'];   //gmdate('Ymd\\THis\\Z');
 			$event->DTSTART = $eData['DTStart'];
+			$event->DTSTART['VALUE'] = $eData['DTStartValue'];
 			$event->SUMMARY = $eData['Summary'];
 			$event->DESCRIPTION = $eData['Description'];
 			$event->DURATION = $eData['Duration'];
+			$event->TRANSP = $eData['Transp'];
 			$event->LOCATION = $eData['Location'];
 			$event->GEO = $eData['Geo'];
 			$calendar->add($event);

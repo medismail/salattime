@@ -410,6 +410,34 @@ class CalculationService {
 	}
 
 	/**
+	 * get Hijri dates from known date range
+	 *
+	 * @param string userId
+	 * @param DateTime startDate
+	 * @param DateTime endDate
+	 * @return array Full Hijri dates for multidays in specific date
+	 */
+	public function getHijriDatesFromDate(string $userId, DateTime $startDate, DateTime $endDate): array {
+		$adjustments = $this->configService->getAdjustmentsValue($userId);
+		$interval = DateInterval::createFromDateString('1 day');
+		$dateRange = new DatePeriod($startDate, $interval, $endDate, DatePeriod::INCLUDE_END_DATE);
+
+		$times = [];
+		foreach ($dateRange as $curDate) {
+			//$curDate->format('d-m-Y H:i:s');
+			$strDate = $curDate->format('Ymd\THis\Z');
+			$hijri = new HijriDate(strtotime($strDate), $this->l10n);
+			if ($adjustments['day'] != "") {
+				$hijri->tune($adjustments['day']);
+			}
+			$curTime = [$strDate, $hijri->get_day_name(), $hijri->get_day(), $hijri->get_month_name(), $hijri->get_month(), $hijri->get_year()];
+			$times[] = $curTime;
+		}
+
+		return $times;
+	}
+
+	/**
 	 * getDayLength Caclulate day length
 	 * @param string sunrise
 	 * @param string sunset
