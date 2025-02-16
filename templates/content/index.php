@@ -4,22 +4,22 @@
       <h2 style="font-family:Arial;"><span id="hijri-date"><?php echo $_['Hijri']; ?></span></h2>
     </section>
     <section id="day-info">
-        <h2>Location</h2>
+        <h2><?php echo $l->t('Location'); ?></h2>
         <p><?php echo $l->t('City'); ?>:  &emsp;<span id="city"><?php echo $_['City']; ?></span></p>
         <br>
         <?php if ($_['SpecialDay']) {
         	echo "<p>", $l->t('Today is'), ": &emsp; <b>", $_['SpecialDay'], '</b></p><br>';
         } ?>
         <!-- Prayer Times Table -->
-        <h2>Prayer Times</h2>
+        <h2><?php echo $l->t('Prayer Times'); ?></h2>
         <p><span id="next"><?php echo $l->t('Next') . ": <b>" . $l->t($_['Salat']) . "</b> " . $l->t('after') . ": <b>" . $_['Remain'] . '</b><br>'; ?></span></p>
         <?php $gback = [ 'Fajr' => "", 'Dhuhr' => "", 'Asr' => "", 'Maghrib' => "", 'Isha' => "", ];
-        $gback[$_['Salat']] = " style=\"background: gray;\""; ?>
+        $gback[$_['Salat']] = " style=\"background: gray; font-weight: bold;\""; ?>
         <table>
             <thead>
                 <tr>
-                    <th>Prayer</th>
-                    <th>Time</th>
+                    <th><?php echo $l->t('Salat'); ?></th>
+                    <th><?php echo $l->t('Time'); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -53,7 +53,7 @@
             </tbody>
         </table>
         <br>
-        <h2>Day Information</h2>
+        <h2><?php echo $l->t('Day Information'); ?></h2>
         <p><?php echo $l->t('Day length'); ?>:  &emsp;  <span id="moonset"><?php echo $_['DayLength']; ?></span></p>
         <?php if ($_['Imsak'] != "") {
         	echo '<p>', $l->t('Imsak') . ":&emsp;&emsp;&emsp;&emsp;<span id=\"imsak\">", $_['Imsak'], '</span></p>';
@@ -83,7 +83,7 @@
 
     <!-- Moon and Sun Section -->
     <section id="moon-sun">
-        <h2>Moon and Sun Information</h2>
+        <h2><?php echo $l->t('Moon and Sun Information'); ?></h2>
         <p><?php echo $l->t('Moon\'s illuminated fraction'); ?>: &emsp;<span id="moon-illuminated-fraction" style="float:right;"><?php echo $_['IlluminatedFraction']; ?>%</span></p>
         <p><?php echo $l->t('Moon Phase'); ?>: &emsp;<span id="moon-phase" style="float:right;"><?php echo $_['MoonPhase']; ?></span></p>
         <p><?php echo $l->t('Moon\'s ecliptic phase angle'); ?>: &emsp;<span id="moon-phase-angle" style="float:right;"><?php echo $_['MoonPhaseAngle']; ?> <?php echo $l->t('degrees'); ?></span></p>

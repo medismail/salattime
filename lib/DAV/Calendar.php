@@ -381,7 +381,7 @@ class Calendar extends ExternalCalendar {
 
 	private function getCalendarName(string $calendarUri):?string {
 		if ($calendarUri == self::prayertimeCalendar) {
-			return $this->l10n->t('Prayer\'s Time');
+			return $this->l10n->t('Prayer Times');
 		} elseif ($calendarUri == self::hijriCalendar) {
 			return $this->l10n->t('Hijri Date');
 		}
