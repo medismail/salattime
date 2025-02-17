@@ -4,6 +4,7 @@ OC.L10N.register(
     "Time" : "වේලාව",
     "Error" : "දෝෂය",
     "Day" : "දිනය",
+    "Location" : "ස්ථානය",
     "Next" : "ඊළඟ",
     "Sunrise" : "ඉර නැගීම",
     "Sunset" : "ඉර බැසීම",

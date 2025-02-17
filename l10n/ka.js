@@ -4,6 +4,7 @@ OC.L10N.register(
     "Time" : "Time",
     "Error" : "Error",
     "Day" : "Day",
+    "Location" : "Location",
     "Next" : "Next",
     "after" : "after",
     "Sunrise" : "Sunrise",

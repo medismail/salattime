@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Cap de resultat.",
     "Error" : "Error",
     "Day" : "Jorn",
+    "Location" : "Emplaçament",
     "Next" : "Seguent",
     "after" : "aprèp",
     "Qatar" : "Qatar",

@@ -13,6 +13,7 @@ OC.L10N.register(
     "No result." : "Nėra rezultatų.",
     "Error" : "Klaida",
     "Day" : "Diena",
+    "Location" : "Vieta",
     "Next" : "Kitas",
     "after" : "po",
     "Sunrise" : "Saulėtekis",

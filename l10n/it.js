@@ -29,6 +29,7 @@ OC.L10N.register(
     "Asr" : "Asr",
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
+    "Location" : "Luogo",
     "Next" : "Successivo",
     "after" : "dopo",
     "Imsak" : "Imsak",

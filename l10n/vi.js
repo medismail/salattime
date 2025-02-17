@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Không có kết quả",
     "Error" : "Lỗi",
     "Day" : "Ngày",
+    "Location" : "Vị trí",
     "Next" : "Tiếp theo",
     "after" : "sau khi",
     "Sunrise" : "Bình minh",

@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Ni zadetkov",
     "Error" : "Napaka",
     "Day" : "Dan",
+    "Location" : "Mesto",
     "Next" : "Naslednji",
     "after" : "po",
     "Day length" : "Dolžina dneva",
@@ -29,7 +30,6 @@ OC.L10N.register(
     "Tunisia" : "Tunizija",
     "Morocco" : "Maroko",
     "Algeria" : "Alžirija",
-    "Prayer Time" : "Čas molitve",
     "Adjustments" : "Prilagoditve",
     "Settings" : "Nastavitve",
     "Enable notification" : "Omogoči opomnik"

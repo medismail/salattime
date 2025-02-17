@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Engar niðurstöður.",
     "Error" : "Villa",
     "Day" : "Dagur",
+    "Location" : "Staðsetning",
     "Next" : "Næsta",
     "after" : "eftir",
     "Sunrise" : "Sólris",

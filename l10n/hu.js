@@ -53,6 +53,7 @@ OC.L10N.register(
     "Asr" : "Asr",
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
+    "Location" : "Hely",
     "Today is" : "Ma",
     "Next" : "Következő",
     "after" : "után",
@@ -94,7 +95,6 @@ OC.L10N.register(
     "Spiritual Administration of Muslims of Russia" : "Az oroszországi muszlimok spirituális igazgatása",
     "Union of Islamic Organizations of France (UOIF)" : "Franciaországi Iszlám Szervezetek Szövetsége (UOIF)",
     "Majlis Ugama Islam Singapura, Singapore" : "Szingapúri Iszlám Vallási Tanács, Szingapúr",
-    "Prayer Time" : "Imaidő",
     "Adjustments" : "Igazítás",
     "Settings" : "Beállítások",
     "Enable notification" : "Értesítés engedélyezése"

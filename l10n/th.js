@@ -4,6 +4,7 @@ OC.L10N.register(
     "Time" : "เวลา",
     "Error" : "ข้อผิดพลาด",
     "Day" : "วัน",
+    "Location" : "ตำแหน่ง",
     "Next" : "ถัดไป",
     "after" : "หลัง",
     "Sunrise" : "อาทิตย์ขึ้น",

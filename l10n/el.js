@@ -11,6 +11,7 @@ OC.L10N.register(
     "No result." : "Κανένα αποτέλεσμα.",
     "Error" : "Σφάλμα",
     "Day" : "Ημέρα",
+    "Location" : "Τοποθεσία",
     "Today is" : "Σήμερα είναι",
     "Next" : "Επόμενο",
     "after" : "μετά",
@@ -27,7 +28,6 @@ OC.L10N.register(
     "Morocco" : "Μαρόκο",
     "Algeria" : "Αλγερία",
     "Spiritual Administration of Muslims of Russia" : "Πνευματική Διοίκηση των Μουσουλμάνων της Ρωσίας",
-    "Prayer Time" : "Ώρα Προσευχής",
     "Settings" : "Ρυθμίσεις",
     "Enable notification" : "Ενεργοποίηση ειδοποιήσεων"
 },

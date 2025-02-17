@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Salat Time" : "Hora do Salat",
     "Salat %s" : "Salat %s",
-    "Prayer's Time" : "Tempo de Oração",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid al-Nabi",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
@@ -58,6 +57,7 @@ OC.L10N.register(
     "Asr" : "Asr",
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
+    "Location" : "Localização",
     "City" : "Cidade",
     "Today is" : "Hoje é",
     "Next" : "Próxima",
@@ -109,7 +109,6 @@ OC.L10N.register(
     "Union of Islamic Organizations of France (UOIF)" : "União das Organizações Islâmicas da França (UOIF)",
     "Comunidade Islamica de Lisboa" : "Comunidade Islamica de Lisboa",
     "Majlis Ugama Islam Singapura, Singapore" : "Majlis Ugama Islam Singapura, Singapore",
-    "Prayer Time" : "Horário da oração",
     "Adjustments" : "Ajustes",
     "Settings" : "Configurações",
     "Enable notification" : "Habilitar notificação",

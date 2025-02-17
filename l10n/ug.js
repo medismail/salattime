@@ -56,6 +56,7 @@ OC.L10N.register(
     "Asr" : "ئەسر",
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
+    "Location" : "ئورنى",
     "City" : "شەھەر",
     "Today is" : "بۈگۈن",
     "Next" : "كېيىنكى",
@@ -103,7 +104,6 @@ OC.L10N.register(
     "Spiritual Administration of Muslims of Russia" : "روسىيە مۇسۇلمانلىرىنى مەنىۋى باشقۇرۇش",
     "Union of Islamic Organizations of France (UOIF)" : "فرانسىيە ئىسلام تەشكىلاتلىرى بىرلەشمىسى (UOIF)",
     "Majlis Ugama Islam Singapura, Singapore" : "مەجلىس ئۇگاما ئىسلام سىنگاپور ، سىنگاپور",
-    "Prayer Time" : "ناماز ۋاقتى",
     "Adjustments" : "تەڭشەش",
     "Settings" : "تەڭشەكلەر",
     "Enable notification" : "ئۇقتۇرۇشنى قوزغىتىڭ"

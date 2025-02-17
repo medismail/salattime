@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Nav iznākuma.",
     "Error" : "Kļūda",
     "Day" : "Diena",
+    "Location" : "Atrašanās vieta",
     "Next" : "Nākamā",
     "after" : "pēc",
     "Sunrise" : "Saullēkts",

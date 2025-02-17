@@ -55,6 +55,7 @@ OC.L10N.register(
     "Asr" : "Asr",
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
+    "Location" : "Ubicación",
     "Today is" : "Hoy es",
     "Next" : "Siguiente",
     "after" : "después",
@@ -98,7 +99,6 @@ OC.L10N.register(
     "Spiritual Administration of Muslims of Russia" : "Administración Espiritual de Musulmanes de Rusia",
     "Union of Islamic Organizations of France (UOIF)" : "Unión de Organizaciones Islámicas de Francia (UOIF)",
     "Majlis Ugama Islam Singapura, Singapore" : "Majlis Ugama Islam Singapura, Singapur",
-    "Prayer Time" : "Horario de Oración",
     "Adjustments" : "Ajustes",
     "Settings" : "Ajustes",
     "Enable notification" : "Habilitar notificaciones"

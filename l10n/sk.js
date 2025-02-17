@@ -46,6 +46,7 @@ OC.L10N.register(
     "Asr" : "Podmanivý",
     "Maghrib" : "Večer",
     "Isha" : "Večera",
+    "Location" : "Miesto",
     "City" : "Mesto",
     "Today is" : "Dnes je",
     "Next" : "Ďalšie",

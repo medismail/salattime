@@ -4,6 +4,7 @@ OC.L10N.register(
     "Time" : "Zäit",
     "Error" : "Fehler",
     "Day" : "Dag",
+    "Location" : "Uert",
     "Next" : "Weider",
     "after" : "No",
     "Sunrise" : "Sonnenopgang",

@@ -98,7 +98,6 @@ OC.L10N.register(
     "Spiritual Administration of Muslims of Russia" : "Духовно управление на мюсюлманите в Русия",
     "Union of Islamic Organizations of France (UOIF)" : "Съюз на ислямските организации на Франция (UOIF)",
     "Majlis Ugama Islam Singapura, Singapore" : "Меджлис Угама Ислам Сингапура, Сингапур",
-    "Prayer Time" : "Час за молитва",
     "Adjustments" : "Корекции",
     "Settings" : "Настройки",
     "Enable notification" : "Разрешаване на известие"

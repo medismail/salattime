@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Niciun rezultat.",
     "Error" : "Eroare",
     "Day" : "Zi",
+    "Location" : "Locație",
     "Next" : "Următorul",
     "after" : "după",
     "Sunrise" : "Răsărit",

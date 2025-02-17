@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Nenia rezulto.",
     "Error" : "Eraro",
     "Day" : "Tago",
+    "Location" : "Loko",
     "Next" : "Sekva",
     "after" : "post",
     "Sunrise" : "Sunleviĝo",

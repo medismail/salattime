@@ -5,6 +5,7 @@ OC.L10N.register(
     "No result." : "Inga resultat.",
     "Error" : "Fel",
     "Day" : "Dag",
+    "Location" : "Plats",
     "Next" : "Nästa",
     "after" : "efter",
     "Sunrise" : "Soluppgång",
