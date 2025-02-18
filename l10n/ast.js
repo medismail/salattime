@@ -29,6 +29,7 @@ OC.L10N.register(
     "No result." : "Nun hai nengún resultáu.",
     "Error" : "Error",
     "Day" : "Día",
+    "Location" : "Llocalización",
     "City" : "Ciudá",
     "Today is" : "Güei ye",
     "Next" : "Siguiente",

@@ -1,0 +1,10 @@
+{ "translations": {
+    "Time" : "Цаг",
+    "Error" : "Алдаа",
+    "Day" : "Өдөр",
+    "Location" : "Байршил",
+    "Next" : "дараагийх",
+    "after" : "дараа",
+    "Settings" : "Тохиргоо"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}
