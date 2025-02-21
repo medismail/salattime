@@ -6,6 +6,7 @@ OC.L10N.register(
     "Error" : "Fejl",
     "Show 5 times prayer." : "Vis 5 gange bøn.",
     "Day" : "Dag",
+    "Location" : "Placering",
     "Next" : "Næste",
     "after" : "efter",
     "Sunrise" : "Solskin",
