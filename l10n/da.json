@@ -1,4 +1,5 @@
 { "translations": {
+    "Hijri Date" : "Hijri Dato",
     "Time" : "Tid",
     "No result." : "Intet resultat",
     "Error" : "Fejl",
@@ -7,8 +8,10 @@
     "Location" : "Placering",
     "Next" : "Næste",
     "after" : "efter",
+    "Day Information" : "Dag Information",
     "Sunrise" : "Solskin",
     "Sunset" : "Solnedgang",
+    "Moon and Sun Information" : "Måne og Sol Information",
     "Timezone:" : "Tidszone:",
     "Qatar" : "Qatar",
     "Kuwait" : "Kuwait",
