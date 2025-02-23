@@ -1,7 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
-    "Hijri Date" : "Hijri Dato",
+    "Hijri Date" : "Hijri dato",
     "Time" : "Tid",
     "No result." : "Intet resultat",
     "Error" : "Fejl",
@@ -10,10 +10,10 @@ OC.L10N.register(
     "Location" : "Placering",
     "Next" : "Næste",
     "after" : "efter",
-    "Day Information" : "Dag Information",
+    "Day Information" : "Dag information",
     "Sunrise" : "Solskin",
     "Sunset" : "Solnedgang",
-    "Moon and Sun Information" : "Måne og Sol Information",
+    "Moon and Sun Information" : "Måne og sol information",
     "Timezone:" : "Tidszone:",
     "Qatar" : "Qatar",
     "Kuwait" : "Kuwait",
