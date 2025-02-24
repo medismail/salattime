@@ -189,7 +189,7 @@ class Calendar extends ExternalCalendar {
 		if ((count($parts) === 2) && ($this->objectData) && (isset($this->objectData[$parts[1]]))) {
 			return true;
 		} else {
-			$cacheKey = $this->principalUri . '/' . $parts[1];
+			$cacheKey = $this->principalUri . '/' . $this->calendarUri . '/' . $parts[1];
 			$cacheValue = $this->cache->get($cacheKey);
 			if ($cacheValue !== null) {
 				$this->objectData[$parts[1]] = $cacheValue;
@@ -198,7 +198,7 @@ class Calendar extends ExternalCalendar {
 		}
 
 		/*$logger = \OC::$server->getLogger();
-		$logger->error("Child name={$name}, user={$this->principalUri}.", ['app' => 'salattime']);*/
+		$logger->error("Child name={$name}, user={$this->principalUri}, calendar={$this->calendarUri}.", ['app' => 'salattime']);*/
 		return false;
 	}
 
@@ -216,8 +216,8 @@ class Calendar extends ExternalCalendar {
 		return null;
 	}
 
-	public function getEventData(int $date, string $salat): array {
-		return $this->objectData[$date][$salat];
+	public function getEventData(int $date, string $event): array {
+		return $this->objectData[$date][$event];
 	}
 
 	private function getSTCalendarObjectsFromTimeRange(\DateTime $startDateTime, \DateTime $endDateTime): array {
@@ -270,12 +270,12 @@ class Calendar extends ExternalCalendar {
 	private function getHDCalendarObjectsFromTimeRange(\DateTime $startDateTime, \DateTime $endDateTime): array {
 		$extendStartDateTime = new \DateTime('', new \DateTimezone('UTC'));
 		$extendEndDateTime = new \DateTime('', new \DateTimezone('UTC'));
-		$extendStartDateTime->setTimestamp($startDateTime->getTimestamp() - self::HOURS_13_TO_SECONDS);
-		$extendEndDateTime->setTimestamp($endDateTime->getTimestamp() + self::HOURS_13_TO_SECONDS);
+		$extendStartDateTime->setTimestamp($startDateTime->getTimestamp());
+		$extendEndDateTime->setTimestamp($endDateTime->getTimestamp());
 		$times = $this->calculationService->getHijriDatesFromDate(basename($this->principalUri), $extendStartDateTime, $extendEndDateTime);
 		$co = [];
-		foreach ($times as $id => $day) {
-			$co[] = $this->fillHDCalendarObjectData($day);
+		foreach ($times as $id => $dayData) {
+			$co[] = $this->fillHDCalendarObjectData($dayData);
 		}
 		$this->updateCache();
 
