@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Error" : "Fazi",
     "Day" : "Deiz",
+    "Location" : "Lec'hiadur",
     "Next" : "Da heul",
     "after" : "goude",
     "Qatar" : "Katar",
