@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1
+### Fixed
+- Missing js files
+
 ## 0.7.0
 ### Added
 - Calendar Inetgration to NextCloud
