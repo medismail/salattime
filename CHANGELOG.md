@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.2
+### Fixed
+- Enable Calendar button
+
 ## 0.7.1
 ### Fixed
 - Missing js files
