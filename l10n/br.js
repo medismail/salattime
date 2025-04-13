@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "No result." : "Disoc'h ebet.",
     "Error" : "Fazi",
     "Day" : "Deiz",
     "Location" : "Lec'hiadur",
