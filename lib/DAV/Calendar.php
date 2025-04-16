@@ -275,19 +275,23 @@ class Calendar extends ExternalCalendar {
 		$times = $this->calculationService->getHijriDatesFromDate(basename($this->principalUri), $extendStartDateTime, $extendEndDateTime);
 		$co = [];
 		foreach ($times as $id => $dayData) {
-			$co[] = $this->fillHDCalendarObjectData($dayData);
+			$spday = '';
+			if ($dayData[6]) {
+				$spday = ' (' . $dayData[6] .')';
+			}
+			$co[] = $this->fillHDCalendarObjectData($dayData, $spday);
 		}
 		$this->updateCache();
 
 		return $co;
 	}
 
-	private function fillHDCalendarObjectData(array $eData): string {
+	private function fillHDCalendarObjectData(array $eData, string $spday): string {
 		$date = explode('T', $eData[0])[0];
 		$this->objectData[$date]['hijri']['DTStart'] = $date;
 		$this->objectData[$date]['hijri']['DTStartValue'] = 'DATE';
 		$this->objectData[$date]['hijri']['DTStamp'] = $eData[0];
-		$this->objectData[$date]['hijri']['Summary'] = $eData[2];
+		$this->objectData[$date]['hijri']['Summary'] = $eData[2] . $spday;
 		$this->objectData[$date]['hijri']['Description'] = $this->l10n->t('Today is: %s %s %s %s', [$eData[1], $eData[2], $eData[3], $eData[5]]);
 		$this->objectData[$date]['hijri']['Duration'] = 'P1D';
 		$this->objectData[$date]['hijri']['Transp'] = 'TRANSPARENT';

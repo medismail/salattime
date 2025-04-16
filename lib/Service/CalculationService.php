@@ -430,7 +430,7 @@ class CalculationService {
 			if ($adjustments['day'] != "") {
 				$hijri->tune($adjustments['day']);
 			}
-			$curTime = [$strDate, $hijri->get_day_name(), $hijri->get_day(), $hijri->get_month_name(), $hijri->get_month(), $hijri->get_year()];
+			$curTime = [$strDate, $hijri->get_day_name(), $hijri->get_day(), $hijri->get_month_name(), $hijri->get_month(), $hijri->get_year(), $hijri->is_day_special()];
 			$times[] = $curTime;
 		}
 

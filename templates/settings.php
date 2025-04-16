@@ -11,7 +11,7 @@ style('salattime', 'style');
         </div>
 
         <div id="app-content">
-                <div id="app-content-wrapper" class="viewcontainer" style="float:left; margin-left:44px; margin-top:20px">
+                <div id="app-content-wrapper" class="viewcontainer" style="margin-right:44px; margin-left:44px; margin-top:20px">
                             <?php print_unescaped($this->inc('content/settings')); ?>
                 </div>
         </div>

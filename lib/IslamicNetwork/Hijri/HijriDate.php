@@ -67,6 +67,10 @@ class HijriDate {
 		return ($this->getHijriHolidays($this->hijri[1], $this->hijri[0]));
 	}
 
+	public function is_day_special() {
+		return ($this->isSpecialDays($this->hijri[1], $this->hijri[0]));
+	}
+
 	public function specialDays() {
 		$days = [];
 		$days[] = ['month' => 1, 'day' => 10, 'name' => 'Ashura', 'tx' => $this->l10n->t('Ashura')];
@@ -153,6 +157,32 @@ class HijriDate {
 			11 => ['number' => 11,'en' => 'Dhū al-Qaʿdah', 'ar' => 'ذوالقعدة', 'tx' => $this->l10n->t('Dhu al-Qadah')],
 			12 => ['number' => 12,'en' => 'Dhū al-Ḥijjah', 'ar' => 'ذوالحجة', 'tx' => $this->l10n->t('Dhu al-Hijjah')]
 		];
+	}
+
+	public function isSpecialDays($day, $month) {
+		$specialDays = [
+			1 => [ 10 => $this->l10n->t('Ashura')],
+			3 => [ 12 => $this->l10n->t('Mawlid al-Nabi')],
+			7 => [ 27 => $this->l10n->t('Lailat-ul-Miraj')],
+			8 => [ 15 => $this->l10n->t('Lailat-ul-Bara\'at')],
+			9 => [ 1 => $this->l10n->t('1st Day of Ramadan'),
+				21 => $this->l10n->t('Lailat-ul-Qadr'),
+				23 => $this->l10n->t('Lailat-ul-Qadr'),
+				25 => $this->l10n->t('Lailat-ul-Qadr'),
+				27 => $this->l10n->t('Lailat-ul-Qadr'),
+				29 => $this->l10n->t('Lailat-ul-Qadr')
+			],
+			10 => [ 1 => $this->l10n->t('Eid-ul-Fitr')],
+			12 => [ 8 => $this->l10n->t('Hajj'),
+				9 => $this->l10n->t('Arafa'),
+				10 => $this->l10n->t('Eid-ul-Adha'),
+				11 => $this->l10n->t('Hajj'),
+				12 => $this->l10n->t('Hajj'),
+				13 => $this->l10n->t('Hajj')
+			],
+		];
+
+		return $specialDays[$month][$day] ?? null;
 	}
 
 	public function tune($days = null) {
