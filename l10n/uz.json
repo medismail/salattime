@@ -1,0 +1,11 @@
+{ "translations": {
+    "Time" : "Vaqt",
+    "Error" : "Error",
+    "Day" : "Kun",
+    "Location" : "Joylashuv",
+    "after" : "keyin",
+    "Sunrise" : "Quyosh chiqishi",
+    "Sunset" : "Quyosh botishi",
+    "Settings" : "Settings"
+},"pluralForm" :"nplurals=1; plural=0;"
+}
