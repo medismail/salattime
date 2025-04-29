@@ -5,6 +5,7 @@ OC.L10N.register(
     "Error" : "Error",
     "Day" : "Kun",
     "Location" : "Joylashuv",
+    "Next" : "Keyingisi",
     "after" : "keyin",
     "Sunrise" : "Quyosh chiqishi",
     "Sunset" : "Quyosh botishi",
