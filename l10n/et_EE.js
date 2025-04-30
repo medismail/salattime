@@ -10,6 +10,11 @@ OC.L10N.register(
     "after" : "pärast",
     "Sunrise" : "Päikesetõus",
     "Sunset" : "Päikeseloojang",
+    "Qatar" : "Katar",
+    "Kuwait" : "Kuveit",
+    "Tunisia" : "Tuneesia",
+    "Morocco" : "Maroko",
+    "Algeria" : "Alžeeria",
     "Settings" : "Seaded"
 },
 "nplurals=2; plural=(n != 1);");
