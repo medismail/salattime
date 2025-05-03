@@ -1,11 +1,13 @@
 OC.L10N.register(
     "salattime",
     {
+    "Today is: %s %s %s %s" : "Šodien ir: %s %s %s %s",
     "Time" : "Laiks",
     "No result." : "Nav iznākuma.",
     "Error" : "Kļūda",
     "Day" : "Diena",
     "Location" : "Atrašanās vieta",
+    "Today is" : "Šodien ir",
     "Next" : "Nākamā",
     "after" : "pēc",
     "Sunrise" : "Saullēkts",
