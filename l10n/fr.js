@@ -5,6 +5,7 @@ OC.L10N.register(
     "Salat %s" : "Salat %s",
     "AM" : "AM",
     "PM" : "PM",
+    "Prayer Times" : "Heures de prières",
     "Ashura" : "Asura",
     "Mawlid al-Nabi" : "Mawlid du Prophète",
     "Lailat-ul-Miraj" : "Nuit du Voyage Nocturne",
