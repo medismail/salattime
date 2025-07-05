@@ -1,6 +1,8 @@
 OC.L10N.register(
     "salattime",
     {
+    "AM" : "EL",
+    "PM" : "PL",
     "Time" : "Aeg",
     "No result." : "Vasteid ei leitud.",
     "Error" : "Viga",
