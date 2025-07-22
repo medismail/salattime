@@ -2,10 +2,13 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "Muda",
+    "No result." : "Hakuna matokeo",
     "Error" : "Hitilafu",
     "Day" : "Siku",
     "Location" : "Mahali/eneo",
     "after" : "baada ya",
+    "Sunrise" : "Mawio",
+    "Sunset" : "Machweo",
     "Qatar" : "Qatar",
     "Kuwait" : "Kuwait",
     "Tunisia" : "Tunisia",
