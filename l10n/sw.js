@@ -6,6 +6,7 @@ OC.L10N.register(
     "Error" : "Hitilafu",
     "Day" : "Siku",
     "Location" : "Mahali/eneo",
+    "Next" : "Next",
     "after" : "baada ya",
     "Sunrise" : "Mawio",
     "Sunset" : "Machweo",
