@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "No result." : "Няма выніку.",
     "Error" : "Памылка",
+    "Location" : "Месцазнаходжанне",
     "Qatar" : "Катар",
     "Kuwait" : "Кувейт",
     "Tunisia" : "Туніс",
