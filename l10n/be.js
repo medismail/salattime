@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Час",
     "No result." : "Няма выніку.",
     "Error" : "Памылка",
     "Location" : "Месцазнаходжанне",
