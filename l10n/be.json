@@ -1,13 +1,26 @@
 { "translations": {
+    "Today is: %s %s %s %s" : "Сёння: %s %s %s %s",
+    "Prayer Times" : "Час малітвы",
     "Time" : "Час",
     "No result." : "Няма выніку.",
     "Error" : "Памылка",
     "Location" : "Месцазнаходжанне",
+    "City" : "Горад",
+    "Sunrise" : "Узыход сонца",
+    "Sunset" : "Захад сонца",
+    "Moon Phase" : "Фаза Месяца",
     "Qatar" : "Катар",
     "Kuwait" : "Кувейт",
     "Tunisia" : "Туніс",
+    "Kementerian Agama Republik Indonesia" : "Міністэрства рэлігій Рэспублікі Інданезія",
     "Morocco" : "Марока",
+    "Jabatan Kemajuan Islam Malaysia (JAKIM)" : "Дэпартамент ісламскага развіцця Малайзіі (JAKIM)",
+    "Ministry of Awqaf, Islamic Affairs and Holy Places, Jordan" : "Міністэрства аўкафаў, ісламскіх спраў і святых месцаў, Іарданія",
     "Algeria" : "Алжыр",
+    "Spiritual Administration of Muslims of Russia" : "Духоўнае ўпраўленне мусульман Расіі",
+    "Union of Islamic Organizations of France (UOIF)" : "Саюз ісламскіх арганізацый Францыі (UOIF)",
+    "Comunidade Islamica de Lisboa" : "Ісламская супольнасць Лісабона",
+    "Majlis Ugama Islam Singapura, Singapore" : "Ісламская рэлігійная рада Сінгапура, Сінгапур",
     "Settings" : "Налады"
 },"pluralForm" :"nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);"
 }
