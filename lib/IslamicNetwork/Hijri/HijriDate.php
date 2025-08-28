@@ -185,10 +185,34 @@ class HijriDate {
 		return $specialDays[$month][$day] ?? null;
 	}
 
-	public function tune($days = null) {
+	public function tune($days = null, $nma = 0) {
 		if ($days) {
 			$time = $this->time + (86400 * $days);
 			$this->hijri = $this->GregorianToHijri($time);
+			if ($nma) {
+				if ($this->hijri[0] == $nma) {
+					$this->hijri[1] = $this->hijri[1] + 1;
+				} elseif ($this->hijri[0] == -$nma) {
+					if ($this->hijri[1] == 1) {
+						$this->hijri[1] = 30;
+						if ($this->hijri[0] == 1) {
+							$this->hijri[0] = 12;
+						} else {
+							$this->hijri[0] = $this->hijri[0] - 1;
+						}
+					} else {
+						$this->hijri[1] = $this->hijri[1] - 1;
+					}
+				} elseif ($this->hijri[1] == 30) {
+					if ($this->hijri[0] == $nma - 1) {
+						$this->hijri[0] = $nma;
+						$this->hijri[1] = 1;
+					} elseif (($nma == 1) && ($this->hijri[0] == 12)) {
+						$this->hijri[0] = 1;
+						$this->hijri[1] = 1;
+					}
+				}
+			}
 		}
 	}
 

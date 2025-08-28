@@ -29,6 +29,8 @@ namespace OCA\SalatTime\Controller;
 
 use OCA\SalatTime\Notification\BackgroundJob;
 use OCP\AppFramework\Controller;
+use OCP\Appframework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\BackgroundJob\IJobList;
 use OCP\Notification\IManager;
 use OCA\SalatTime\Service\ConfigService;
@@ -56,9 +58,9 @@ class NotificationController extends Controller {
 	}
 
 	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
 	 */
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function addJob() {
 		$this->config->setUserNotification($this->userId);
 		$this->jobList->add(BackgroundJob::class, null);
@@ -71,9 +73,9 @@ class NotificationController extends Controller {
 	}
 
 	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
 	 */
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function removeJob() {
 		$this->config->unsetUserNotification($this->userId);
 		$this->clearOldNotifications();

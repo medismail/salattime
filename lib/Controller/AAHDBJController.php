@@ -27,39 +27,30 @@
 
 namespace OCA\SalatTime\Controller;
 
+use OCA\SalatTime\IslamicNetwork\Hijri\HijriBackgroundJob;
 use OCP\AppFramework\Controller;
 use OCP\Appframework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
-use OCA\SalatTime\Service\ConfigService;
+use OCP\BackgroundJob\IJobList;
 use OCP\IRequest;
 
-class CalendarController extends Controller {
-	/** @var ConfigService */
-	private ConfigService $config;
+// Auto Adjust Hijri Date Background Job
+class AAHDBJController extends Controller {
+	private IJobList $jobList;
 
-	/** @var UserId */
-	private $UserId;
-
-	public function __construct(string $appName, IRequest $request, ConfigService $configService, $UserId) {
+	public function __construct(string $appName, IRequest $request, IJobList $jobList) {
 		parent::__construct($appName, $request);
 
-		$this->config = $configService;
-		$this->userId = $UserId;
+		$this->jobList = $jobList;
 	}
 
-	/**
-	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function addCalendar() {
-		$this->config->setUserCalendar($this->userId);
+	public function addJob() {
+		$this->jobList->add(HijriBackgroundJob::class, null);
 	}
 
-	/**
-	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function removeCalendar() {
-		$this->config->unsetUserCalendar($this->userId);
+	public function removeJob() {
+		if (empty($this->calculationService->getAllUserAutoHijriDate())) {
+			$this->jobList->remove(HijriBackgroundJob::class, null);
+		}
 	}
 }

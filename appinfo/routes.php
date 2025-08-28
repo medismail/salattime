@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Create your routes in here. The name is the lowercase name of the controller
  * without the controller part, the stuff after the hash is the method.
@@ -9,7 +10,7 @@
  */
 return [
     'routes' => [
-	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
+           ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
            ['name' => 'page#settings', 'url' => '/settings', 'verb' => 'GET'],
            ['name' => 'page#adjustments', 'url' => '/adjustments', 'verb' => 'GET'],
            ['name' => 'page#prayertime', 'url' => '/prayertime', 'verb' => 'GET'],

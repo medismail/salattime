@@ -65,7 +65,7 @@ class Notifier implements \OCP\Notification\INotifier {
 	public function prepare(INotification $notification, string $languageCode): INotification {
 		if ($notification->getApp() !== Application::APP_ID) {
 			// Not my app => throw
-			throw new \InvalidArgumentException();
+			throw new \OCP\Notification\UnknownNotificationException();
 		}
 
 		// Read the language from the notification

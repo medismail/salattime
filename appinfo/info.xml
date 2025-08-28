@@ -6,13 +6,13 @@
     <summary>Show 5 times prayer.</summary>
     <description><![CDATA[# Salat Time
  * 5 muslim daily prayer times
- * Hijri date
- * Qibla direction
+ * Hijri date with optional auto adjustment according to local observation capability
+ * Qibla direction degrees and according to the sun and/or moon position
+ * DAV Calendar Integration for prayer times and hijri date
  * Adhan notification
- * DAV Calendar Integration
  * Widget on Dashboard
  * and many others useful informations.]]></description>
-    <version>0.7.2</version>
+    <version>0.8.0</version>
     <licence>agpl</licence>
     <author mail="imejri@hotmail.com" >Mohamed</author>
     <website>https://github.com/medismail/salattime</website>
@@ -24,7 +24,7 @@
     <bugs>https://github.com/medismail/salattime/issues</bugs>
     <screenshot>https://raw.githubusercontent.com/medismail/salattime/main/img/salattime.png</screenshot>
     <dependencies>
-        <nextcloud min-version="28" max-version="30"/>
+        <nextcloud min-version="29" max-version="31"/>
     </dependencies>
     <navigations>
         <navigation>

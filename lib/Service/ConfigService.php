@@ -27,14 +27,18 @@
 
 namespace OCA\SalatTime\Service;
 
-use \OCP\IConfig;
+use OCP\IUserManager;
+use OCP\IConfig;
+use OCP\IUser;
 use OCA\SalatTime\AppInfo\Application;
 
 class ConfigService {
-	private $config;
+	private IConfig $config;
+	private IUserManager $userManager;
 
-	public function __construct(IConfig $config) {
+	public function __construct(IConfig $config, IUserManager $userManager) {
 		$this->config = $config;
+		$this->userManager = $userManager;
 	}
 
 	public function getUserValue($userId, $key) {
@@ -94,13 +98,22 @@ class ConfigService {
 
 	public function getAdjustmentsValue($userId) {
 		$adjustments = explode(",", $this->config->getUserValue($userId, Application::APP_ID, 'adjustments'));
-		if (count($adjustments) == 6) {
+		if (count($adjustments) == 7) {
 			$ret['day'] = $adjustments['0'];
 			$ret['Fajr'] = $adjustments['1'];
 			$ret['Dhuhr'] = $adjustments['2'];
 			$ret['Asr'] = $adjustments['3'];
 			$ret['Maghrib'] = $adjustments['4'];
 			$ret['Isha'] = $adjustments['5'];
+			$ret['nma'] = $adjustments['6'];
+		} elseif (count($adjustments) == 6) {
+			$ret['day'] = $adjustments['0'];
+			$ret['Fajr'] = $adjustments['1'];
+			$ret['Dhuhr'] = $adjustments['2'];
+			$ret['Asr'] = $adjustments['3'];
+			$ret['Maghrib'] = $adjustments['4'];
+			$ret['Isha'] = $adjustments['5'];
+			$ret['nma'] = 0;
 		} else {
 			$ret['day'] = 0;
 			$ret['Fajr'] = 0;
@@ -108,6 +121,7 @@ class ConfigService {
 			$ret['Asr'] = 0;
 			$ret['Maghrib'] = 0;
 			$ret['Isha'] = 0;
+			$ret['nma'] = 0;
 		}
 		return $ret;
 	}
@@ -148,5 +162,81 @@ class ConfigService {
 
 	public function getUserCalendar($userId) {
 		return $this->config->getUserValue($userId, Application::APP_ID, 'calendar');
+	}
+
+	/**
+	 * Get all users who have any value for the given config key
+	 *
+	 * @param string $configKey
+	 * @return IUser[]
+	 */
+	public function getUsersWithConfig(string $configKey): array {
+		$users = $this->userManager->search('');
+		$result = [];
+
+		foreach ($users as $user) {
+			$userId = $user->getUID();
+			$value = $this->config->getUserValue($userId, Application::APP_ID, $configKey, null);
+
+			if ($value !== null && $value !== '') {
+				$result[] = $user;
+			}
+		}
+
+		return $result;
+	}
+	/**
+	 * Get all users where the config value matches a pattern like "*:*:3" or "10:*:2"
+	 *
+	 * @param string $configKey
+	 * @param string $pattern  Pattern like "*:*:3"
+	 * @return IUser[]
+	 */
+	public function getUsersWithConfigMatching(string $configKey, string $pattern): array {
+		$users = $this->userManager->search('');
+		$result = [];
+
+		$patternParts = explode(':', $pattern);
+
+		foreach ($users as $user) {
+			$userId = $user->getUID();
+			$value = $this->config->getUserValue($userId, Application::APP_ID, $configKey, null);
+
+			if ($value !== null && $value !== '') {
+				$valueParts = explode(':', $value);
+
+				if ($this->matchesPattern($valueParts, $patternParts)) {
+					$result[] = $user;
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Compare valueParts against patternParts
+	 */
+	private function matchesPattern(array $valueParts, array $patternParts): bool {
+		if (count($valueParts) !== count($patternParts)) {
+			return false;
+		}
+
+		foreach ($patternParts as $i => $p) {
+			if ($p === '*') {
+				continue; // wildcard, skip check
+			}
+			if (substr($p, 0, 1) == '!') { //Not to match
+				$np = substr($p, 1);
+				if ($valueParts[$i] == $np) {
+					return false;
+				}
+			} else {
+				if ($valueParts[$i] !== $p) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

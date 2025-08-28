@@ -161,7 +161,11 @@ class CalculationService {
 
 		$hijri = new HijriDate($curtime, $this->l10n);
 		if ($adjustments['day'] != "") {
-			$hijri->tune($adjustments['day']);
+			if ($adjustments['nma'] == '15') {
+				$hijri->tune($adjustments['day'], '0');
+			} else {
+				$hijri->tune($adjustments['day'], $adjustments['nma']);
+			}
 		}
 
 		$times['Hijri'] = $hijri->get_day_name() . ' ' . $hijri->get_day() . ' ' . $hijri->get_month_name() . ' ' . $hijri->get_year() . $this->l10n->t('H');
@@ -310,6 +314,10 @@ class CalculationService {
 		return $this->configService->getUserCalendar($userId);
 	}
 
+	public function getAllUserAutoHijriDate(): array {
+		return $this->configService->getUsersWithConfigMatching('adjustments', '*:*:*:*:*:*:!0');
+	}
+
 	/**
 	 * setConfigSettings set settingss values in database
 	 * @param string userId
@@ -348,6 +356,23 @@ class CalculationService {
 	public function setConfigAdjustments(string $userId, string $adjustments) {
 		$this->configService->setUserValue($userId, 'adjustments', $adjustments);
 	}
+
+	/**
+	 * getDayAutoAdjustments get Day Auto Adjustments
+	 * @param string userId
+	 * @return int adjustments days
+	 */
+    public function getDayAutoAdjustments(string $userId) {
+    	if (Helper::pythonInstalled()) {
+            $p_settings = $this->configService->getSettingsValue($userId);
+            $hijri = new HijriDate(false, $this->l10n);
+            $output = null;
+            $retval = null;
+            exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $hijri->get_day(), $output, $retval);
+            return (int)$output[0];
+		}
+        return 0;
+    }
 
 	/**
 	 * get Prayers times from known date

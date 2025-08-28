@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0
+### Added
+- Add support for Nextcloud 31
+- Add special date name to hijri calendar
+- Add Auto Adjustment of Hijri Date According to Local Observation Capability
+
 ## 0.7.2
 ### Fixed
 - Enable Calendar button

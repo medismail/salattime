@@ -32,6 +32,8 @@ require_once __DIR__ . '/../Service/CalculationService.php';
 use OCA\SalatTime\Service\CalculationService;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
+use OCP\Appframework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\IRequest;
 
 class WidgetController extends OCSController {
@@ -51,9 +53,9 @@ class WidgetController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 */
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function getWidgetContent(): DataResponse {
 		$times = $this->calculationService->getPrayerTimes($this->userId);
 		$name = $this->calculationService->gretNames();

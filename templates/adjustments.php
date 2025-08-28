@@ -1,5 +1,6 @@
 <?php
 script('salattime', 'script');
+script('salattime', 'adjustments');
 style('salattime', 'style');
 ?>
 
