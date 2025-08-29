@@ -58,7 +58,6 @@ OC.L10N.register(
     "No result." : "لا توجد أي نتيجة",
     "Error" : "خطأ",
     "Show 5 times prayer." : "عرض أوقات الصلوات الـ 5.",
-    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "ِ# وقت الصلاة\n* مواعيد الصلوات الـ 5 للمسلم\n* بالتاريخ الهجري\n* إتجاه القبلة\n* إشعار بالآذان\n* مكاملة مع تقويم المواعيد\n* ودجة على لوحة المعلومات\n* و معلومات أخرى مفيدة",
     "Salat time content is unavailable" : "محتويات وقت الصلاة غير متوفرة",
     "Day" : "اليوم",
     "Fajr" : "الفجر",

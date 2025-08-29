@@ -58,7 +58,6 @@ OC.L10N.register(
     "No result." : "Нема резултата.",
     "Error" : "Грешка",
     "Show 5 times prayer." : "Прикажи 5 времена за молитву.",
-    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "# Салат време\n * 5 муслиманских дневних времена молитве\n * Даум по Хиџри\n * Смер Кибле\n * Адхан обавештење\n * Интеграција са DAV Календаром\n * Виџет на Контролној табли\n * и многе друге корисне информације.",
     "Salat time content is unavailable" : "Садржај са Салат време није доступан",
     "Day" : "Дан",
     "Fajr" : "Фаџр",

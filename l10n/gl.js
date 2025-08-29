@@ -58,7 +58,6 @@ OC.L10N.register(
     "No result." : "Sen resultados.",
     "Error" : "Erro",
     "Show 5 times prayer." : "Amosar 5 veces a oración.",
-    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "#Horas do rezo (salat)\n* 5 momentos diarios de oración (salat) dos musulmáns\n* Datas do calendario Hijri\n* Dirección á Qibla (A Meca)\n* Proclamación e declaración (azán)\n* Integración do calendario con DAV\n* Trebello no Taboleiro\n* e moita outra información útil.",
     "Salat time content is unavailable" : "O contido da hora da oración non está dispoñíbel",
     "Day" : "Día",
     "Fajr" : "Amencer",

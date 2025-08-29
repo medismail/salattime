@@ -58,7 +58,6 @@ OC.L10N.register(
     "No result." : "Жодного результату.",
     "Error" : "Помилка",
     "Show 5 times prayer." : "Повторіть молитву 5 разів.",
-    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "# Час молитви\n* 5 щоденних молитов мусульман\n* Дата за мусульманським календарем\n* Напрямок Кібли\n* Повідомлення про азан\n* Інтеграція з календарем DAV\n* Віджет на панелі інструментів\n* та багато іншої корисної інформації.",
     "Salat time content is unavailable" : "Вміст часу приготування салату недоступний",
     "Day" : "День",
     "Fajr" : "Фаджр.",

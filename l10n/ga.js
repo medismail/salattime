@@ -58,7 +58,6 @@ OC.L10N.register(
     "No result." : "Gan toradh.",
     "Error" : "Earráid",
     "Show 5 times prayer." : "Taispeáin paidir 5 huaire.",
-    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "# Am Sailéad\n* 5 huaire urnaí Moslamach in aghaidh an lae\n* Dáta Hijri\n* treo Qibla\n* Adhan fógra\n* Comhtháthú Féilire DAV\n* Giuirléid ar an Deais\n* agus go leor faisnéise úsáideacha eile.",
     "Salat time content is unavailable" : "Níl ábhar ama salainn ar fáil",
     "Day" : "Lá",
     "Fajr" : "Fajr",

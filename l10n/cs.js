@@ -58,7 +58,6 @@ OC.L10N.register(
     "No result." : "No result.",
     "Error" : "Error",
     "Show 5 times prayer." : "Show 5 times prayer.",
-    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations." : "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date\n * Qibla direction\n * Adhan notification\n * DAV Calendar Integration\n * Widget on Dashboard\n * and many others useful informations.",
     "Salat time content is unavailable" : "Salat time content is unavailable",
     "Day" : "Day",
     "Fajr" : "Fajr",
