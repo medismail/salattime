@@ -29,8 +29,6 @@ namespace OCA\SalatTime\Controller;
 
 use OCA\SalatTime\IslamicNetwork\Hijri\HijriBackgroundJob;
 use OCP\AppFramework\Controller;
-use OCP\Appframework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\BackgroundJob\IJobList;
 use OCP\IRequest;
 

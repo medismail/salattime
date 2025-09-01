@@ -85,8 +85,6 @@ class PageController extends Controller {
 	}
 
 	 /**
-      * @NoAdminRequired
-      * @NoCSRFRequired
 	  */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
@@ -172,9 +170,9 @@ class PageController extends Controller {
 		if ($nma == "") {
 			$nma = 0;
 		}
-        if ($nma) {
-            $day = $this->calculationService->getDayAutoAdjustments($this->userId);
-        }
+		if ($nma) {
+			$day = $this->calculationService->getDayAutoAdjustments($this->userId);
+		}
 		$adjustments = $day . ',' . $Fajr . ',' . $Dhuhr . ',' . $Asr . ',' . $Maghrib . ',' . $Isha . ',' . $nma;
 		$this->calculationService->setConfigAdjustments($this->userId, $adjustments);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');

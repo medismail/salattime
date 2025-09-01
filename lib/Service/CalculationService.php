@@ -362,17 +362,17 @@ class CalculationService {
 	 * @param string userId
 	 * @return int adjustments days
 	 */
-    public function getDayAutoAdjustments(string $userId) {
-    	if (Helper::pythonInstalled()) {
-            $p_settings = $this->configService->getSettingsValue($userId);
-            $hijri = new HijriDate(false, $this->l10n);
-            $output = null;
-            $retval = null;
-            exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $hijri->get_day(), $output, $retval);
-            return (int)$output[0];
+	public function getDayAutoAdjustments(string $userId) {
+		if (Helper::pythonInstalled()) {
+			$p_settings = $this->configService->getSettingsValue($userId);
+			$hijri = new HijriDate(false, $this->l10n);
+			$output = null;
+			$retval = null;
+			exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $hijri->get_day(), $output, $retval);
+			return (int)$output[0];
 		}
-        return 0;
-    }
+		return 0;
+	}
 
 	/**
 	 * get Prayers times from known date
@@ -448,15 +448,81 @@ class CalculationService {
 		$dateRange = new DatePeriod($startDate, $interval, $endDate, DatePeriod::INCLUDE_END_DATE);
 
 		$times = [];
-		foreach ($dateRange as $curDate) {
-			//$curDate->format('d-m-Y H:i:s');
-			$strDate = $curDate->format('Ymd\THis\Z');
-			$hijri = new HijriDate(strtotime($strDate), $this->l10n);
-			if ($adjustments['day'] != "") {
-				$hijri->tune($adjustments['day']);
+		if (($adjustments['nma'] != "") && ($adjustments['nma'] != "0")) {
+			$p_settings = $this->configService->getSettingsValue($userId);
+			$hijri = new HijriDate(strtotime($startDate), $this->l10n);
+			$hijriWeekdays = $hijri->hijriWeekdays();
+			$islamicMonths = $hijri->getIslamicMonths();
+			$hday = $hijri->get_day();
+			$hmonth = $hijri->get_month();
+			$hyear = $hijri->get_year();
+			$output = null;
+			$retval = null;
+			exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $startDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
+			$offsetDays = (int)$output[0];
+			$hday = $hday + $offsetDays;
+			if (($hday < 1) || ($hday > 30)) {
+				if ($hday < 1) {
+					$hday + 30;
+					$hmonth--;
+					if ($hmonth < 1) {
+						$hmonth = 12;
+						$hyear--;
+					}
+				} else {
+					$hday - 30;
+					$hmonth ++;
+					if ($hmonth > 12) {
+						$hmonth = 1;
+						$hyear++;
+					}
+				}
+				$output = null;
+				$retval = null;
+				$effectstartDate = clone $startDate;
+				$effectstartDate->modify("+$offsetDays days");
+				exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $effectstartDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
+				$hday = $hday + (int)$output[0];
 			}
-			$curTime = [$strDate, $hijri->get_day_name(), $hijri->get_day(), $hijri->get_month_name(), $hijri->get_month(), $hijri->get_year(), $hijri->is_day_special()];
-			$times[] = $curTime;
+			foreach ($dateRange as $curDate) {
+				$strDate = $curDate->format('Ymd\THis\Z');
+				if ($hday > 29) {
+					if ($hday == 30) {
+						$output = null;
+					}
+					$retval = null;
+					exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $curDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
+					if ((int)$output[0]) {
+						$hday = 1;
+						$hmont++;
+						if ($hmonth > 12) {
+							$hmonth = 1;
+							$hyear++;
+						}
+					} else {
+						$hday = 1;
+						$hmont++;
+						if ($hmonth > 12) {
+							$hmonth = 1;
+							$hyear++;
+						}
+					}
+				}
+				$curTime = [$strDate, $hijriWeekdays[date('l', $strDate)]['tx'], $hday, $islamicMonths[$hmonth]['tx'], $hmonth, $hyear, $hijri->isSpecialDays($hday, $hmonth)];
+				$times[] = $curTime;
+				$hday++;
+			}
+		} else {
+			foreach ($dateRange as $curDate) {
+				//$curDate->format('d-m-Y H:i:s');
+				$strDate = $curDate->format('Ymd\THis\Z');
+				$hijri = new HijriDate(strtotime($strDate), $this->l10n);
+				if ($adjustments['day'] != "") {
+					$hijri->tune($adjustments['day']);
+				}
+				$curTime = [$strDate, $hijri->get_day_name(), $hijri->get_day(), $hijri->get_month_name(), $hijri->get_month(), $hijri->get_year(), $hijri->is_day_special()];
+				$times[] = $curTime;
+			}
 		}
 
 		return $times;
