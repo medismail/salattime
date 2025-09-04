@@ -30,6 +30,7 @@ declare(strict_types=1);
 namespace OCA\SalatTime\IslamicNetwork\Hijri;
 
 use OCA\SalatTime\Service\CalculationService;
+use OCA\SalatTime\Tools\Helper;
 use OCP\BackgroundJob\TimedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
 

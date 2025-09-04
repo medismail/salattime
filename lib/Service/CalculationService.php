@@ -450,7 +450,7 @@ class CalculationService {
 		$times = [];
 		if (($adjustments['nma'] != "") && ($adjustments['nma'] != "0")) {
 			$p_settings = $this->configService->getSettingsValue($userId);
-			$hijri = new HijriDate(strtotime($startDate), $this->l10n);
+			$hijri = new HijriDate(strtotime($startDate->format('Ymd\THis\Z')), $this->l10n);
 			$hijriWeekdays = $hijri->hijriWeekdays();
 			$islamicMonths = $hijri->getIslamicMonths();
 			$hday = $hijri->get_day();
@@ -494,21 +494,21 @@ class CalculationService {
 					exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $curDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
 					if ((int)$output[0]) {
 						$hday = 1;
-						$hmont++;
+						$hmonth++;
 						if ($hmonth > 12) {
 							$hmonth = 1;
 							$hyear++;
 						}
 					} else {
 						$hday = 1;
-						$hmont++;
+						$hmonth++;
 						if ($hmonth > 12) {
 							$hmonth = 1;
 							$hyear++;
 						}
 					}
 				}
-				$curTime = [$strDate, $hijriWeekdays[date('l', $strDate)]['tx'], $hday, $islamicMonths[$hmonth]['tx'], $hmonth, $hyear, $hijri->isSpecialDays($hday, $hmonth)];
+				$curTime = [$strDate, $hijriWeekdays[date('l', strtotime($strDate))]['tx'], $hday, $islamicMonths[$hmonth]['tx'], $hmonth, $hyear, $hijri->isSpecialDays($hday, $hmonth)];
 				$times[] = $curTime;
 				$hday++;
 			}

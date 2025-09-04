@@ -38,6 +38,6 @@
         </calendar-plugins>
     </sabre>
     <background-jobs>
-        <job>OCA\SalatTime\Service\CalculationService\HijriBackgroundJob</job>
+        <job>OCA\SalatTime\IslamicNetwork\Hijri\HijriBackgroundJob</job>
     </background-jobs>
 </info>
