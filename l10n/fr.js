@@ -70,6 +70,7 @@ OC.L10N.register(
     "Imsak" : "Commencement du jeûne",
     "Sunrise" : "Lever du soleil",
     "Sunset" : "Coucher du soleil",
+    "Moon and Sun Information" : "Informations sur la Lune et le Soleil",
     "Moon's illuminated fraction" : "La partie illuminée de la lune ",
     "Moon Phase" : "Phase de lune",
     "Moon's ecliptic phase angle" : "Angle de phase écliptique de la lune",
