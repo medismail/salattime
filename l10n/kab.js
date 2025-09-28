@@ -7,6 +7,8 @@ OC.L10N.register(
     "Next" : "Uḍfir",
     "Sunrise" : "Alluy n yiṭij",
     "Sunset" : "Aɣelluy n yiṭij",
+    "Tunisia" : "Tunes",
+    "Algeria" : "Zzayer",
     "Settings" : "Iɣewwaṛen"
 },
 "nplurals=2; plural=(n != 1);");
