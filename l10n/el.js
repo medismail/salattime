@@ -19,6 +19,7 @@ OC.L10N.register(
     "Sunset" : "Δύση",
     "Moon Phase" : "Φάση της Σελήνης",
     "Sun Position" : "Θέση Ηλίου",
+    "Altitude" : "Υψόμετρο",
     "Moon Position" : "Θέση Σελήνης",
     "Use 24 hours format" : "Χρήση μορφής 24ώρου",
     "Timezone:" : "Χρονική ζώνη:",
