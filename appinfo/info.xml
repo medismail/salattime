@@ -24,7 +24,7 @@
     <bugs>https://github.com/medismail/salattime/issues</bugs>
     <screenshot>https://raw.githubusercontent.com/medismail/salattime/main/img/salattime.png</screenshot>
     <dependencies>
-        <nextcloud min-version="29" max-version="31"/>
+        <nextcloud min-version="29" max-version="32"/>
     </dependencies>
     <navigations>
         <navigation>
