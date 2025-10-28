@@ -95,6 +95,7 @@ endif
 js:
 	cp src/script.js js/
 	cp src/settings.js js/
+	cp src/adjustments.js js/
 
 # Removes the appstore build
 .PHONY: clean

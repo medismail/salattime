@@ -2,6 +2,7 @@
 
 ## 0.8.0
 ### Added
+- Add support for Nextcloud 32
 - Add support for Nextcloud 31
 - Add special date name to hijri calendar
 - Add Auto Adjustment of Hijri Date According to Local Observation Capability
