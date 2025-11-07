@@ -9,6 +9,11 @@ OC.L10N.register(
     "after" : "keyin",
     "Sunrise" : "Quyosh chiqishi",
     "Sunset" : "Quyosh botishi",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Quvayt",
+    "Tunisia" : "Tunis",
+    "Morocco" : "Marokash",
+    "Algeria" : "Jazoir",
     "Settings" : "Sozlamalar"
 },
 "nplurals=1; plural=0;");
