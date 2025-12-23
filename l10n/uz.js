@@ -2,6 +2,7 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "Vaqt",
+    "No result." : "Natija yo'q.",
     "Error" : "Xatolik",
     "Day" : "Kun",
     "Location" : "Joylashuv",
