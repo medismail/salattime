@@ -11,6 +11,11 @@ OC.L10N.register(
     "Sunrise" : "Bình minh",
     "Sunset" : "Hoàng hôn",
     "Timezone:" : "Múi giờ:",
+    "Qatar" : "Qatar",
+    "Kuwait" : "Kuwait",
+    "Tunisia" : "Tunisia",
+    "Morocco" : "Ma-rốc",
+    "Algeria" : "Algeria",
     "Settings" : "Cài đặt"
 },
 "nplurals=1; plural=0;");
