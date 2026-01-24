@@ -1,4 +1,5 @@
 { "translations": {
+    "Today is: %s %s %s %s" : "Oggi è: %s %s %s %s",
     "Ashura" : "Ashura",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
     "Lailat-ul-Bara'at" : "Lailat-ul-Bara'at",
@@ -28,6 +29,7 @@
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
     "Location" : "Luogo",
+    "Today is" : "Oggi è",
     "Next" : "Successivo",
     "after" : "dopo",
     "Imsak" : "Imsak",

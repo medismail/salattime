@@ -1,6 +1,7 @@
 OC.L10N.register(
     "salattime",
     {
+    "Today is: %s %s %s %s" : "Oggi è: %s %s %s %s",
     "Ashura" : "Ashura",
     "Lailat-ul-Miraj" : "Lailat-ul-Miraj",
     "Lailat-ul-Bara'at" : "Lailat-ul-Bara'at",
@@ -30,6 +31,7 @@ OC.L10N.register(
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
     "Location" : "Luogo",
+    "Today is" : "Oggi è",
     "Next" : "Successivo",
     "after" : "dopo",
     "Imsak" : "Imsak",
