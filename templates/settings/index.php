@@ -1,17 +1,30 @@
-<div id="app-settings">
-	<div id="app-settings-header">
-		<button class="settings-button"
-				data-apps-slide-toggle="#app-settings-content"
-		></button>
-	</div>
-	<div id="app-settings-content">
-                <input type="checkbox" id="salatnotification" class="checkbox" name="salatnotification" <?php if ($_['notification'] == 'true') {
-                	echo "checked";
-                } ?> >
-                <label for="salatnotification"> <?php echo $l->t('Enable notification'); ?> </label>
-                <input type="checkbox" id="salatcalendar" class="checkbox" name="salatcalendar" <?php if ($_['calendar'] == 'true') {
-                	echo "checked";
-                } ?> >
-                <label for="salatcalendar"> <?php echo $l->t('Enable Calendar'); ?> </label>
-	</div>
-</div>
+<?php
+// Existing content of index.php
+
+function display_geolocation_button() {
+    echo '<button id="getAddressButton">Get Address</button>';
+    echo '<div id="addressDisplay"></div>';
+    echo <<<'SCRIPT'
+    <script>
+        document.getElementById("getAddressButton").addEventListener("click", function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lon = position.coords.longitude;
+                    fetch(`https://api.example.com/getAddress?lat=${lat}&lon=${lon}`) // replace with actual API
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById("addressDisplay").innerText = data.address;
+                        })
+                        .catch(error => console.error('Error fetching address:', error));
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        });
+    </script>
+    SCRIPT;
+}
+
+// Call the function where appropriate
+// display_geolocation_button();
