@@ -84,20 +84,20 @@ class HijriBackgroundJob extends TimedJob {
 			$hijri->tune($adjustments['day'], $adjustments['nma']);
 			if (($adjust == 0) && ($hijri->get_day() == 1)) {
 				$adjustments['nma'] = -$hijri->get_month();
-				$this->calculationService->setConfigAdjustments($uid, implode(":", $adjustments));
+				$this->calculationService->setConfigAdjustments($uid, $adjustments);
 			} elseif (($adjust == 1)($hijri->get_day() == 30)) {
 				$adjustments['nma'] = $hijri->get_month();
-				$this->calculationService->setConfigAdjustments($uid, implode(":", $adjustments));
+				$this->calculationService->setConfigAdjustments($uid, $adjustments);
 			}
 		} elseif ($hijri->get_day() == 1) {
 			if ($adjustments['nma'] == $hijri->get_month()) {
 				$adjustments['day'] = $adjustments['day'] + 1;
 				$adjustments['nma'] = 15;
-				$this->calculationService->setConfigAdjustments($uid, implode(":", $adjustments));
+				$this->calculationService->setConfigAdjustments($uid, $adjustments);
 			} elseif ($adjustments['nma'] == -$hijri->get_month()) {
 				$adjustments['day'] = $adjustments['day'] - 1;
 				$adjustments['nma'] = 15;
-				$this->calculationService->setConfigAdjustments($uid, implode(":", $adjustments));
+				$this->calculationService->setConfigAdjustments($uid, $adjustments);
 			}
 		}
 	}

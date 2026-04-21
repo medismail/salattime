@@ -60,6 +60,34 @@ class Helper {
 		return true;
 	}
 
+	public static function runPythonScriptProcOpen(string $scriptPath, array $args, array &$output = null, int &$retval = null): void {
+		$cmd = array_merge(['python3', $scriptPath], array_map('strval', $args));
+
+		$descriptorSpec = [
+			1 => ['pipe', 'w'], // stdout
+			2 => ['pipe', 'w'], // stderr (optional; can be useful for debugging)
+		];
+
+		$process = proc_open($cmd, $descriptorSpec, $pipes);
+
+		if (!is_resource($process)) {
+			throw new RuntimeException("Cannot start process");
+		}
+
+		// Read STDOUT
+		$stdout = stream_get_contents($pipes[1]);
+		// Optionally, read STDERR
+		$stderr = stream_get_contents($pipes[2]);
+
+		fclose($pipes[1]);
+		fclose($pipes[2]);
+
+		$retval = proc_close($process);
+
+		// Reproduce exec(): $output as array of lines
+		$output = $stdout !== false ? preg_split('/\r\n|\r|\n/', rtrim($stdout)) : [];
+	}
+
 	public static function findBinaryPath($program, $default = null) {
 		$memcache = \OC::$server->getMemCacheFactory()->createDistributed('findBinaryPath');
 		if ($memcache->hasKey($program)) {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1
+### Fixed
+- Add support for Nextcloud 33
+- Auto Adjustment of Hijri Date not working
+
 ## 0.8.0
 ### Added
 - Add support for Nextcloud 32

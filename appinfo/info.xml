@@ -12,7 +12,7 @@
  * Adhan notification
  * Widget on Dashboard
  * and many others useful informations.]]></description>
-    <version>0.8.0</version>
+    <version>0.8.1</version>
     <licence>agpl</licence>
     <author mail="imejri@hotmail.com" >Mohamed</author>
     <website>https://github.com/medismail/salattime</website>
@@ -24,7 +24,7 @@
     <bugs>https://github.com/medismail/salattime/issues</bugs>
     <screenshot>https://raw.githubusercontent.com/medismail/salattime/main/img/salattime.png</screenshot>
     <dependencies>
-        <nextcloud min-version="29" max-version="32"/>
+        <nextcloud min-version="32" max-version="33"/>
     </dependencies>
     <navigations>
         <navigation>

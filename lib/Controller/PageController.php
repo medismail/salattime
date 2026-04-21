@@ -56,9 +56,9 @@ class PageController extends Controller {
 						IURLGenerator $urlGenerator,
 						CurrentUser $currentUser,
 						CalculationService $calculationService,
-						$UserId) {
+						$userId) {
 		parent::__construct($AppName, $request);
-		$this->userId = $UserId;
+		$this->userId = $userId;
 		$this->user = (string) $currentUser->getUID();
 		$this->urlGenerator = $urlGenerator;
 		$this->calculationService = $calculationService;
@@ -118,7 +118,7 @@ class PageController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method, string $format_12_24): RedirectResponse {
-		$p_settings = $latitude . ':' . $longitude . ':' . $timezone . ':' . $elevation . ':' . $method . ':' . $format_12_24 . ':' . $address;
+		$p_settings = [ $latitude, $longitude, $timezone, $elevation, $method, $format_12_24, $address ];
 		$this->calculationService->setConfigSettings($this->userId, $p_settings);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);
@@ -173,7 +173,7 @@ class PageController extends Controller {
 		if ($nma) {
 			$day = $this->calculationService->getDayAutoAdjustments($this->userId);
 		}
-		$adjustments = $day . ',' . $Fajr . ',' . $Dhuhr . ',' . $Asr . ',' . $Maghrib . ',' . $Isha . ',' . $nma;
+		$adjustments = [ $day, $Fajr, $Dhuhr, $Asr, $Maghrib, $Isha, $nma ];
 		$this->calculationService->setConfigAdjustments($this->userId, $adjustments);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);

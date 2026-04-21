@@ -234,7 +234,16 @@ class CalculationService {
 			];
 			$output = null;
 			$retval = null;
-			exec('python3 ' . __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date) + $dayoffset, $output, $retval);
+			// salattime.py call
+			// exec('python3 ' . __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date) + $dayoffset, $output, $retval);
+			$scriptPath = __DIR__ . '/../bin/salattime.py';
+			$args = [
+				(float)$p_settings['latitude'],
+				(float)$p_settings['longitude'],
+				(float)$p_settings['elevation'],
+				(int)$udtz->getOffset($date) + (int)$dayoffset,
+			];
+			Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
 			$sunMoonTimes['Sunrise'] = $this->timeConversion($output[1], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Sunset'] = $this->timeConversion($output[2], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonrise'] = $this->timeConversion($output[3], $udtz, $textFormat_12_24);
@@ -321,10 +330,9 @@ class CalculationService {
 	/**
 	 * setConfigSettings set settingss values in database
 	 * @param string userId
-	 * @param string settings
+	 * @param array settings
 	 */
-	public function setConfigSettings(string $userId, string $settings) {
-		$p_settings = explode(":", $settings);
+	public function setConfigSettings(string $userId, array $p_settings) {
 		if ($p_settings['6'] != "") {
 			$addressInfo = $this->getGeoCode($p_settings['6']);
 			if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
@@ -351,10 +359,10 @@ class CalculationService {
 	/**
 	 * setConfigAdjustments set adjustments values in database
 	 * @param string userId
-	 * @param string adjustments
+	 * @param array adjustments
 	 */
-	public function setConfigAdjustments(string $userId, string $adjustments) {
-		$this->configService->setUserValue($userId, 'adjustments', $adjustments);
+	public function setConfigAdjustments(string $userId, array $adjustments) {
+		$this->configService->setUserValue($userId, 'adjustments', implode(":", $adjustments));
 	}
 
 	/**
@@ -368,7 +376,16 @@ class CalculationService {
 			$hijri = new HijriDate(false, $this->l10n);
 			$output = null;
 			$retval = null;
-			exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $hijri->get_day(), $output, $retval);
+			// hijriadjust.py call
+			// exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $hijri->get_day(), $output, $retval);
+			$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
+			$args = [
+				(float)$p_settings['latitude'],
+				(float)$p_settings['longitude'],
+				(float)$p_settings['elevation'],
+				(int)$hijri->get_day(),
+			];
+			Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
 			return (int)$output[0];
 		}
 		return 0;
@@ -458,7 +475,16 @@ class CalculationService {
 			$hyear = $hijri->get_year();
 			$output = null;
 			$retval = null;
-			exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $startDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
+			// exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $startDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
+			$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
+			$args = [
+				(float)$p_settings['latitude'],
+				(float)$p_settings['longitude'],
+				(float)$p_settings['elevation'],
+				(string)$startDate->format('Y-m-d\TH:i:s.u\Z'),
+				(int)$hday,
+			];
+			Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
 			$offsetDays = (int)$output[0];
 			$hday = $hday + $offsetDays;
 			if (($hday < 1) || ($hday > 30)) {
@@ -481,7 +507,16 @@ class CalculationService {
 				$retval = null;
 				$effectstartDate = clone $startDate;
 				$effectstartDate->modify("+$offsetDays days");
-				exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $effectstartDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
+				// exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $effectstartDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
+				$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
+				$args = [
+					(float)$p_settings['latitude'],
+					(float)$p_settings['longitude'],
+					(float)$p_settings['elevation'],
+					(string)$effectstartDate->format('Y-m-d\TH:i:s.u\Z'),
+					(int)$hday,
+				];
+				Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
 				$hday = $hday + (int)$output[0];
 			}
 			foreach ($dateRange as $curDate) {
@@ -489,15 +524,24 @@ class CalculationService {
 				if ($hday > 29) {
 					if ($hday == 30) {
 						$output = null;
-					}
-					$retval = null;
-					exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $curDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
-					if ((int)$output[0]) {
-						$hday = 1;
-						$hmonth++;
-						if ($hmonth > 12) {
-							$hmonth = 1;
-							$hyear++;
+						$retval = null;
+						//exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $curDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
+						$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
+						$args = [
+							(float)$p_settings['latitude'],
+							(float)$p_settings['longitude'],
+							(float)$p_settings['elevation'],
+							(string)$curDate->format('Y-m-d\TH:i:s.u\Z'),
+							(int)$hday,
+						];
+						Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
+						if ((int)$output[0]) {
+							$hday = 1;
+							$hmonth++;
+							if ($hmonth > 12) {
+								$hmonth = 1;
+								$hyear++;
+							}
 						}
 					} else {
 						$hday = 1;

@@ -97,7 +97,7 @@ class ConfigService {
 	}
 
 	public function getAdjustmentsValue($userId) {
-		$adjustments = explode(",", $this->config->getUserValue($userId, Application::APP_ID, 'adjustments'));
+		$adjustments = explode(":", $this->config->getUserValue($userId, Application::APP_ID, 'adjustments'));
 		if (count($adjustments) == 7) {
 			$ret['day'] = $adjustments['0'];
 			$ret['Fajr'] = $adjustments['1'];
