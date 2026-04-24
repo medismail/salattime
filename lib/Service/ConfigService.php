@@ -46,6 +46,10 @@ class ConfigService {
 	}
 
 	public function setUserValue($userId, $key, $value) {
+        if (is_array($value)) {
+            $p_value = implode(":", $value);
+            $value = $p_value;
+        }
 		$this->config->setUserValue($userId, Application::APP_ID, $key, $value);
 	}
 
@@ -127,9 +131,9 @@ class ConfigService {
 	}
 
 	public function setCityValue($userId, $city) {
-		$p_settings = $this->getSettingsValue($userId);
-		$str_settings = $p_settings['latitude'] . ':' . $p_settings['longitude'] . ':' . $p_settings['timezone'] . ':' . $p_settings['elevation'] . ':' . $p_settings['method'] . ':' . $p_settings['format_12_24'] . ':' . $city;
-		$this->config->setUserValue($userId, Application::APP_ID, 'settings', $str_settings);
+		$settings = $this->getSettingsValue($userId);
+        $settings['city'] = $city;
+		$this->setUserValue($userId, 'settings', $settings);
 	}
 
 	public function getUserTimeZone($userId) {
@@ -206,7 +210,7 @@ class ConfigService {
 				$valueParts = explode(':', $value);
 
 				if ($this->matchesPattern($valueParts, $patternParts)) {
-					$result[] = $user;
+					$result[] = $userId;
 				}
 			}
 		}

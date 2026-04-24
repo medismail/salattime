@@ -332,27 +332,26 @@ class CalculationService {
 	 * @param string userId
 	 * @param array settings
 	 */
-	public function setConfigSettings(string $userId, array $p_settings) {
-		if ($p_settings['6'] != "") {
-			$addressInfo = $this->getGeoCode($p_settings['6']);
+	public function setConfigSettings(string $userId, array $settings) {
+		if ($settings['6'] != "") {
+			$addressInfo = $this->getGeoCode($settings['6']);
 			if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
-				$p_settings['0'] = $addressInfo['latitude'];
-				$p_settings['1'] = $addressInfo['longitude'];
+				$settings['0'] = $addressInfo['latitude'];
+				$settings['1'] = $addressInfo['longitude'];
 				if (isset($addressInfo['elevation'])) {
-					$p_settings['3'] = $addressInfo['elevation'];
+					$settings['3'] = $addressInfo['elevation'];
 				}
-				$p_settings['2'] = $this->configService->getUserTimeZone($userId);
-				$p_settings['6'] = $addressInfo['city'];
+				$settings['2'] = $this->configService->getUserTimeZone($userId);
+				$settings['6'] = $addressInfo['city'];
 			}
-		} elseif (($p_settings['0'] == "0") && ($p_settings['1'] == "0")) {
+		} elseif (($settings['0'] == "0") && ($settings['1'] == "0")) {
 			$op_settings = $this->configService->getSettingsValue($userId);
-			$p_settings['0'] = $op_settings['0'];
-			$p_settings['1'] = $op_settings['1'];
-			if ($p_settings['2'] == "") {
-				$p_settings['2'] = $op_settings['2'];
+			$settings['0'] = $op_settings['0'];
+			$settings['1'] = $op_settings['1'];
+			if ($settings['2'] == "") {
+				$settings['2'] = $op_settings['2'];
 			}
 		}
-		$settings = implode(":", $p_settings);
 		$this->configService->setUserValue($userId, 'settings', $settings);
 	}
 
@@ -362,7 +361,7 @@ class CalculationService {
 	 * @param array adjustments
 	 */
 	public function setConfigAdjustments(string $userId, array $adjustments) {
-		$this->configService->setUserValue($userId, 'adjustments', implode(":", $adjustments));
+		$this->configService->setUserValue($userId, 'adjustments', $adjustments);
 	}
 
 	/**
