@@ -160,11 +160,11 @@ class CalculationService {
 		}
 
 		$hijri = new HijriDate($curtime, $this->l10n);
-		if ($adjustments['day'] != "") {
-			if ($adjustments['nma'] == '15') {
-				$hijri->tune($adjustments['day'], '0');
+		if ($adjustments['Day'] != "") {
+			if ($adjustments['NMA'] == '15') {
+				$hijri->tune($adjustments['Day'], '0');
 			} else {
-				$hijri->tune($adjustments['day'], $adjustments['nma']);
+				$hijri->tune($adjustments['Day'], $adjustments['NMA']);
 			}
 		}
 
@@ -324,7 +324,7 @@ class CalculationService {
 	}
 
 	public function getAllUserAutoHijriDate(): array {
-		return $this->configService->getUsersWithConfigMatching('adjustments', '*:*:*:*:*:*:!0');
+		return $this->configService->getUsersWithConfigMatching('adjustments', ['NMA' => '!0']);
 	}
 
 	/**
@@ -333,23 +333,28 @@ class CalculationService {
 	 * @param array settings
 	 */
 	public function setConfigSettings(string $userId, array $settings) {
-		if ($settings['6'] != "") {
-			$addressInfo = $this->getGeoCode($settings['6']);
+		if ($settings['city'] != "") {
+			$addressInfo = $this->getGeoCode($settings['city']);
 			if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
-				$settings['0'] = $addressInfo['latitude'];
-				$settings['1'] = $addressInfo['longitude'];
+				$settings['latitude'] = $addressInfo['latitude'];
+				$settings['longitude'] = $addressInfo['longitude'];
 				if (isset($addressInfo['elevation'])) {
-					$settings['3'] = $addressInfo['elevation'];
+					$settings['elevation'] = $addressInfo['elevation'];
 				}
-				$settings['2'] = $this->configService->getUserTimeZone($userId);
-				$settings['6'] = $addressInfo['city'];
+				$settings['timezone'] = $this->configService->getUserTimeZone($userId);
+				$settings['city'] = $addressInfo['city'];
 			}
-		} elseif (($settings['0'] == "0") && ($settings['1'] == "0")) {
+		} elseif (($settings['latitude'] == "0") && ($settings['longitude'] == "0")) {
 			$op_settings = $this->configService->getSettingsValue($userId);
-			$settings['0'] = $op_settings['0'];
-			$settings['1'] = $op_settings['1'];
-			if ($settings['2'] == "") {
-				$settings['2'] = $op_settings['2'];
+			$settings['latitude'] = $op_settings['latitude'];
+			$settings['longitude'] = $op_settings['longitude'];
+			if ($settings['timezone'] == "") {
+				$settings['timezone'] = $op_settings['timezone'];
+			}
+		} else {
+			$op_settings = $this->configService->getSettingsValue($userId);
+			if (($settings['latitude'] == $op_settings['latitude']) && ($settings['longitude'] == $op_settings['longitude'])) {
+				$settings['city'] = $op_settings['city'];
 			}
 		}
 		$this->configService->setUserValue($userId, 'settings', $settings);
@@ -464,7 +469,7 @@ class CalculationService {
 		$dateRange = new DatePeriod($startDate, $interval, $endDate, DatePeriod::INCLUDE_END_DATE);
 
 		$times = [];
-		if (($adjustments['nma'] != "") && ($adjustments['nma'] != "0")) {
+		if (($adjustments['NMA'] != "") && ($adjustments['NMA'] != "0")) {
 			$p_settings = $this->configService->getSettingsValue($userId);
 			$hijri = new HijriDate(strtotime($startDate->format('Ymd\THis\Z')), $this->l10n);
 			$hijriWeekdays = $hijri->hijriWeekdays();

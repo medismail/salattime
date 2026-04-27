@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.0
+### Changed
+- Data storage format standardized to JSON for consistency, reliability, and interoperability.
+- Python execution calls updated to use secure, isolated methods (avoiding shell injection risks). 
+
 ## 0.8.1
 ### Fixed
 - Add support for Nextcloud 33

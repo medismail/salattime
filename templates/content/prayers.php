@@ -50,8 +50,8 @@ $pt->tune($imsak = 0, $fajr = $_['Fajr'], $sunrise = 0, $dhuhr = $_['Dhuhr'], $a
 $date = new DateTime(null, new DateTimezone($timezone));
 $curtime = strtotime($date->format('d-m-Y H:i:s'));
 $hijri = new HijriDate($curtime, $l);
-if ($_['day'] != "") {
-	$hijri->tune($_['day']);
+if ($_['Day'] != "") {
+	$hijri->tune($_['Day']);
 }
 
 echo "<div id=\"prayertime\" class=\"viewcontainer\"><h2 style=\"font-family:Arial;\">",  $hijri->get_day_name() . ' ' . $hijri->get_day() . ' ' . $hijri->get_month_name() . ' ' . $hijri->get_year() . $l->t('H'), '</h2>';

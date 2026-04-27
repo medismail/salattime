@@ -118,7 +118,15 @@ class PageController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method, string $format_12_24): RedirectResponse {
-		$p_settings = [ $latitude, $longitude, $timezone, $elevation, $method, $format_12_24, $address ];
+		$p_settings = [
+			'latitude' => $latitude,
+			'longitude' => $longitude,
+			'timezone' => $timezone,
+			'elevation' => $elevation,
+			'method' => $method,
+			'format_12_24' => $format_12_24,
+			'city' => $address
+		];
 		$this->calculationService->setConfigSettings($this->userId, $p_settings);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);
@@ -138,19 +146,20 @@ class PageController extends Controller {
 	}
 
 	 /**
-	  * @param int $day
+	  * @param int $Day
 	  * @param int $Fajr
 	  * @param int $Dhuhr
 	  * @param int $Asr
 	  * @param int $Maghrib
 	  * @param int $Isha
+	  * @param int $NMA
 	  *
 	  */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function saveadjustment(int $day, int $Fajr, int $Dhuhr, int $Asr, int $Maghrib, int $Isha, int $nma): RedirectResponse {
-		if ($day == "") {
-			$day = 0;
+	public function saveadjustment(int $Day, int $Fajr, int $Dhuhr, int $Asr, int $Maghrib, int $Isha, int $NMA): RedirectResponse {
+		if ($Day == "") {
+			$Day = 0;
 		}
 		if ($Fajr == "") {
 			$Fajr = 0;
@@ -167,13 +176,21 @@ class PageController extends Controller {
 		if ($Isha == "") {
 			$Isha = 0;
 		}
-		if ($nma == "") {
-			$nma = 0;
+		if ($NMA == "") {
+			$NMA = 0;
 		}
-		if ($nma) {
-			$day = $this->calculationService->getDayAutoAdjustments($this->userId);
+		if ($NMA) {
+			$Day = $this->calculationService->getDayAutoAdjustments($this->userId);
 		}
-		$adjustments = [ $day, $Fajr, $Dhuhr, $Asr, $Maghrib, $Isha, $nma ];
+		$adjustments = [
+			'Day' => $Day,
+			'Fajr' => $Fajr,
+			'Dhuhr' => $Dhuhr,
+			'Asr' => $Asr,
+			'Maghrib' => $Maghrib,
+			'Isha' => $Isha,
+			'NMA' => $NMA
+		];
 		$this->calculationService->setConfigAdjustments($this->userId, $adjustments);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);

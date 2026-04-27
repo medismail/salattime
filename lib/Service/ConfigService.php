@@ -46,93 +46,108 @@ class ConfigService {
 	}
 
 	public function setUserValue($userId, $key, $value) {
-        if (is_array($value)) {
-            $p_value = implode(":", $value);
-            $value = $p_value;
-        }
+		if (is_array($value)) {
+			//$p_value = implode(":", $value);
+			$p_value = json_encode($value);
+			$value = $p_value;
+		}
 		$this->config->setUserValue($userId, Application::APP_ID, $key, $value);
 	}
 
 	public function getSettingsValue($userId) {
-		$p_settings = explode(":", $this->config->getUserValue($userId, Application::APP_ID, 'settings'));
-		if (count($p_settings) > 2) {
-			$ret['latitude'] = $p_settings['0'];
-			if ($ret['latitude'] == "") {
+		$settings = $this->config->getUserValue($userId, Application::APP_ID, 'settings');
+		$p_settings = json_decode($settings);
+		if ($p_settings == null) {
+			$p_settings = explode(":", $settings);
+			if (count($p_settings) > 2) {
+				$ret['latitude'] = $p_settings['0'];
+				if ($ret['latitude'] == "") {
+					$ret['latitude'] = 21.3890824;
+				}
+				$ret['longitude'] = $p_settings['1'];
+				if ($ret['longitude'] == "") {
+					$ret['longitude'] = 39.8579118;
+				}
+				$ret['timezone'] = $p_settings['2'];
+				if ($ret['timezone'] == "") {
+					$ret['timezone'] = '+0300';
+				}
+				if (isset($p_settings['3']) && ($p_settings['3'] != "")) {
+					$ret['elevation'] = $p_settings['3'];
+				} else {
+					$ret['elevation'] = 0.0;
+				}
+				if (isset($p_settings['4']) && ($p_settings['4'] != "")) {
+					$ret['method'] = $p_settings['4'];
+				} else {
+					$ret['method'] = 'MWL';
+				}
+				if (isset($p_settings['5']) && ($p_settings['5'] != "")) {
+					$ret['format_12_24'] = $p_settings['5'];
+				} else {
+					$ret['format_12_24'] = '12h';
+				}
+				if (isset($p_settings['6']) && ($p_settings['6'] != "")) {
+					$ret['city'] = $p_settings['6'];
+				} else {
+					$ret['city'] = '';
+				}
+			} else {
 				$ret['latitude'] = 21.3890824;
-			}
-			$ret['longitude'] = $p_settings['1'];
-			if ($ret['longitude'] == "") {
 				$ret['longitude'] = 39.8579118;
-			}
-			$ret['timezone'] = $p_settings['2'];
-			if ($ret['timezone'] == "") {
 				$ret['timezone'] = '+0300';
-			}
-			if (isset($p_settings['3']) && ($p_settings['3'] != "")) {
-				$ret['elevation'] = $p_settings['3'];
-			} else {
 				$ret['elevation'] = null;
-			}
-			if (isset($p_settings['4']) && ($p_settings['4'] != "")) {
-				$ret['method'] = $p_settings['4'];
-			} else {
 				$ret['method'] = 'MWL';
-			}
-			if (isset($p_settings['5']) && ($p_settings['5'] != "")) {
-				$ret['format_12_24'] = $p_settings['5'];
-			} else {
 				$ret['format_12_24'] = '12h';
+				$ret['city'] = 'Makkah';
 			}
-			if (isset($p_settings['6']) && ($p_settings['6'] != "")) {
-				$ret['city'] = $p_settings['6'];
-			} else {
-				$ret['city'] = '';
-			}
+			$this->setUserValue($userId, 'settings', $ret);
 		} else {
-			$ret['latitude'] = 21.3890824;
-			$ret['longitude'] = 39.8579118;
-			$ret['timezone'] = '+0300';
-			$ret['elevation'] = null;
-			$ret['method'] = 'MWL';
-			$ret['format_12_24'] = '12h';
-			$ret['city'] = 'Makkah';
+			$ret = (array) $p_settings;
 		}
 		return $ret;
 	}
 
 	public function getAdjustmentsValue($userId) {
-		$adjustments = explode(":", $this->config->getUserValue($userId, Application::APP_ID, 'adjustments'));
-		if (count($adjustments) == 7) {
-			$ret['day'] = $adjustments['0'];
-			$ret['Fajr'] = $adjustments['1'];
-			$ret['Dhuhr'] = $adjustments['2'];
-			$ret['Asr'] = $adjustments['3'];
-			$ret['Maghrib'] = $adjustments['4'];
-			$ret['Isha'] = $adjustments['5'];
-			$ret['nma'] = $adjustments['6'];
-		} elseif (count($adjustments) == 6) {
-			$ret['day'] = $adjustments['0'];
-			$ret['Fajr'] = $adjustments['1'];
-			$ret['Dhuhr'] = $adjustments['2'];
-			$ret['Asr'] = $adjustments['3'];
-			$ret['Maghrib'] = $adjustments['4'];
-			$ret['Isha'] = $adjustments['5'];
-			$ret['nma'] = 0;
+		$v_adjustments = $this->config->getUserValue($userId, Application::APP_ID, 'adjustments');
+		$adjustments = json_decode($v_adjustments);
+		if ($adjustments == null) {
+			$adjustments = explode(",", $v_adjustments);
+			if (count($adjustments) == 7) {
+				$ret['Day'] = $adjustments['0'];
+				$ret['Fajr'] = $adjustments['1'];
+				$ret['Dhuhr'] = $adjustments['2'];
+				$ret['Asr'] = $adjustments['3'];
+				$ret['Maghrib'] = $adjustments['4'];
+				$ret['Isha'] = $adjustments['5'];
+				$ret['NMA'] = $adjustments['6'];
+			} elseif (count($adjustments) == 6) {
+				$ret['Day'] = $adjustments['0'];
+				$ret['Fajr'] = $adjustments['1'];
+				$ret['Dhuhr'] = $adjustments['2'];
+				$ret['Asr'] = $adjustments['3'];
+				$ret['Maghrib'] = $adjustments['4'];
+				$ret['Isha'] = $adjustments['5'];
+				$ret['NMA'] = 0;
+			} else {
+				$ret['Day'] = 0;
+				$ret['Fajr'] = 0;
+				$ret['Dhuhr'] = 0;
+				$ret['Asr'] = 0;
+				$ret['Maghrib'] = 0;
+				$ret['Isha'] = 0;
+				$ret['NMA'] = 0;
+			}
+			$this->setUserValue($userId, 'adjustments', $ret);
 		} else {
-			$ret['day'] = 0;
-			$ret['Fajr'] = 0;
-			$ret['Dhuhr'] = 0;
-			$ret['Asr'] = 0;
-			$ret['Maghrib'] = 0;
-			$ret['Isha'] = 0;
-			$ret['nma'] = 0;
+			$ret = (array) $adjustments;
 		}
 		return $ret;
 	}
 
 	public function setCityValue($userId, $city) {
 		$settings = $this->getSettingsValue($userId);
-        $settings['city'] = $city;
+		$settings['city'] = $city;
 		$this->setUserValue($userId, 'settings', $settings);
 	}
 
@@ -169,12 +184,13 @@ class ConfigService {
 	}
 
 	/**
-	 * Get all users who have any value for the given config key
+	 * Get all users where the config value matches a pattern match {key:value}
 	 *
 	 * @param string $configKey
+	 * @param array $pattern  Pattern like {key:value}
 	 * @return IUser[]
 	 */
-	public function getUsersWithConfig(string $configKey): array {
+	public function getUsersWithConfigMatching(string $configKey, array $patternParts): array {
 		$users = $this->userManager->search('');
 		$result = [];
 
@@ -183,31 +199,7 @@ class ConfigService {
 			$value = $this->config->getUserValue($userId, Application::APP_ID, $configKey, null);
 
 			if ($value !== null && $value !== '') {
-				$result[] = $user;
-			}
-		}
-
-		return $result;
-	}
-	/**
-	 * Get all users where the config value matches a pattern like "*:*:3" or "10:*:2"
-	 *
-	 * @param string $configKey
-	 * @param string $pattern  Pattern like "*:*:3"
-	 * @return IUser[]
-	 */
-	public function getUsersWithConfigMatching(string $configKey, string $pattern): array {
-		$users = $this->userManager->search('');
-		$result = [];
-
-		$patternParts = explode(':', $pattern);
-
-		foreach ($users as $user) {
-			$userId = $user->getUID();
-			$value = $this->config->getUserValue($userId, Application::APP_ID, $configKey, null);
-
-			if ($value !== null && $value !== '') {
-				$valueParts = explode(':', $value);
+				$valueParts = json_decode($value);
 
 				if ($this->matchesPattern($valueParts, $patternParts)) {
 					$result[] = $userId;

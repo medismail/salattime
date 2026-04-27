@@ -71,7 +71,7 @@ class HijriBackgroundJob extends TimedJob {
 		$date = new DateTime('', new DateTimezone('UTC'));
 		$curtime = strtotime($date->format('d-m-Y H:i:s'));
 		$hijri = new HijriDate($curtime);
-		$hijri->tune($adjustments['day'], $adjustments['nma']);
+		$hijri->tune($adjustments['Day'], $adjustments['NMA']);
 		if ($hijri->get_day() == 29) {
 			$output = null;
 			$retval = null;
@@ -81,22 +81,22 @@ class HijriBackgroundJob extends TimedJob {
 			$adjust = (int)$output[0];
 			$curtime = strtotime($date->format('d-m-Y H:i:s'));
 			$hijri = new HijriDate($curtime);
-			$hijri->tune($adjustments['day'], $adjustments['nma']);
+			$hijri->tune($adjustments['Day'], $adjustments['NMA']);
 			if (($adjust == 0) && ($hijri->get_day() == 1)) {
-				$adjustments['nma'] = -$hijri->get_month();
+				$adjustments['NMA'] = -$hijri->get_month();
 				$this->calculationService->setConfigAdjustments($uid, $adjustments);
 			} elseif (($adjust == 1)($hijri->get_day() == 30)) {
-				$adjustments['nma'] = $hijri->get_month();
+				$adjustments['NMA'] = $hijri->get_month();
 				$this->calculationService->setConfigAdjustments($uid, $adjustments);
 			}
 		} elseif ($hijri->get_day() == 1) {
-			if ($adjustments['nma'] == $hijri->get_month()) {
-				$adjustments['day'] = $adjustments['day'] + 1;
-				$adjustments['nma'] = 15;
+			if ($adjustments['NMA'] == $hijri->get_month()) {
+				$adjustments['Day'] = $adjustments['Day'] + 1;
+				$adjustments['NMA'] = 15;
 				$this->calculationService->setConfigAdjustments($uid, $adjustments);
-			} elseif ($adjustments['nma'] == -$hijri->get_month()) {
-				$adjustments['day'] = $adjustments['day'] - 1;
-				$adjustments['nma'] = 15;
+			} elseif ($adjustments['NMA'] == -$hijri->get_month()) {
+				$adjustments['Day'] = $adjustments['Day'] - 1;
+				$adjustments['NMA'] = 15;
 				$this->calculationService->setConfigAdjustments($uid, $adjustments);
 			}
 		}
