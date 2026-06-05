@@ -1,4 +1,5 @@
 <div>
+    <button id="getgeo"><?php echo $l->t('Get current location'); ?></button>
     <form name="auto" action="savesetting" method="get">
         <?php echo $l->t('Location address:'); ?> <input type="text" name="address"><br>
         <input type="text" name="latitude" style="display: none;" value<?php echo "\"" . $_['latitude'] . "\""; ?>>
@@ -15,7 +16,7 @@
     } ?> />
     <label for="checkbox1224"> <?php echo $l->t('Use 24 hours format'); ?></label><br>
     <br>
-    <button id="btnmtoggle"><?php echo $l->t('Click for manual settings'); ?></button>
+    <button id="btnmtoggle"><?php echo $l->t('Toggle manual settings'); ?></button>
     <div id="divmanuel" style="display: none;">
         <?php echo $l->t('Manual settings:'); ?>
         <br>

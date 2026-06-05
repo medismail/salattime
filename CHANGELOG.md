@@ -1,6 +1,8 @@
 # Changelog
 
 ## 0.9.0
+### Added
+- Add get current location from device
 ### Changed
 - Data storage format standardized to JSON for consistency, reliability, and interoperability.
 - Python execution calls updated to use secure, isolated methods (avoiding shell injection risks). 
