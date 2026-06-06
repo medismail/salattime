@@ -90,7 +90,6 @@ OC.L10N.register(
     "Qibla direction" : "Напрямок Qibla",
     "Location address:" : "Адреса місцезнаходження:",
     "Use 24 hours format" : "Використовуйте формат 24 години",
-    "Click for manual settings" : "Клацніть для ручних налаштувань",
     "Manual settings:" : "Ручні налаштування:",
     "Latitude:" : "Широта:",
     "Longitude:" : "Довгота:",

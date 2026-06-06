@@ -75,7 +75,6 @@ OC.L10N.register(
     "Qibla direction" : "جهت قبله",
     "Location address:" : "موقعیت:",
     "Use 24 hours format" : "استفاده از قالب ۲۴ ساعته",
-    "Click for manual settings" : "Click for manual settings",
     "Manual settings:" : "Manual settings:",
     "Latitude:" : "عرض جغرافیایی:",
     "Longitude:" : "طول جغرافیایی:",

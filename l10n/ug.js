@@ -92,7 +92,6 @@ OC.L10N.register(
     "Qibla direction" : "قىبلە يۆنىلىشى",
     "Location address:" : "ئورۇن ئادرېسى:",
     "Use 24 hours format" : "24 سائەت فورماتىنى ئىشلىتىڭ",
-    "Click for manual settings" : "قولدا تەڭشەش ئۈچۈن چېكىڭ",
     "Manual settings:" : "قولدا تەڭشەش:",
     "Latitude:" : "كەڭلىك:",
     "Longitude:" : "ئۇزۇنلۇقى:",

@@ -18,7 +18,6 @@ OC.L10N.register(
     "Moon Position" : "Položaj Lune",
     "Location address:" : "Naslov mesta:",
     "Use 24 hours format" : "24-urni zapis",
-    "Click for manual settings" : "Klikni za ročne nastavitve",
     "Manual settings:" : "Ročne nastavitve:",
     "Latitude:" : "Zemljepisna širina:",
     "Longitude:" : "Zemljepisna dolžina:",

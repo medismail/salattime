@@ -92,7 +92,6 @@ OC.L10N.register(
     "Qibla direction" : "Quibla, dirección á Meca",
     "Location address:" : "Enderezo de localización:",
     "Use 24 hours format" : "Usar o formato de 24 horas",
-    "Click for manual settings" : "Prema para axuste manual",
     "Manual settings:" : "Axustes manuais:",
     "Latitude:" : "Latitude:",
     "Longitude:" : "Lonxitude:",

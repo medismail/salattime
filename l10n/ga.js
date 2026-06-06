@@ -92,7 +92,6 @@ OC.L10N.register(
     "Qibla direction" : "Treoir Qibla",
     "Location address:" : "Seoladh suímh:",
     "Use 24 hours format" : "Bain úsáid as formáid 24 uair an chloig",
-    "Click for manual settings" : "Cliceáil le haghaidh socruithe láimhe",
     "Manual settings:" : "Socruithe láimhe:",
     "Latitude:" : "Domhanleithead:",
     "Longitude:" : "Domhanfhad:",

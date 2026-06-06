@@ -73,7 +73,6 @@ OC.L10N.register(
     "Qibla direction" : "Kibla-irány",
     "Location address:" : "Hely címe:",
     "Use 24 hours format" : "24 órás formátum használata",
-    "Click for manual settings" : "Kattintson a kézi beállításokhoz",
     "Manual settings:" : "Kézi beállítások:",
     "Latitude:" : "Szélesség:",
     "Longitude:" : "Hosszúság:",

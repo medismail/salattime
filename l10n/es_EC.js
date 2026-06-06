@@ -74,7 +74,6 @@ OC.L10N.register(
     "Qibla direction" : "Dirección de la Qibla",
     "Location address:" : "Dirección de ubicación:",
     "Use 24 hours format" : "Usar formato de 24 horas",
-    "Click for manual settings" : "Haz clic para ajustes manuales",
     "Manual settings:" : "Ajustes manuales:",
     "Latitude:" : "Latitud:",
     "Longitude:" : "Longitud:",

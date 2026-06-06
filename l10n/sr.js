@@ -92,7 +92,6 @@ OC.L10N.register(
     "Qibla direction" : "Смер Кибле",
     "Location address:" : "Адреса локације:",
     "Use 24 hours format" : "Користи 24 часовни формат",
-    "Click for manual settings" : "Кликните за ручна подешавања",
     "Manual settings:" : "Ручна подешавања:",
     "Latitude:" : "Ширина:",
     "Longitude:" : "Дужина:",

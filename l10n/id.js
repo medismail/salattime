@@ -92,7 +92,6 @@ OC.L10N.register(
     "Qibla direction" : "Arah kiblat",
     "Location address:" : "Alamat lokasi:",
     "Use 24 hours format" : "Gunakan format 24 jam",
-    "Click for manual settings" : "Klik untuk pengaturan manual",
     "Manual settings:" : "Pengaturan manual:",
     "Latitude:" : "Lintang:",
     "Longitude:" : "Bujur:",

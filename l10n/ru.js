@@ -16,7 +16,6 @@ OC.L10N.register(
     "Sun Position" : "Расположение Солнца",
     "Altitude" : "Высота",
     "Moon Position" : "Расположение Луны",
-    "Click for manual settings" : "Нажмите для ручных настроек",
     "Manual settings:" : "Ручные настройки:",
     "Timezone:" : "Часовой пояс:",
     "Qatar" : "Катар",

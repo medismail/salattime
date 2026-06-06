@@ -78,7 +78,6 @@ OC.L10N.register(
     "Qibla direction" : "Qibla norabidea",
     "Location address:" : "Kokapen helbidea:",
     "Use 24 hours format" : "Erabili 24 orduko formatua",
-    "Click for manual settings" : "Egin klik eskuzko ezarpenentzako",
     "Manual settings:" : "Eskuzko ezarpenak:",
     "Latitude:" : "Latitudea:",
     "Longitude:" : "Longitudea:",

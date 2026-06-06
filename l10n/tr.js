@@ -92,7 +92,6 @@ OC.L10N.register(
     "Qibla direction" : "Kıble yönü",
     "Location address:" : "Konum adresi:",
     "Use 24 hours format" : "24 saat biçimi kullanılsın",
-    "Click for manual settings" : "El ile ayarlamak için tıklayın",
     "Manual settings:" : "El ile yapılan ayarlar:",
     "Latitude:" : "Enlem:",
     "Longitude:" : "Boylam:",
