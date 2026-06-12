@@ -1,13 +1,19 @@
 OC.L10N.register(
     "salattime",
     {
+    "Time" : "Akud",
     "Error" : "Erreur",
     "Day" : "Ass",
     "Location" : "Adig",
     "Next" : "Uḍfir",
+    "after" : "mbaɛd",
     "Sunrise" : "Alluy n yiṭij",
     "Sunset" : "Aɣelluy n yiṭij",
+    "Altitude" : "Talqayt",
+    "Qatar" : "Qaṭar",
+    "Kuwait" : "Lekwit",
     "Tunisia" : "Tunes",
+    "Morocco" : "Merruk",
     "Algeria" : "Zzayer",
     "Settings" : "Iɣewwaṛen"
 },
