@@ -18,6 +18,7 @@ OC.L10N.register(
     "after" : "po",
     "Sunrise" : "Saulėtekis",
     "Sunset" : "Saulėlydis",
+    "Altitude" : "Aukštis",
     "Manual settings:" : "Rankiniai nustatymai:",
     "Latitude:" : "Platuma:",
     "Longitude:" : "Ilguma:",
