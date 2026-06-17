@@ -55,7 +55,7 @@ class HijriBackgroundJob extends TimedJob {
 	 * update salat time Hijri Date
 	 */
 	protected function updateHijriDate() {
-		if (Helper::pythonInstalled()) {
+		if (Helper::pythonInstalled(null, $this->calculationService->getAppDataFolder())) {
 			$uids = $this->calculationService->getAllUserAutoHijriDate();
 			foreach ($uids as $uid) {
 				$this->updateUserHijriDate($uid);

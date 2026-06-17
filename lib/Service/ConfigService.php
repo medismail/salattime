@@ -54,6 +54,10 @@ class ConfigService {
 		$this->config->setUserValue($userId, Application::APP_ID, $key, $value);
 	}
 
+	public function getSystemValue($key) {
+		return $this->config->getSystemConfig()->getValue($key);
+	}
+
 	public function getSettingsValue($userId) {
 		$settings = $this->config->getUserValue($userId, Application::APP_ID, 'settings');
 		$p_settings = json_decode($settings);

@@ -51,6 +51,8 @@ use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IClient;
 use OCP\ICacheFactory;
 use OCP\ICache;
+use OCP\App\IAppManager;
+use Psr\Log\LoggerInterface;
 use OCP\IL10N;
 use DateTime;
 use DateTimezone;
@@ -109,6 +111,12 @@ class CalculationService {
 	/** @var ICache */
 	private $cache;
 
+	/** @var IAppManager */
+	private $appManager;
+
+	/** @var LoggerInterface */
+	private $logger;
+
 	/** @var IL10N */
 	private $l10n;
 
@@ -118,6 +126,8 @@ class CalculationService {
 					   IUserManager $userManager,
 					   IClientService $clientService,
 					   ICacheFactory $cacheFactory,
+					   IAppManager $appManager,
+					   LoggerInterface $logger,
 					   IL10N $l
 				   ) {
 		$this->configService = $configService;
@@ -126,6 +136,8 @@ class CalculationService {
 		$this->clientService = $clientService;
 		$this->client = $clientService->newClient();
 		$this->cache = $cacheFactory->createDistributed('salattime');
+		$this->appManager = $appManager;
+		$this->logger = $logger;
 		$this->l10n = $l;
 	}
 
@@ -212,7 +224,7 @@ class CalculationService {
 
 		$udtz = new DateTimezone($p_settings['timezone']);
 		$date = new DateTime('', $udtz);
-		if (Helper::pythonInstalled()) {
+		if (Helper::pythonInstalled($this->cache, $this->getAppDataFolder())) {
 			$mphase = [
 				0 => $this->l10n->t('New Moon'),
 				1 => $this->l10n->t('Waxing Crescent Moon'),
@@ -327,6 +339,10 @@ class CalculationService {
 		return $this->configService->getUsersWithConfigMatching('adjustments', ['NMA' => '!0']);
 	}
 
+	public function getAppDataFolder(): string {
+		return $this->configService->getSystemValue('datadirectory');
+	}
+
 	/**
 	 * setConfigSettings set settingss values in database
 	 * @param string userId
@@ -375,7 +391,7 @@ class CalculationService {
 	 * @return int adjustments days
 	 */
 	public function getDayAutoAdjustments(string $userId) {
-		if (Helper::pythonInstalled()) {
+		if (Helper::pythonInstalled($this->cache, $this->getAppDataFolder())) {
 			$p_settings = $this->configService->getSettingsValue($userId);
 			$hijri = new HijriDate(false, $this->l10n);
 			$output = null;
@@ -784,7 +800,7 @@ class CalculationService {
 		try {
 			$options = [
 				'headers' => [
-					'User-Agent' => 'NextcloudSalattime/' . Helper::getVersion() . ' nextcloud.com'
+					'User-Agent' => 'NextcloudSalattime/' . Helper::getVersion($this->appManager) . ' nextcloud.com'
 				],
 			];
 
@@ -820,8 +836,7 @@ class CalculationService {
 				return $json;
 			}
 		} catch (\Exception $e) {
-			$logger = \OC::$server->getLogger();
-			$logger->warning($url . 'API error : ' . $e, ['app' => Application::APP_ID]);
+			$this->logger->warning($url . 'API error : ' . $e, ['app' => Application::APP_ID]);
 			return ['error' => $e->getMessage()];
 		}
 	}
