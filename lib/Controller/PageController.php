@@ -93,7 +93,7 @@ class PageController extends Controller {
 		$parameters = $this->calculationService->getConfigSettings($this->userId);
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
 		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
-		return new TemplateResponse($this->appName, $templateName, array_merge($parameters, $notification, $calendar));
+		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($parameters, $notification, $calendar));
 	}
 
 	 /**
@@ -142,7 +142,7 @@ class PageController extends Controller {
 		$parameters = $this->calculationService->getConfigAdjustments($this->userId);
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
 		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
-		return new TemplateResponse($this->appName, $templateName, array_merge($parameters, $notification, $calendar));
+		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($parameters, $notification, $calendar));
 	}
 
 	 /**
