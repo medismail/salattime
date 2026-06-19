@@ -60,39 +60,39 @@ class ConfigService {
 
 	public function getSettingsValue($userId) {
 		$settings = $this->config->getUserValue($userId, Application::APP_ID, 'settings');
-		$p_settings = json_decode($settings);
+		$p_settings = json_decode($settings, true);
 		if ($p_settings == null) {
 			$p_settings = explode(":", $settings);
 			if (count($p_settings) > 2) {
-				$ret['latitude'] = $p_settings['0'];
+				$ret['latitude'] = $p_settings[0];
 				if ($ret['latitude'] == "") {
 					$ret['latitude'] = 21.3890824;
 				}
-				$ret['longitude'] = $p_settings['1'];
+				$ret['longitude'] = $p_settings[1];
 				if ($ret['longitude'] == "") {
 					$ret['longitude'] = 39.8579118;
 				}
-				$ret['timezone'] = $p_settings['2'];
+				$ret['timezone'] = $p_settings[2];
 				if ($ret['timezone'] == "") {
 					$ret['timezone'] = '+0300';
 				}
-				if (isset($p_settings['3']) && ($p_settings['3'] != "")) {
-					$ret['elevation'] = $p_settings['3'];
+				if (isset($p_settings[3]) && ($p_settings[3] != "")) {
+					$ret['elevation'] = $p_settings[3];
 				} else {
 					$ret['elevation'] = 0.0;
 				}
-				if (isset($p_settings['4']) && ($p_settings['4'] != "")) {
-					$ret['method'] = $p_settings['4'];
+				if (isset($p_settings[4]) && ($p_settings[4] != "")) {
+					$ret['method'] = $p_settings[4];
 				} else {
 					$ret['method'] = 'MWL';
 				}
-				if (isset($p_settings['5']) && ($p_settings['5'] != "")) {
-					$ret['format_12_24'] = $p_settings['5'];
+				if (isset($p_settings[5]) && ($p_settings[5] != "")) {
+					$ret['format_12_24'] = $p_settings[5];
 				} else {
 					$ret['format_12_24'] = '12h';
 				}
-				if (isset($p_settings['6']) && ($p_settings['6'] != "")) {
-					$ret['city'] = $p_settings['6'];
+				if (isset($p_settings[6]) && ($p_settings[6] != "")) {
+					$ret['city'] = $p_settings[6];
 				} else {
 					$ret['city'] = '';
 				}
@@ -114,24 +114,24 @@ class ConfigService {
 
 	public function getAdjustmentsValue($userId) {
 		$v_adjustments = $this->config->getUserValue($userId, Application::APP_ID, 'adjustments');
-		$adjustments = json_decode($v_adjustments);
+		$adjustments = json_decode($v_adjustments, true);
 		if ($adjustments == null) {
 			$adjustments = explode(",", $v_adjustments);
 			if (count($adjustments) == 7) {
-				$ret['Day'] = $adjustments['0'];
-				$ret['Fajr'] = $adjustments['1'];
-				$ret['Dhuhr'] = $adjustments['2'];
-				$ret['Asr'] = $adjustments['3'];
-				$ret['Maghrib'] = $adjustments['4'];
-				$ret['Isha'] = $adjustments['5'];
-				$ret['NMA'] = $adjustments['6'];
+				$ret['Day'] = $adjustments[0];
+				$ret['Fajr'] = $adjustments[1];
+				$ret['Dhuhr'] = $adjustments[2];
+				$ret['Asr'] = $adjustments[3];
+				$ret['Maghrib'] = $adjustments[4];
+				$ret['Isha'] = $adjustments[5];
+				$ret['NMA'] = $adjustments[6];
 			} elseif (count($adjustments) == 6) {
-				$ret['Day'] = $adjustments['0'];
-				$ret['Fajr'] = $adjustments['1'];
-				$ret['Dhuhr'] = $adjustments['2'];
-				$ret['Asr'] = $adjustments['3'];
-				$ret['Maghrib'] = $adjustments['4'];
-				$ret['Isha'] = $adjustments['5'];
+				$ret['Day'] = $adjustments[0];
+				$ret['Fajr'] = $adjustments[1];
+				$ret['Dhuhr'] = $adjustments[2];
+				$ret['Asr'] = $adjustments[3];
+				$ret['Maghrib'] = $adjustments[4];
+				$ret['Isha'] = $adjustments[5];
 				$ret['NMA'] = 0;
 			} else {
 				$ret['Day'] = 0;
@@ -203,7 +203,7 @@ class ConfigService {
 			$value = $this->config->getUserValue($userId, Application::APP_ID, $configKey, null);
 
 			if ($value !== null && $value !== '') {
-				$valueParts = json_decode($value);
+				$valueParts = json_decode($value, true);
 
 				if ($this->matchesPattern($valueParts, $patternParts)) {
 					$result[] = $userId;
