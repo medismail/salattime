@@ -101,8 +101,8 @@ class BackgroundJob extends TimedJob {
 		foreach ($salawat as $id => $salat) {
 			$notification = $this->notificationManager->createNotification();
 			if ($offset[$salat] == 1) {
-				$PrayerTime->setTimestamp(strtotime('+1 day', strtotime($times[$salat])));
-				$PrayerTimeEnd->setTimestamp(strtotime('+1 day', strtotime($times[$endTimes[$id]])));
+				$PrayerTime->setTimestamp(strtotime($times[$salat]) + 86400);
+				$PrayerTimeEnd->setTimestamp(strtotime($times[$endTimes[$id]]) + 86400);
 			} else {
 				$PrayerTime->setTimestamp(strtotime($times[$salat]));
 				$PrayerTimeEnd->setTimestamp(strtotime($times[$endTimes[$id]]));
