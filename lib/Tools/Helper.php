@@ -27,6 +27,8 @@
 
 namespace OCA\SalatTime\Tools;
 
+use RuntimeException;
+
 class Helper {
 	public const APP_ID = 'salattime';
 
