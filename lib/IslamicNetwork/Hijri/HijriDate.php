@@ -25,7 +25,7 @@ class HijriDate {
 	/** @var IL10N */
 	private $l10n;
 
-	public function __construct($time = false, IL10N $l = none) {
+	public function __construct($time = false, IL10N $l = null) {
 		if (!$time) {
 			$time = time();
 		}
