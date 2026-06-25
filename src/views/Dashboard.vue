@@ -8,7 +8,7 @@
 		<NcEmptyContent v-else
 			:description="emptyContentMessage">
 			<template #icon>
-				<CloseIcon />
+				<span class="icon-close" />
 			</template>
 		</NcEmptyContent>
 	</div>
@@ -116,23 +116,23 @@ export default {
 		}
 	}
 	a {
-		color: var(--color-text-light);
+		color: var(--color-primary-element);
 		text-decoration: underline;
 	}
 	td, th {
-		border: 1px solid #ddd;
+		border: 1px solid var(--color-border);
 		padding: 6px;
 	}
 	tr:nth-child(even) {
-		color: black;
-		background-color: #f2f2f2;
+		color: var(--color-main-text);
+		background-color: var(--color-background-hover);
 	}
 	th {
 		padding-top: 6px;
 		padding-bottom: 6px;
 		text-align: left;
-		background-color: #04AA6D;
-		color: white;
+		background-color: var(--color-primary-element);
+		color: var(--color-primary-element-text);
 	}
 	> p {
 		img {

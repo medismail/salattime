@@ -84,8 +84,8 @@ foreach ($daterange as $date1) {
 	$times = $pt->getTimes($date1, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format_12_24);
 	$curtime = strtotime($date1->format('d-m-Y H:i:s'));
 	$hijri = new HijriDate($curtime, $l);
-	if ($_['day'] != "") {
-		$hijri->tune($_['day']);
+	if ($_['Day'] != "") {
+		$hijri->tune($_['Day']);
 	}
 	echo "<tr><td scope=\"row\">", $hijri->get_day_name(), " ", $hijri->get_year(), "-", $hijri->get_month(), "-", $hijri->get_day(), "</td>";
 	if ($hijri->get_month() == 9) {

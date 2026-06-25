@@ -2,12 +2,12 @@
     <button id="getgeo"><?php echo $l->t('Get current location'); ?></button>
     <form name="auto" action="savesetting" method="get">
         <?php echo $l->t('Location address:'); ?> <input type="text" name="address"><br>
-        <input type="text" name="latitude" style="display: none;" value<?php echo "\"" . $_['latitude'] . "\""; ?>>
-        <input type="text" name="longitude" style="display: none;" value<?php echo "\"" . $_['longitude'] . "\""; ?>>
-        <input type="text" name="timezone" style="display: none;" value<?php echo "\"" . $_['timezone'] . "\""; ?>>
-        <input type="text" name="elevation" style="display: none;" value<?php echo "\"" . $_['elevation'] . "\""; ?>>
-        <input type="text" name="method" style="display: none;" value<?php echo "\"" . $_['method'] . "\""; ?>>
-        <input type="text" name="format_12_24" style="display: none;" value=<?php echo "\"" . $_['format_12_24'] . "\""; ?>>
+        <input type="hidden" name="latitude" value="<?php p($_['latitude']); ?>">
+        <input type="hidden" name="longitude" value="<?php p($_['longitude']); ?>">
+        <input type="hidden" name="timezone" value="<?php p($_['timezone']); ?>">
+        <input type="hidden" name="elevation" value="<?php p($_['elevation']); ?>">
+        <input type="hidden" name="method" value="<?php p($_['method']); ?>">
+        <input type="hidden" name="format_12_24" value="<?php p($_['format_12_24']); ?>">
         <input type="submit">
     </form>
     <br>
@@ -21,10 +21,10 @@
         <?php echo $l->t('Manual settings:'); ?>
         <br>
         <form name="man" action="savesetting" method="get">
-            <input type="text" name="address" style="display: none;" value"">
-            <?php echo $l->t('Latitude:'); ?> <input type="text" name="latitude" value=<?php echo "\"" . $_['latitude'] . "\""; ?>><br>
-            <?php echo $l->t('Longitude:'); ?> <input type="text" name="longitude" value=<?php echo "\"" . $_['longitude'] . "\""; ?>><br>
-            <?php echo $l->t('Timezone:'); ?> <input list="timezones" name="timezone" id="timezone" value=<?php echo "\"" . $_['timezone'] . "\""; ?>><br>
+            <input type="hidden" name="address" value="">
+            <?php echo $l->t('Latitude:'); ?> <input type="text" name="latitude" value="<?php p($_['latitude']); ?>"><br>
+            <?php echo $l->t('Longitude:'); ?> <input type="text" name="longitude" value="<?php p($_['longitude']); ?>"><br>
+            <?php echo $l->t('Timezone:'); ?> <input list="timezones" name="timezone" id="timezone" value="<?php p($_['timezone']); ?>"><br>
             <datalist id="timezones">
                 <option value="UTC">
                 <option value="+0100">
@@ -60,7 +60,7 @@
                 <option value="-1100">
                 <option value="-1200">
             </datalist>
-            <?php echo $l->t('Altitude:'); ?> <input type="text" name="elevation" value=<?php echo "\"" . $_['elevation'] . "\""; ?>><br>
+            <?php echo $l->t('Altitude:'); ?> <input type="text" name="elevation" value="<?php p($_['elevation']); ?>"><br>
             <?php echo $l->t('Calculation method:'); ?> <select name="method" id="method">
                 <option value="MWL" <?php if ($_['method'] == 'MWL') {
                 	echo("selected");
@@ -130,7 +130,7 @@
                 }?>><?php echo $l->t('Majlis Ugama Islam Singapura, Singapore'); ?></option>
             </select>
             <br>
-            <input type="text" name="format_12_24" style="display: none;" value=<?php echo "\"" . $_['format_12_24'] . "\""; ?>>
+            <input type="hidden" name="format_12_24" value="<?php p($_['format_12_24']); ?>">
             <input type="submit">
         </form>
     </div>

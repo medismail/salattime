@@ -28,6 +28,7 @@
 namespace OCA\SalatTime\Controller;
 
 use OCA\SalatTime\IslamicNetwork\Hijri\HijriBackgroundJob;
+use OCA\SalatTime\Service\CalculationService;
 use OCP\AppFramework\Controller;
 use OCP\BackgroundJob\IJobList;
 use OCP\IRequest;
@@ -35,11 +36,13 @@ use OCP\IRequest;
 // Auto Adjust Hijri Date Background Job
 class AAHDBJController extends Controller {
 	private IJobList $jobList;
+	private CalculationService $calculationService;
 
-	public function __construct(string $appName, IRequest $request, IJobList $jobList) {
+	public function __construct(string $appName, IRequest $request, IJobList $jobList, CalculationService $calculationService) {
 		parent::__construct($appName, $request);
 
 		$this->jobList = $jobList;
+		$this->calculationService = $calculationService;
 	}
 
 	public function addJob() {

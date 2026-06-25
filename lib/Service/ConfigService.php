@@ -191,7 +191,7 @@ class ConfigService {
 	 * Get all users where the config value matches a pattern match {key:value}
 	 *
 	 * @param string $configKey
-	 * @param array $pattern  Pattern like {key:value}
+	 * @param array $patternParts Pattern like {key:value}
 	 * @return IUser[]
 	 */
 	public function getUsersWithConfigMatching(string $configKey, array $patternParts): array {
@@ -205,7 +205,7 @@ class ConfigService {
 			if ($value !== null && $value !== '') {
 				$valueParts = json_decode($value, true);
 
-				if ($this->matchesPattern($valueParts, $patternParts)) {
+				if (is_array($valueParts) && $this->matchesPattern($valueParts, $patternParts)) {
 					$result[] = $userId;
 				}
 			}
@@ -218,25 +218,31 @@ class ConfigService {
 	 * Compare valueParts against patternParts
 	 */
 	private function matchesPattern(array $valueParts, array $patternParts): bool {
-		if (count($valueParts) !== count($patternParts)) {
-			return false;
+		foreach ($patternParts as $key => $patternValue) {
+			if (!array_key_exists($key, $valueParts)) {
+				return false;
+			}
+
+			if (!$this->matchesPatternValue($valueParts[$key], $patternValue)) {
+				return false;
+			}
 		}
 
-		foreach ($patternParts as $i => $p) {
-			if ($p === '*') {
-				continue; // wildcard, skip check
-			}
-			if (substr($p, 0, 1) == '!') { //Not to match
-				$np = substr($p, 1);
-				if ($valueParts[$i] == $np) {
-					return false;
-				}
-			} else {
-				if ($valueParts[$i] !== $p) {
-					return false;
-				}
-			}
-		}
 		return true;
+	}
+
+	/**
+	 * Compare a single decoded config value against a pattern value.
+	 */
+	private function matchesPatternValue($value, $patternValue): bool {
+		if ($patternValue === '*') {
+			return true;
+		}
+
+		if (is_string($patternValue) && substr($patternValue, 0, 1) === '!') {
+			return (string)$value !== substr($patternValue, 1);
+		}
+
+		return (string)$value === (string)$patternValue;
 	}
 }
