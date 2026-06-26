@@ -29,6 +29,10 @@ namespace OCA\SalatTime\Controller;
 
 require_once __DIR__ . '/../Service/CalculationService.php';
 
+use DateInterval;
+use DatePeriod;
+use DateTime;
+use DateTimeZone;
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\RedirectResponse;
@@ -37,8 +41,11 @@ use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Controller;
 use OCA\SalatTime\AppInfo\Application;
 use OCP\IURLGenerator;
+use OCP\IL10N;
 use OCA\SalatTime\Tools\CurrentUser;
 use OCA\SalatTime\Service\CalculationService;
+use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
+use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
 
 class PageController extends Controller {
 	private $userId;
@@ -52,16 +59,21 @@ class PageController extends Controller {
 	/** @var CalculationService */
 	private $calculationService;
 
+	/** @var IL10N */
+	private $l10n;
+
 	public function __construct($AppName, IRequest $request,
 						IURLGenerator $urlGenerator,
 						CurrentUser $currentUser,
 						CalculationService $calculationService,
+						IL10N $l10n,
 						$userId) {
 		parent::__construct($AppName, $request);
 		$this->userId = $userId;
 		$this->user = (string) $currentUser->getUID();
 		$this->urlGenerator = $urlGenerator;
 		$this->calculationService = $calculationService;
+		$this->l10n = $l10n;
 	}
 
 	/**
@@ -106,7 +118,8 @@ class PageController extends Controller {
 		$confAdjustments = $this->calculationService->getConfigAdjustments($this->userId);
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
 		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
-		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($confSettings, $confAdjustments, $notification, $calendar));
+		$prayers = ['prayers' => $this->getPrayerRows($confSettings, $confAdjustments)];
+		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($confSettings, $confAdjustments, $notification, $calendar, $prayers));
 	}
 
 	 /**
@@ -194,5 +207,60 @@ class PageController extends Controller {
 		$this->calculationService->setConfigAdjustments($this->userId, $adjustments);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
 		return new RedirectResponse($url);
+	}
+
+	private function getPrayerRows(array $confSettings, array $confAdjustments): array {
+		$latitude = $confSettings['latitude'] !== '' ? $confSettings['latitude'] : 21.3890824;
+		$longitude = $confSettings['longitude'] !== '' ? $confSettings['longitude'] : 39.8579118;
+		$timezone = $confSettings['timezone'] !== '' ? $confSettings['timezone'] : '+0300';
+		$elevation = $confSettings['elevation'] !== '' ? $confSettings['elevation'] : null;
+		$method = $confSettings['method'] !== '' ? $confSettings['method'] : 'MWL';
+		$format = $confSettings['format_12_24'] !== '' ? $confSettings['format_12_24'] : PrayerTimes::TIME_FORMAT_12H;
+
+		$pt = new PrayerTimes($method);
+		$pt->tune($imsak = 0, $fajr = $confAdjustments['Fajr'], $sunrise = 0, $dhuhr = $confAdjustments['Dhuhr'], $asr = $confAdjustments['Asr'], $maghrib = $confAdjustments['Maghrib'], $sunset = 0, $isha = $confAdjustments['Isha'], $midnight = 0);
+
+		$startDate = new DateTime('today -3 day', new DateTimeZone($timezone));
+		$endDate = new DateTime('today +12 day', new DateTimeZone($timezone));
+		$interval = DateInterval::createFromDateString('1 day');
+		$dateRange = new DatePeriod($startDate, $interval, $endDate);
+		$today = (new DateTime('today', new DateTimeZone($timezone)))->format('Y-m-d');
+
+		$rows = [];
+		foreach ($dateRange as $date) {
+			$times = $pt->getTimes($date, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format);
+			$curtime = strtotime($date->format('d-m-Y H:i:s'));
+			$hijri = new HijriDate($curtime, $this->l10n);
+			if ($confAdjustments['Day'] != "") {
+				$hijri->tune($confAdjustments['Day']);
+			}
+
+			$specialDay = $hijri->is_day_special();
+			if (is_array($specialDay)) {
+				$specialDay = implode(' ', $specialDay);
+			}
+
+			$rows[] = [
+				'date' => $date->format('Y-m-d'),
+				'isToday' => $date->format('Y-m-d') === $today,
+				'dayName' => $hijri->get_day_name(),
+				'hijriDay' => $hijri->get_day(),
+				'hijriMonth' => $hijri->get_month(),
+				'hijriMonthName' => $hijri->get_month_name(),
+				'hijriYear' => $hijri->get_year(),
+				'specialDay' => $specialDay,
+				'times' => [
+					'Imsak' => $hijri->get_month() == 9 ? $times['Imsak'] : '',
+					'Fajr' => $times['Fajr'],
+					'Sunrise' => $times['Sunrise'],
+					'Dhuhr' => $times['Dhuhr'],
+					'Asr' => $times['Asr'],
+					'Maghrib' => $times['Maghrib'],
+					'Isha' => $times['Isha'],
+				],
+			];
+		}
+
+		return $rows;
 	}
 }

@@ -1,195 +1,374 @@
-/* Header styles */
-#sheader {
-    background-color: #6b4423; /* Brown */
-    text-align: center;
-    padding: 12px;
-    animation: headerFadeIn 2s ease-in-out;
-    border-radius: 10px;
+.salattime-shell {
+	display: flex;
+	min-height: 100%;
+	background: var(--color-main-background);
+	color: var(--color-main-text);
 }
 
-#sheader h2 {
-    font-size: 24px; /* Larger font size */
-    color: #fff;
-    margin: 0;
-    animation: headerZoomIn 2s ease-in-out;
+.salattime-shell #app-navigation {
+	padding: calc(var(--default-grid-baseline) * 3) calc(var(--default-grid-baseline) * 2);
 }
 
-/* Body section styles */
-#day-info {
-    background-color: #fff; /* White background */
-    /*border: 1px solid #ccc; */
-    padding: 20px;
-    margin: 20px auto;
-    max-width: 600px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 2s ease-in-out;
+.salattime-nav-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 10px 18px;
 }
 
-#day-info h2 {
-    font-size: 24px; /* Larger font size */
-    color: #5e9647; /* Green */
-    animation: textColorChange 2s ease-in-out;
+.salattime-nav-header h2 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 700;
 }
 
-#day-info p {
-    font-size: 18px; /* Larger font size */
-    color: #6b4423; /* Brown */
-    margin-top: 10px;
+.salattime-nav-header p,
+.salattime-page-title p,
+.salattime-location,
+.salattime-next-card small,
+.salattime-card-header span,
+.salattime-table small {
+	color: var(--color-text-maxcontrast);
 }
 
-/* Table styles */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background-color: #ffffcc; /* Yellow background */
-    animation: tableFadeIn 2s ease-in-out;
-    font-family: Arial, Helvetica, sans-serif;
-    border-collapse: collapse;
-    width: 90%;
+.salattime-nav-icon {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+	font-size: 24px;
+	background: linear-gradient(135deg, var(--color-primary-element), #8a6238);
+	color: var(--color-primary-element-text);
 }
 
-table, th, td {
-    /* border: 1px solid #ccc; */
-    border: 1px solid #ddd;
-    padding: 6px;
-    font-weight: inherit;
+.salattime-navigation-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
 }
 
-th, td {
-    padding: 10px;
-    text-align: center;
-}
-
-table tr:nth-child(even) {
- color: black;
- background-color: #f2f2f2;
-}
-
-table tr:hover {background-color: #ddd;}
-
-table th {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  text-align: left;
-  background-color: #04AA6D;
-  color: white;
-}
-
-
-/* Keyframe animations */
-@keyframes headerFadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes headerZoomIn {
-    from {
-        transform: scale(0.8);
-    }
-    to {
-        transform: scale(1);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes textColorChange {
-    from {
-        color: #5e9647; /* Start with green text */
-    }
-    to {
-        color: #3366cc; /* Transition to blue text */
-    }
-}
-
-@keyframes tableFadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-/* Moon and Sun Section */
-#moon-sun {
-    background-color: #b5d6e6; /* Light blue background */
-    /*border: 1px solid #ccc;*/
-    padding: 20px;
-    margin: 20px auto;
-    max-width: 600px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 2s ease-in-out;
-}
-
-#moon-sun h2 {
-    font-size: 24px; /* Larger font size */
-    color: #3366cc; /* Blue */
-}
-
-#moon-sun p {
-    font-size: 18px; /* Larger font size */
-    color: #333; /* Dark gray text */
-    margin-top: 10px;
-}
-
-#infos {
-  margin-top: 20px;
-}
-
-#compass {
-  margin-inline: auto;
-  position: relative;
-  width: 240px;
-  height: 240px;
-  background: url(../img/pusula.png) no-repeat;
-}
-
-@media screen and (min-width: 640px) {
-  #main-content-div {
-    display: flex;
-  }
-  #infos {
-    margin-left: 20px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  #moon-sun {
-    background-color: #5e7f8f;
-  }
-  #day-info {
-    background-color: #333333;
-  }
-  #day-info p {
-    color: #c1793d;
-  }
-  table {
-    background-color: inherit;
-  }
+.salattime-navigation-list li {
+	margin: 4px 0;
 }
 
 .app-navigation-entry {
-    display: block;
-    width: 100%;
-    line-height: 44px;
-    align-content: center;
-    padding: 0 12px 0 14px;
-    border-radius: var(--border-radius-pill);
-    color: var(--color-main-text);
-    text-decoration: none;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	line-height: 44px;
+	padding: 0 12px 0 14px;
+	border-radius: var(--border-radius-pill);
+	color: var(--color-main-text);
+	text-decoration: none;
+	font-weight: 600;
 }
 
-.app-navigation-entry:hover {background-color: var(--color-background-hover);} {
+.app-navigation-entry:hover,
+.app-navigation-entry.active {
+	background-color: var(--color-background-hover);
+	color: var(--color-primary-element);
+}
+
+.salattime-nav-entry-icon {
+	width: 24px;
+	text-align: center;
+}
+
+.salattime-side-settings-content {
+	padding: 10px 14px 18px;
+}
+
+.salattime-switch-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 10px 0;
+}
+
+.salattime-content {
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: 28px;
+}
+
+.salattime-page {
+	animation: salattime-fade-in 180ms ease-out;
+}
+
+.salattime-hero,
+.salattime-page-title,
+.salattime-card {
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-large);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+}
+
+.salattime-hero {
+	display: flex;
+	justify-content: space-between;
+	gap: 20px;
+	align-items: stretch;
+	padding: 28px;
+	background:
+		radial-gradient(circle at top right, rgba(196, 150, 77, .26), transparent 32%),
+		linear-gradient(135deg, var(--color-primary-element), #6b4423);
+	color: var(--color-primary-element-text);
+}
+
+.salattime-hero h1,
+.salattime-page-title h1 {
+	margin: 0;
+	font-size: clamp(26px, 4vw, 42px);
+	line-height: 1.15;
+}
+
+.salattime-hero .salattime-kicker,
+.salattime-hero .salattime-location {
+	color: rgba(255, 255, 255, .82);
+}
+
+.salattime-kicker {
+	margin: 0 0 8px;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.salattime-next-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-width: 180px;
+	padding: 18px;
+	border-radius: var(--border-radius-large);
+	background-color: rgba(255, 255, 255, .16);
+	backdrop-filter: blur(10px);
+}
+
+.salattime-next-card strong {
+	font-size: 28px;
+	line-height: 1.2;
+}
+
+.salattime-special-day {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 18px 0 0;
+	padding: 10px 14px;
+	border-radius: var(--border-radius-pill);
+	background-color: var(--color-warning-light);
+	color: var(--color-warning-text);
+	font-weight: 700;
+}
+
+.salattime-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 18px;
+	margin-top: 18px;
+}
+
+.salattime-card,
+.salattime-page-title {
+	padding: 22px;
+	background: var(--color-main-background);
+}
+
+.salattime-card h2,
+.salattime-page-title h1 {
+	color: var(--color-main-text);
+}
+
+.salattime-card h2 {
+	margin-top: 0;
+}
+
+.salattime-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+}
+
+.salattime-prayer-list {
+	display: grid;
+	gap: 8px;
+	margin-top: 14px;
+}
+
+.salattime-prayer-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 14px;
+	border-radius: var(--border-radius);
+	background-color: var(--color-background-hover);
+}
+
+.salattime-prayer-row.active {
+	background-color: var(--color-primary-element);
+	color: var(--color-primary-element-text);
+}
+
+.salattime-prayer-row strong {
+	font-size: 18px;
+}
+
+.salattime-jumaa {
+	border: 1px dashed var(--color-primary-element);
+}
+
+.salattime-facts {
+	display: grid;
+	grid-template-columns: minmax(130px, 1fr) auto;
+	gap: 10px 16px;
+	margin: 0;
+}
+
+.salattime-facts dt {
+	color: var(--color-text-maxcontrast);
+}
+
+.salattime-facts dd {
+	margin: 0;
+	font-weight: 700;
+	text-align: end;
+}
+
+.salattime-compass-card {
+	text-align: center;
+}
+
+.salattime-compass {
+	position: relative;
+	width: 240px;
+	height: 240px;
+	margin: 8px auto 14px;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+.salattime-compass img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 240px;
+	height: 240px;
+	transform-origin: center center;
+}
+
+.salattime-center-fact {
+	margin: 0;
+}
+
+.salattime-page-title {
+	margin-bottom: 18px;
+	background:
+		radial-gradient(circle at top left, rgba(4, 170, 109, .14), transparent 26%),
+		var(--color-main-background);
+}
+
+.salattime-table-card {
+	overflow-x: auto;
+}
+
+.salattime-table {
+	width: 100%;
+	border-collapse: collapse;
+	min-width: 760px;
+}
+
+.salattime-table th,
+.salattime-table td {
+	padding: 12px;
+	border-bottom: 1px solid var(--color-border);
+	text-align: start;
+}
+
+.salattime-table th {
+	background-color: var(--color-background-hover);
+	font-weight: 700;
+}
+
+.salattime-table tbody tr:hover,
+.salattime-table tbody tr.today {
+	background-color: var(--color-background-hover);
+}
+
+.salattime-table td:first-child {
+	display: grid;
+	gap: 2px;
+}
+
+.salattime-form {
+	max-width: 900px;
+}
+
+.salattime-form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 16px;
+}
+
+.salattime-form label:not(.salattime-switch-row) {
+	display: grid;
+	gap: 6px;
+	font-weight: 600;
+}
+
+.salattime-form input[type='text'],
+.salattime-form input[type='number'],
+.salattime-form select {
+	width: 100%;
+}
+
+.salattime-inline-switch {
+	margin-top: 18px;
+	font-weight: 600;
+}
+
+.salattime-form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 22px;
+}
+
+@keyframes salattime-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media screen and (max-width: 780px) {
+	.salattime-shell {
+		display: block;
+	}
+
+	.salattime-content {
+		padding: 16px;
+	}
+
+	.salattime-hero {
+		flex-direction: column;
+	}
+
+	.salattime-next-card {
+		min-width: 0;
+	}
+
+	.salattime-form-actions {
+		flex-direction: column;
+	}
+}
