@@ -1,74 +1,71 @@
 <?php
 
-/**
- *
- * Salat Time APP (Nextcloud)
- *
- * @author Mohamed-Ismail MEJRI <imejri@hotmail.com>
- *
- * @copyright Copyright (c) 2024 Mohamed-Ismail MEJRI
- *
- * @license GNU AGPL version 3 or any later version
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
+declare(strict_types=1);
 
-namespace OCA\salattime\Controller;
-
-require_once __DIR__ . '/../Service/CalculationService.php';
+namespace OCA\SalatTime\Controller;
 
 use OCA\SalatTime\Service\CalculationService;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
-use OCP\Appframework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\IRequest;
 
 class WidgetController extends OCSController {
-	private $calculationService;
-	private $userId;
+	private CalculationService $calculationService;
+	private ?string $userId;
 
 	public function __construct(
-		$AppName,
+		string $appName,
 		IRequest $request,
 		CalculationService $calculationService,
-		$UserId
-		) {
-		parent::__construct($AppName, $request);
-
+		?string $userId,
+	) {
+		parent::__construct($appName, $request);
 		$this->calculationService = $calculationService;
-		$this->userId = $UserId;
+		$this->userId = $userId;
 	}
 
-	/**
-	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function getWidgetContent(): DataResponse {
+	public function getWidgetData(): DataResponse {
 		$times = $this->calculationService->getPrayerTimes($this->userId);
-		$name = $this->calculationService->gretNames();
+		$names = $this->calculationService->gretNames();
+		$nextPrayerKey = (string)($times['Salat'] ?? '');
+
+		$prayerDefinitions = [
+			['key' => 'Fajr', 'nameKey' => 'FAJR'],
+			['key' => 'Sunrise', 'nameKey' => 'SUNRISE'],
+			['key' => 'Dhuhr', 'nameKey' => 'ZHUHR'],
+			['key' => 'Asr', 'nameKey' => 'ASR'],
+			['key' => 'Maghrib', 'nameKey' => 'MAGHRIB'],
+			['key' => 'Isha', 'nameKey' => 'ISHA'],
+		];
+
+		$prayers = array_map(static function (array $definition) use ($names, $times, $nextPrayerKey): array {
+			$key = $definition['key'];
+			return [
+				'key' => $key,
+				'label' => (string)($names[$definition['nameKey']] ?? $key),
+				'time' => (string)($times[$key] ?? ''),
+				'isNext' => $key === $nextPrayerKey,
+			];
+		}, $prayerDefinitions);
+
+		$nextPrayer = null;
+		foreach ($prayers as $prayer) {
+			if ($prayer['isNext']) {
+				$nextPrayer = $prayer;
+				break;
+			}
+		}
+
 		return new DataResponse([
-			'content' => "\n ## " . $times['Hijri'] . " \n" .
-				"| ". $name['PRAYER'] ." | &nbsp;&nbsp;" . $name['TIME'] . "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | \n| ----------- | :-----------: | " .
-				"\n| " . $name['FAJR'] . " | " . $times['Fajr'] . " | " .
-				"\n| " . $name['SUNRISE'] . " | " . $times['Sunrise'] . " | " .
-				"\n| " . $name['ZHUHR'] . " | " . $times['Dhuhr'] . " | " .
-				"\n| " . $name['ASR'] . " | " . $times['Asr'] . " | " .
-				"\n| " . $name['MAGHRIB'] . " &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| " . $times['Maghrib'] . " | " .
-				"\n| " . $name['ISHA'] . " | " . $times['Isha'] . " |",
+			'hijri' => (string)($times['Hijri'] ?? ''),
+			'city' => (string)($times['City'] ?? ''),
+			'prayers' => $prayers,
+			'nextPrayer' => $nextPrayer,
+			'remaining' => (string)($times['Remain'] ?? ''),
 		]);
-		//return new DataResponse(array('msg' => 'not found!'), Http::STATUS_NOT_FOUND);
 	}
 }

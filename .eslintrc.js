@@ -1,15 +1,14 @@
 module.exports = {
-	globals: {
-		appVersion: true
-	},
-	parserOptions: {
-		requireConfigFile: false
-	},
+	root: true,
 	extends: [
-		'@nextcloud'
+		'@nextcloud/eslint-config/vue3',
 	],
+	parserOptions: {
+		requireConfigFile: false,
+	},
 	rules: {
 		'jsdoc/require-jsdoc': 'off',
-		'jsdoc/tag-lines': 'off'
-	}
+		'jsdoc/tag-lines': 'off',
+	},
 }
+
