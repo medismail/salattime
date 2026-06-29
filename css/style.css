@@ -28,7 +28,7 @@
 .salattime-next-card small,
 .salattime-card-header span,
 .salattime-table small {
-	color: var(--color-text-maxcontrast);
+	color: var(--color-primary-element-text);
 }
 
 .salattime-nav-icon {

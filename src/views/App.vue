@@ -1,10 +1,21 @@
 <template>
-	<div class="salattime-shell">
-		<div id="app-navigation">
-			<div class="salattime-nav-header"><div class="salattime-nav-icon">☾</div><div><h2>{{ t('Salat Time') }}</h2><p>{{ t('Muslim prayer times') }}</p></div></div>
-			<ul class="salattime-navigation-list">
-				<li v-for="item in navigation" :key="item.view"><a class="app-navigation-entry" :class="{ active: view === item.view }" :href="item.href"><span>{{ item.icon }}</span>{{ item.label }}</a></li>
-			</ul>
+    <NcContent app-name="salattime">
+        <NcAppNavigation
+            <template #header>
+			    <div class="salattime-nav-header"><div class="salattime-nav-icon">☾</div><div><h2>{{ t('Salat Time') }}</h2><p>{{ t('Muslim prayer times') }}</p></div></div>
+            </template>
+            <template #list>
+                <NcAppNavigationItem
+                    v-for="item in navigation"
+                    :key="item.view"
+                    :allow-collapse="true"
+                    :open="false"
+                    >
+                   <a class="app-navigation-entry" :class="{ active: view === item.view }" :href="item.href">
+                   <span>{{ item.icon }}</span>
+                   {{ item.label }}
+                </NcAppNavigationItem>
+            </template>
 			<div id="app-settings" class="salattime-side-settings">
 				<div id="app-settings-header"><button class="settings-button" data-apps-slide-toggle="#app-settings-content" :aria-label="t('Settings')"></button></div>
 				<div id="app-settings-content" class="salattime-side-settings-content">
@@ -12,10 +23,10 @@
 					<label class="salattime-switch-row"><input v-model="status.calendar" class="checkbox" type="checkbox" @change="toggleStatus('calendar')">{{ t('Enable Calendar') }}</label>
 				</div>
 			</div>
-		</div>
+        </NcAppNavigation>
 		<div id="app-content"><div id="app-content-wrapper" class="salattime-content">
 			<section v-if="view === 'overview'" class="salattime-page">
-				<div class="salattime-hero"><div><p class="salattime-kicker">{{ t('Today is') }}</p><h1>{{ state.Hijri || t('Hijri Date') }}</h1><p>{{ t('City') }}: {{ state.City || t('Unknown city') }}</p></div><div class="salattime-next-card"><span>{{ t('Next') }}</span><strong>{{ t(state.Salat || 'Salat') }}</strong><small>{{ t('after') }} {{ state.Remain || '--:--' }}</small></div></div>
+				<div class="salattime-hero"><div><p class="salattime-kicker">{{ t('Today is') }}</p><h1>{{ state.Hijri || t('Hijri Date') }}</h1><p>{{ t('City') }}: {{ state.City || t('Unknown city') }}</p></div><div class="salattime-next-card"><span>{{ t('Next') }}</span><strong>{{ t(state.Salat || 'Salat') }}</strong><small>{{ t('after') }} </small><strong>{{ state.Remain || '--:--' }}</strong></div></div>
 				<div v-if="state.SpecialDay" class="salattime-special-day">✦ {{ state.SpecialDay }}</div>
 				<div class="salattime-grid">
 					<section class="salattime-card"><h2>{{ t('Prayer Times') }}</h2><div class="salattime-prayer-list"><div v-for="p in todayPrayers" :key="p.key" class="salattime-prayer-row" :class="{ active: state.Salat === p.key }"><span>{{ p.label }}</span><strong>{{ p.time || '--:--' }}</strong></div><div v-if="state.Jumaa" class="salattime-prayer-row"><span>{{ t("Juma'a") }}</span><strong>{{ state.Dhuhr }}</strong></div></div></section>
@@ -28,12 +39,13 @@
 			<section v-else-if="view === 'settings'" class="salattime-page"><header class="salattime-page-title"><p class="salattime-kicker">{{ t('Settings') }}</p><h1>{{ t('Location') }}</h1><p v-if="state.city">{{ t('Current location') }}: {{ state.city }}</p></header><form class="salattime-card salattime-form" @submit.prevent="saveSettings"><div class="salattime-form-grid"><label><span>{{ t('Location address:') }}</span><input v-model="settingsForm.address" type="text" :placeholder="state.city || 'Makkah'"></label><label v-for="f in settingsFields" :key="f.key"><span>{{ f.label }}</span><input v-model="settingsForm[f.key]" :list="f.key === 'timezone' ? 'salattime-timezones' : null" type="text"></label><label><span>{{ t('Calculation method:') }}</span><select v-model="settingsForm.method"><option v-for="m in methods" :key="m.value" :value="m.value">{{ m.label }}</option></select></label></div><datalist id="salattime-timezones"><option v-for="z in timezones" :key="z" :value="z"></option></datalist><label class="salattime-switch-row salattime-inline-switch"><input v-model="use24Hours" type="checkbox" class="checkbox">{{ t('Use 24 hours format') }}</label><div class="salattime-form-actions"><button type="button" class="button secondary" @click="getCurrentLocation">{{ t('Get current location') }}</button><button type="submit" class="button primary">{{ t('Save') }}</button></div></form></section>
 			<section v-else-if="view === 'adjustments'" class="salattime-page"><header class="salattime-page-title"><p class="salattime-kicker">{{ t('Adjustments') }}</p><h1>{{ t('Hijri Date') }}</h1></header><form class="salattime-card salattime-form" @submit.prevent="saveAdjustments"><label class="salattime-switch-row salattime-inline-switch"><input v-model="autoHijri" type="checkbox" class="checkbox" @change="adjustmentForm.NMA = autoHijri ? '15' : '0'">{{ t('Hijri Date Auto Adjust') }}</label><div class="salattime-form-grid"><label><span>{{ t('Day') }}</span><input v-model="adjustmentForm.Day" type="number" :disabled="autoHijri"></label><label v-for="f in adjustmentFields" :key="f"><span>{{ t(f) }}</span><input v-model="adjustmentForm[f]" type="number"></label></div><div class="salattime-form-actions"><button type="submit" class="button primary">{{ t('Save') }}</button></div></form></section>
 		</div></div>
-	</div>
+    </NcContent>
 </template>
 
 <script>
 import { generateUrl } from '@nextcloud/router'
 import { translate } from '@nextcloud/l10n'
+import { NcContent, NcAppNavigation, NcAppNavigationItem} from '@nextcloud/vue'  
 export default {
 	name: 'SalatTimeApp',
 	props: { initialView: { type: String, default: 'overview' }, initialState: { type: Object, default: () => ({}) } },
