@@ -119,7 +119,7 @@ class PageController extends Controller {
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
 		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
 		$prayers = ['prayers' => $this->getPrayerRows($confSettings, $confAdjustments)];
-		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($confSettings, $confAdjustments, $notification, $calendar, $prayers));
+		return new TemplateResponse(Application::APP_ID, $templateName, array_merge($notification, $calendar, $prayers));
 	}
 
 	 /**
