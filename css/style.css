@@ -274,6 +274,38 @@
 		var(--color-main-background);
 }
 
+.salattime-date-filter {
+	margin-bottom: 18px;
+}
+
+.salattime-date-filter-fields {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(180px, 1fr)) auto;
+	align-items: end;
+	gap: 16px;
+}
+
+.salattime-date-filter label,
+.salattime-form label:not(.salattime-switch-row) {
+	display: grid;
+	gap: 6px;
+	font-weight: 600;
+}
+
+.salattime-date-filter input[type='date'] {
+	width: 100%;
+}
+
+.salattime-date-filter-actions {
+	margin-top: 0;
+}
+
+.salattime-range-message {
+	margin: 12px 0 0;
+	color: var(--color-warning-text);
+	font-weight: 600;
+}
+
 .salattime-table-card {
 	overflow-x: auto;
 }
@@ -316,10 +348,12 @@
 	gap: 16px;
 }
 
-.salattime-form label:not(.salattime-switch-row) {
-	display: grid;
-	gap: 6px;
-	font-weight: 600;
+.salattime-location-form-grid {
+	margin-top: 14px;
+}
+
+.salattime-form-wide {
+	grid-column: 1 / -1;
 }
 
 .salattime-form input[type='text'],
@@ -360,7 +394,9 @@
 		padding: 16px;
 	}
 
-	.salattime-hero {
+	.salattime-hero,
+	.salattime-date-filter-fields {
+		grid-template-columns: 1fr;
 		flex-direction: column;
 	}
 
@@ -368,7 +404,9 @@
 		min-width: 0;
 	}
 
-	.salattime-form-actions {
+	.salattime-form-actions,
+	.salattime-date-filter-actions {
 		flex-direction: column;
+		align-items: stretch;
 	}
 }
