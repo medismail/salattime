@@ -1,5 +1,17 @@
 <?php
 
+/**
+ *
+ * Salat Time APP (Nextcloud)
+ *
+ * @author Mohamed-Ismail MEJRI <imejri@hotmail.com>
+ *
+ * @copyright Copyright (c) 2024 Mohamed-Ismail MEJRI
+ *
+ * @license GNU AGPL version 3 or any later version
+ *
+ */
+
 declare(strict_types=1);
 
 namespace OCA\SalatTime\Controller;
@@ -19,7 +31,7 @@ class WidgetController extends OCSController {
 		string $appName,
 		IRequest $request,
 		CalculationService $calculationService,
-		?string $userId,
+		?string $userId
 	) {
 		parent::__construct($appName, $request);
 		$this->calculationService = $calculationService;

@@ -441,6 +441,63 @@ class CalculationService {
 		return $times;
 	}
 
+	public function getPrayerRows(string $userId, DateTime $startDate, DateTime $endDate): array {
+		$confSettings = $this->configService->getSettingsValue($userId);
+		$confAdjustments = $this->configService->getAdjustmentsValue($userId);
+
+		$latitude = $confSettings['latitude'] !== '' ? $confSettings['latitude'] : 21.3890824;
+		$longitude = $confSettings['longitude'] !== '' ? $confSettings['longitude'] : 39.8579118;
+		$timezone = $confSettings['timezone'] !== '' ? $confSettings['timezone'] : '+0300';
+		$elevation = $confSettings['elevation'] !== '' ? $confSettings['elevation'] : null;
+		$method = $confSettings['method'] !== '' ? $confSettings['method'] : 'MWL';
+		$format = $confSettings['format_12_24'] !== '' ? $confSettings['format_12_24'] : PrayerTimes::TIME_FORMAT_12H;
+
+		$pt = new PrayerTimes($method);
+		$pt->tune($imsak = 0, $fajr = $confAdjustments['Fajr'], $sunrise = 0, $dhuhr = $confAdjustments['Dhuhr'], $asr = $confAdjustments['Asr'], $maghrib = $confAdjustments['Maghrib'], $sunset = 0, $isha = $confAdjustments['Isha'], $midnight = 0);
+
+		$interval = DateInterval::createFromDateString('1 day');
+		$dateRange = new DatePeriod($startDate, $interval, $endDate, DatePeriod::INCLUDE_END_DATE);
+		$today = (new DateTime('today', new DateTimeZone($timezone)))->format('Y-m-d');
+
+		$rows = [];
+		foreach ($dateRange as $date) {
+			$times = $pt->getTimes($date, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format);
+			$curtime = strtotime($date->format('d-m-Y H:i:s'));
+			$hijri = new HijriDate($curtime, $this->l10n);
+			if ($confAdjustments['Day'] != "") {
+				$hijri->tune($confAdjustments['Day']);
+			}
+
+			$specialDay = $hijri->is_day_special();
+			if (is_array($specialDay)) {
+				$specialDay = implode(' ', $specialDay);
+			}
+
+			$rows[] = [
+				'date' => $date->format('Y-m-d'),
+				'isToday' => $date->format('Y-m-d') === $today,
+				'dayName' => $hijri->get_day_name(),
+				'hijriDay' => $hijri->get_day(),
+				'hijriMonth' => $hijri->get_month(),
+				'hijriMonthName' => $hijri->get_month_name(),
+				'hijriYear' => $hijri->get_year(),
+				'specialDay' => $specialDay,
+				'times' => [
+					'Imsak' => $hijri->get_month() == 9 ? $times['Imsak'] : '',
+					'Fajr' => $times['Fajr'],
+					'Sunrise' => $times['Sunrise'],
+					'Dhuhr' => $times['Dhuhr'],
+					'Asr' => $times['Asr'],
+					'Maghrib' => $times['Maghrib'],
+					'Isha' => $times['Isha'],
+				],
+			];
+		}
+
+		return $rows;
+	}
+
+
 	/**
 	 * get Prayers times from known date by number of days
 	 *

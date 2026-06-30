@@ -188,7 +188,7 @@
 					</header>
 					<form class="salattime-card salattime-form" @submit.prevent="saveSettings">
 						<NcCheckboxRadioSwitch v-model="manualLocation" type="switch" class="salattime-inline-switch">
-							{{ t('Manual settings') }}
+							{{ t('Toggle manual settings') }}
 						</NcCheckboxRadioSwitch>
 						<div class="salattime-form-grid salattime-location-form-grid">
 							<label v-if="!manualLocation" class="salattime-form-wide">
