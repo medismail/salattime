@@ -79,7 +79,20 @@ class HijriBackgroundJob extends TimedJob {
 			$retval = null;
 			$date = new DateTime('today +1 day', new DateTimeZone('UTC'));
 			$p_settings = $this->calculationService->getConfigSettings($uid);  //$p_settings['timezone']
-			exec('python3 ' . __DIR__ . '/../../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $date->format('Y-m-d\TH:i:s.u\Z') . ' 30', $output, $retval);
+			$pythonPath = Helper::getPythonBinaryPath(null, $this->calculationService->getAppDataFolder());
+			if ($pythonPath === null) {
+				return;
+			}
+			Helper::runPythonScriptProcOpen(__DIR__ . '/../../bin/hijriadjust.py', [
+				(float)$p_settings['latitude'],
+				(float)$p_settings['longitude'],
+				(float)$p_settings['elevation'],
+				$date->format('Y-m-d\TH:i:s.u\Z'),
+				30,
+			], $output, $retval, $pythonPath);
+			if ($retval !== 0 || !isset($output[0])) {
+				return;
+			}
 			$adjust = (int)$output[0];
 			$curtime = strtotime($date->format('d-m-Y H:i:s'));
 			$hijri = new HijriDate($curtime);

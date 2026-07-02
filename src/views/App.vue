@@ -455,17 +455,19 @@ export default {
 		resetPrayerRange() {
 			window.location.href = generateUrl('/apps/salattime/prayertime')
 		},
-		saveSettings() {
+		async saveSettings() {
 			const parameters = Object.assign({}, this.settingsForm, {
 				address: this.manualLocation ? '' : this.settingsForm.address,
 			})
-			window.location.href = generateUrl('/apps/salattime/savesetting') + '?' + new URLSearchParams(parameters).toString()
+			await axios.post(generateUrl('/apps/salattime/savesetting'), parameters)
+			window.location.href = generateUrl('/apps/salattime/')
 		},
-		saveAdjustments() {
+		async saveAdjustments() {
 			const parameters = Object.assign({}, this.adjustmentForm, {
 				NMA: this.autoHijri ? this.adjustmentForm.NMA || '15' : '0',
 			})
-			window.location.href = generateUrl('/apps/salattime/saveadjustment') + '?' + new URLSearchParams(parameters).toString()
+			await axios.post(generateUrl('/apps/salattime/saveadjustment'), parameters)
+			window.location.href = generateUrl('/apps/salattime/')
 		},
 		getCurrentLocation() {
 			if (!navigator.geolocation) {

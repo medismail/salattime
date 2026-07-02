@@ -28,7 +28,6 @@
 namespace OCA\SalatTime\Controller;
 
 use OCP\AppFramework\Controller;
-use OCP\Appframework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCA\SalatTime\Service\ConfigService;
 use OCP\IRequest;
@@ -50,7 +49,6 @@ class CalendarController extends Controller {
 	/**
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	public function addCalendar() {
 		$this->config->setUserCalendar($this->userId);
 	}
@@ -58,7 +56,6 @@ class CalendarController extends Controller {
 	/**
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	public function removeCalendar() {
 		$this->config->unsetUserCalendar($this->userId);
 	}

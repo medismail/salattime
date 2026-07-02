@@ -46,7 +46,9 @@ class AAHDBJController extends Controller {
 	}
 
 	public function addJob() {
-		$this->jobList->add(HijriBackgroundJob::class, null);
+		if (!$this->jobList->has(HijriBackgroundJob::class, null)) {
+			$this->jobList->add(HijriBackgroundJob::class, null);
+		}
 	}
 
 	public function removeJob() {

@@ -29,7 +29,6 @@ namespace OCA\SalatTime\Controller;
 
 use OCA\SalatTime\Notification\BackgroundJob;
 use OCP\AppFramework\Controller;
-use OCP\Appframework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\BackgroundJob\IJobList;
 use OCP\Notification\IManager;
@@ -60,22 +59,16 @@ class NotificationController extends Controller {
 	/**
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	public function addJob() {
 		$this->config->setUserNotification($this->userId);
-		$this->jobList->add(BackgroundJob::class, null);
-		/*if ($this->jobList->has(BackgroundJob::class, null) == false) {
+		if (!$this->jobList->has(BackgroundJob::class, null)) {
 			$this->jobList->add(BackgroundJob::class, null);
-		} else {
-			$job = $this->jobList->getJobs(BackgroundJob::class, )
-			$this->jobList->resetBackgroundJob($job);
-		}*/
+		}
 	}
 
 	/**
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	public function removeJob() {
 		$this->config->unsetUserNotification($this->userId);
 		$this->clearOldNotifications();
@@ -97,7 +90,7 @@ class NotificationController extends Controller {
 					->setObject('Adhan', $salat);
 				$notification->setUser($this->userId);
 			} catch (\InvalidArgumentException $e) {
-				return;
+				continue;
 			}
 			$this->notificationManager->markProcessed($notification);
 		}

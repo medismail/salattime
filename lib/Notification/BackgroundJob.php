@@ -117,7 +117,7 @@ class BackgroundJob extends TimedJob {
 				$notification->setUser($uid);
 				$this->notificationManager->notify($notification);
 			} catch (\InvalidArgumentException $e) {
-				return;
+				continue;
 			}
 		}
 	}
@@ -136,7 +136,7 @@ class BackgroundJob extends TimedJob {
 					->setObject('Adhan', $salat);
 				$notification->setUser($uid);
 			} catch (\InvalidArgumentException $e) {
-				return;
+				continue;
 			}
 			$this->notificationManager->markProcessed($notification);
 		}

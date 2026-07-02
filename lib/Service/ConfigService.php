@@ -49,6 +49,9 @@ class ConfigService {
 		if (is_array($value)) {
 			//$p_value = implode(":", $value);
 			$p_value = json_encode($value);
+			if ($p_value === false) {
+				throw new \InvalidArgumentException('Could not encode Salat Time user config');
+			}
 			$value = $p_value;
 		}
 		$this->config->setUserValue($userId, Application::APP_ID, $key, $value);
@@ -61,7 +64,8 @@ class ConfigService {
 	public function getSettingsValue($userId) {
 		$settings = $this->config->getUserValue($userId, Application::APP_ID, 'settings');
 		$p_settings = json_decode($settings, true);
-		if ($p_settings == null) {
+		$needsSave = false;
+		if (!is_array($p_settings)) {
 			$p_settings = explode(":", $settings);
 			if (count($p_settings) > 2) {
 				$ret['latitude'] = $p_settings[0];
@@ -105,9 +109,13 @@ class ConfigService {
 				$ret['format_12_24'] = '12h';
 				$ret['city'] = 'Makkah';
 			}
-			$this->setUserValue($userId, 'settings', $ret);
+			$needsSave = true;
 		} else {
 			$ret = (array) $p_settings;
+		}
+		$ret = $this->normalizeSettings($ret);
+		if ($needsSave || $ret !== (array) $p_settings) {
+			$this->setUserValue($userId, 'settings', $ret);
 		}
 		return $ret;
 	}
@@ -115,7 +123,8 @@ class ConfigService {
 	public function getAdjustmentsValue($userId) {
 		$v_adjustments = $this->config->getUserValue($userId, Application::APP_ID, 'adjustments');
 		$adjustments = json_decode($v_adjustments, true);
-		if ($adjustments == null) {
+		$needsSave = false;
+		if (!is_array($adjustments)) {
 			$adjustments = explode(",", $v_adjustments);
 			if (count($adjustments) == 7) {
 				$ret['Day'] = $adjustments[0];
@@ -142,10 +151,15 @@ class ConfigService {
 				$ret['Isha'] = 0;
 				$ret['NMA'] = 0;
 			}
-			$this->setUserValue($userId, 'adjustments', $ret);
+			$needsSave = true;
 		} else {
 			$ret = (array) $adjustments;
 		}
+		$ret = $this->normalizeAdjustments($ret);
+		if ($needsSave || $ret !== (array) $adjustments) {
+			$this->setUserValue($userId, 'adjustments', $ret);
+		}
+		$this->setUserAutoHijriDate($userId, $this->isAutoHijriEnabled($ret));
 		return $ret;
 	}
 
@@ -173,6 +187,25 @@ class ConfigService {
 
 	public function getAllUsersNotification() {
 		return $this->config->getUsersForUserValue(Application::APP_ID, 'notification', 'true');
+	}
+
+	public function setUserAutoHijriDate($userId, bool $enabled) {
+		$this->config->setUserValue($userId, Application::APP_ID, 'auto_hijri', $enabled ? 'true' : 'false');
+	}
+
+	public function getAllUserAutoHijriDate(): array {
+		$users = $this->config->getUsersForUserValue(Application::APP_ID, 'auto_hijri', 'true');
+		if ($this->config->getAppValue(Application::APP_ID, 'auto_hijri_migrated', 'false') === 'true') {
+			return $users;
+		}
+
+		$legacyUsers = $this->getUsersWithConfigMatching('adjustments', ['NMA' => '!0']);
+		foreach ($legacyUsers as $userId) {
+			$this->setUserAutoHijriDate($userId, true);
+		}
+		$this->config->setAppValue(Application::APP_ID, 'auto_hijri_migrated', 'true');
+
+		return array_values(array_unique(array_merge($users, $legacyUsers)));
 	}
 
 	public function setUserCalendar($userId) {
@@ -244,5 +277,54 @@ class ConfigService {
 		}
 
 		return (string)$value === (string)$patternValue;
+	}
+
+	private function normalizeSettings(array $settings): array {
+		$defaults = [
+			'latitude' => 21.3890824,
+			'longitude' => 39.8579118,
+			'timezone' => '+0300',
+			'elevation' => 0.0,
+			'method' => 'MWL',
+			'format_12_24' => '12h',
+			'city' => 'Makkah',
+		];
+
+		$ret = array_merge($defaults, array_intersect_key($settings, $defaults));
+		foreach ($defaults as $key => $default) {
+			if ($key === 'city') {
+				continue;
+			}
+			if ($ret[$key] === null || $ret[$key] === '') {
+				$ret[$key] = $default;
+			}
+		}
+
+		return $ret;
+	}
+
+	private function normalizeAdjustments(array $adjustments): array {
+		$defaults = [
+			'Day' => 0,
+			'Fajr' => 0,
+			'Dhuhr' => 0,
+			'Asr' => 0,
+			'Maghrib' => 0,
+			'Isha' => 0,
+			'NMA' => 0,
+		];
+
+		$ret = array_merge($defaults, array_intersect_key($adjustments, $defaults));
+		foreach ($defaults as $key => $default) {
+			if ($ret[$key] === null || $ret[$key] === '') {
+				$ret[$key] = $default;
+			}
+		}
+
+		return $ret;
+	}
+
+	private function isAutoHijriEnabled(array $adjustments): bool {
+		return isset($adjustments['NMA']) && (string)$adjustments['NMA'] !== '0' && $adjustments['NMA'] !== '';
 	}
 }

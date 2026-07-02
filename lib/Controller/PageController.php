@@ -87,7 +87,8 @@ class PageController extends Controller {
 	#[NoCSRFRequired]
 	public function prayertime(): TemplateResponse {
 		$templateName = 'prayers';
-		$range = $this->getPrayerDateRange('UTC');
+		$confSettings = $this->calculationService->getConfigSettings($this->userId);
+		$range = $this->getPrayerDateRange($confSettings['timezone'] ?? '+0300');
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
 		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
 		$prayers = [
@@ -106,16 +107,15 @@ class PageController extends Controller {
 	 * @param string $timezone
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function savesetting(string $address, float $latitude, float $longitude, string $timezone, float $elevation, string $method, string $format_12_24): RedirectResponse {
+	public function savesetting($address = '', $latitude = '', $longitude = '', $timezone = '', $elevation = '', $method = '', $format_12_24 = ''): RedirectResponse {
 		$p_settings = [
-			'latitude' => $latitude,
-			'longitude' => $longitude,
-			'timezone' => $timezone,
-			'elevation' => $elevation,
-			'method' => $method,
-			'format_12_24' => $format_12_24,
-			'city' => $address
+			'latitude' => $this->stringParam($latitude),
+			'longitude' => $this->stringParam($longitude),
+			'timezone' => $this->stringParam($timezone),
+			'elevation' => $this->stringParam($elevation),
+			'method' => $this->stringParam($method),
+			'format_12_24' => $this->stringParam($format_12_24),
+			'city' => $this->stringParam($address)
 		];
 		$this->calculationService->setConfigSettings($this->userId, $p_settings);
 		$url = $this->urlGenerator->getAbsoluteURL('/apps/' . Application::APP_ID . '/');
@@ -133,29 +133,15 @@ class PageController extends Controller {
 	}
 
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function saveadjustment(int $Day, int $Fajr, int $Dhuhr, int $Asr, int $Maghrib, int $Isha, int $NMA): RedirectResponse {
-		if ($Day == "") {
-			$Day = 0;
-		}
-		if ($Fajr == "") {
-			$Fajr = 0;
-		}
-		if ($Dhuhr == "") {
-			$Dhuhr = 0;
-		}
-		if ($Asr == "") {
-			$Asr = 0;
-		}
-		if ($Maghrib == "") {
-			$Maghrib = 0;
-		}
-		if ($Isha == "") {
-			$Isha = 0;
-		}
-		if ($NMA == "") {
-			$NMA = 0;
-		}
+	public function saveadjustment($Day = 0, $Fajr = 0, $Dhuhr = 0, $Asr = 0, $Maghrib = 0, $Isha = 0, $NMA = 0): RedirectResponse {
+		$Day = $this->intParam($Day);
+		$Fajr = $this->intParam($Fajr);
+		$Dhuhr = $this->intParam($Dhuhr);
+		$Asr = $this->intParam($Asr);
+		$Maghrib = $this->intParam($Maghrib);
+		$Isha = $this->intParam($Isha);
+		$NMA = $this->intParam($NMA);
+
 		if ($NMA) {
 			$Day = $this->calculationService->getDayAutoAdjustments($this->userId);
 		}
@@ -217,5 +203,13 @@ class PageController extends Controller {
 		}
 
 		return $date;
+	}
+
+	private function stringParam($value): string {
+		return is_scalar($value) ? trim((string) $value) : '';
+	}
+
+	private function intParam($value): int {
+		return is_numeric($value) ? (int) $value : 0;
 	}
 }
