@@ -42,7 +42,7 @@ class WidgetController extends OCSController {
 	#[NoCSRFRequired]
 	public function getWidgetData(): DataResponse {
 		$times = $this->calculationService->getPrayerTimes($this->userId);
-		$names = $this->calculationService->gretNames();
+		$names = $this->calculationService->getNames();
 		$nextPrayerKey = (string)($times['Salat'] ?? '');
 
 		$prayerDefinitions = [

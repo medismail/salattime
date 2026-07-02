@@ -294,7 +294,7 @@ class CalculationService {
 		return $sunMoonTimes;
 	}
 
-	public function gretNames(): array {
+	public function getNames(): array {
 		return [
 			'IMSAK' => $this->l10n->t(PrayerTimes::IMSAK),
 			'FAJR' => $this->l10n->t(PrayerTimes::FAJR),
@@ -566,14 +566,14 @@ class CalculationService {
 			$hday = $hday + $offsetDays;
 			if (($hday < 1) || ($hday > 30)) {
 				if ($hday < 1) {
-					$hday + 30;
+					$hday = $hday + 30;
 					$hmonth--;
 					if ($hmonth < 1) {
 						$hmonth = 12;
 						$hyear--;
 					}
 				} else {
-					$hday - 30;
+					$hday = $hday - 30;
 					$hmonth ++;
 					if ($hmonth > 12) {
 						$hmonth = 1;
@@ -638,8 +638,8 @@ class CalculationService {
 				//$curDate->format('d-m-Y H:i:s');
 				$strDate = $curDate->format('Ymd\THis\Z');
 				$hijri = new HijriDate(strtotime($strDate), $this->l10n);
-				if ($adjustments['day'] != "") {
-					$hijri->tune($adjustments['day']);
+				if ($adjustments['Day'] != "") {
+					$hijri->tune($adjustments['Day']);
 				}
 				$curTime = [$strDate, $hijri->get_day_name(), $hijri->get_day(), $hijri->get_month_name(), $hijri->get_month(), $hijri->get_year(), $hijri->is_day_special()];
 				$times[] = $curTime;
@@ -826,8 +826,8 @@ class CalculationService {
 	 *
 	 * @return array with success state and address information
 	 */
-	private function usePersonalAddress(): array {
-		$account = $this->accountManager->getAccount($this->userManager->get($this->userId));
+	private function usePersonalAddress(string $userId): array {
+		$account = $this->accountManager->getAccount($this->userManager->get($userId));
 		try {
 			$address = $account->getProperty('address')->getValue();
 		} catch (PropertyDoesNotExistException $e) {

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0
+### Added
+- New look for APP
+- Paryers times with calendar choice for dates
+### Changed
+- Use of nextcloud Vuejs instead of old templates
+- Use of json instead of Markdown in the widget
+### Fixed
+- Auto Adjustment of Hijri Date not working in the background
+
 ## 0.9.0
 ### Added
 - Add get current location from device

@@ -45,8 +45,8 @@ class NotificationController extends Controller {
 	/** @var ConfigService */
 	private ConfigService $config;
 
-	/** @var UserId */
-	private $UserId;
+	/** @var userId */
+	private $userId;
 
 	public function __construct(string $appName, IRequest $request, IJobList $jobList, IManager $notificationManager, ConfigService $configService, $UserId) {
 		parent::__construct($appName, $request);

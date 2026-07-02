@@ -87,7 +87,7 @@ class PageController extends Controller {
 	#[NoCSRFRequired]
 	public function prayertime(): TemplateResponse {
 		$templateName = 'prayers';
-		$range = $this->getPrayerDateRange($confSettings['timezone'] ?? '+0300');
+		$range = $this->getPrayerDateRange('UTC');
 		$notification = ['notification' => $this->calculationService->getUserNotification($this->userId)];
 		$calendar = ['calendar' => $this->calculationService->getUserCalendar($this->userId)];
 		$prayers = [
