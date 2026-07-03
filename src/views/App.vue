@@ -57,10 +57,6 @@
 									<span>{{ p.label }}</span>
 									<strong>{{ p.time || '--:--' }}</strong>
 								</div>
-								<div v-if="state.Jumaa" class="salattime-prayer-row">
-									<span>{{ t('Juma\'a') }}</span>
-									<strong>{{ state.Dhuhr }}</strong>
-								</div>
 							</div>
 						</section>
 						<section class="salattime-card">
@@ -378,8 +374,8 @@ export default {
 			const rows = this.tablePrayers
 				.filter((p) => p !== 'Sunrise')
 				.map((key) => ({ key, label: this.t(key), time: this.state[key] }))
-			if (this.state.Imsak) {
-				rows.unshift({ key: 'Imsak', label: this.t('Imsak'), time: this.state.Imsak })
+			if (this.state.Jumaa) {
+				rows.splice(1, 0, { key: 'Juma\'a', label: this.t('Juma\'a'), time: this.state.Dhuhr })
 			}
 			return rows
 		},

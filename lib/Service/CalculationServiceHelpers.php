@@ -2,12 +2,10 @@
 
 namespace OCA\SalatTime\Service;
 
-use DateTime;
 use DateTimeZone;
 use OCA\SalatTime\AppInfo\Application;
 use OCA\SalatTime\Tools\Helper;
 use OCP\Accounts\PropertyDoesNotExistException;
-
 
 trait CalculationServiceHelpers {
 	private function searchForAddress(string $address): array {

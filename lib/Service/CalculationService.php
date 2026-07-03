@@ -43,10 +43,7 @@ use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
 use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
 use OCA\SalatTime\IslamicNetwork\SunMoonCalc\SunCalc;
 use OCA\SalatTime\IslamicNetwork\QiblaDirection\Calculation;
-use OCA\SalatTime\Tools\Helper;
-use OCA\SalatTime\AppInfo\Application;
 use OCP\Accounts\IAccountManager;
-use OCP\Accounts\PropertyDoesNotExistException;
 use OCP\IUserManager;
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IClient;
@@ -123,7 +120,7 @@ class CalculationService {
 
 	private const TIME_FORMATS = [
 		PrayerTimes::TIME_FORMAT_12H,
-		'24h',
+		PrayerTimes::TIME_FORMAT_24H,
 	];
 
 	/** @var ConfigService */
@@ -220,6 +217,9 @@ class CalculationService {
 		$times['SpecialDay'] = implode(" ", $hijri->get_day_special_name());
 		if (date('N', $curtime) == 5) {
 			$times['Jumaa'] = "Juma'a";
+			if ($times[PrayerTimes::SALAT] == PrayerTimes::ZHUHR) {
+				$times[PrayerTimes::SALAT] = 'Juma\'a';
+			}
 		}
 		if ($hijri->get_month() != 9) { //Ramadhane
 			$times[PrayerTimes::IMSAK] = "";
