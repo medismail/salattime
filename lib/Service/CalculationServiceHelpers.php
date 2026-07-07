@@ -2,10 +2,13 @@
 
 namespace OCA\SalatTime\Service;
 
+use DateTime;
 use DateTimeZone;
 use OCA\SalatTime\AppInfo\Application;
+use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
 use OCA\SalatTime\Tools\Helper;
 use OCP\Accounts\PropertyDoesNotExistException;
+
 
 trait CalculationServiceHelpers {
 	private function searchForAddress(string $address): array {
@@ -28,21 +31,32 @@ trait CalculationServiceHelpers {
 
 	private function getNameFromGeo(string $lat, string $lon):?string {
 		$city_name = null;
-		$opts = array(
-			'http' => array(
-				'method' => "GET",
-				'header' =>
-					"User-agent: NextcloudWeather\r\n".
-					"Accept: */*\r\n".
-					"Accept-language: en\r\n".
-					"Connection: close\r\n",
-			)
-		);
-		$city_info = json_decode(file_get_contents("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&lat=".$lat."&lon=".$lon, false, stream_context_create($opts)), true);
+		$city_info = $this->requestJSON('https://nominatim.openstreetmap.org/reverse', [
+			'format' => 'jsonv2',
+			'zoom' => '14',
+			'lat' => $lat,
+			'lon' => $lon,
+		]);
+
+		if (isset($city_info['error']) || !is_array($city_info)) {
+			return null;
+		}
+
 		if ((isset($city_info['osm_type'])) && (isset($city_info['osm_id']))) {
 			$osm_types = ['node' => 'N', 'relation' => 'R', 'way' => 'W'];
-			$city_detail = json_decode(file_get_contents("https://nominatim.openstreetmap.org/details.php?osmtype=".$osm_types[$city_info['osm_type']]."&osmid=".$city_info['osm_id']."&addressdetails=1&hierarchy=0&group_hierarchy=1&format=json", false, stream_context_create($opts)), true);
-			if (isset($city_detail['city_name']['names']['name:en'])) {
+			if (isset($osm_types[$city_info['osm_type']])) {
+				$city_detail = $this->requestJSON('https://nominatim.openstreetmap.org/details.php', [
+					'osmtype' => $osm_types[$city_info['osm_type']],
+					'osmid' => (string)$city_info['osm_id'],
+					'addressdetails' => '1',
+					'hierarchy' => '0',
+					'group_hierarchy' => '1',
+					'format' => 'json',
+				]);
+			} else {
+				$city_detail = [];
+			}
+			if (is_array($city_detail) && isset($city_detail['city_name']['names']['name:en'])) {
 				$city_name = $city_detail['city_name']['names']['name:en'];
 				if (isset($city_detail['city_name']['addresstags']['state'])) {
 					$city_name = $city_name . ", " . $city_detail['city_name']['addresstags']['state'];
@@ -177,14 +191,16 @@ trait CalculationServiceHelpers {
 	private function requestJSON(string $url, array $params = []): array {
 		$cacheKey = $url . '|' . implode(',', $params) . '|' . implode(',', array_keys($params));
 		$cacheValue = $this->cache->get($cacheKey);
-		if ($cacheValue !== null) {
+		if (is_array($cacheValue)) {
 			return $cacheValue;
 		}
 
 		try {
 			$options = [
 				'headers' => [
-					'User-Agent' => 'NextcloudSalattime/' . Helper::getVersion($this->appManager) . ' nextcloud.com'
+					'User-Agent' => 'NextcloudSalattime/' . Helper::getVersion($this->appManager) . ' nextcloud.com',
+					'Accept' => 'application/json',
+					'Accept-Language' => 'en',
 				],
 			];
 
@@ -202,7 +218,10 @@ trait CalculationServiceHelpers {
 			if ($respCode >= 400) {
 				return ['error' => $this->l10n->t('Error')];
 			} else {
-				$json = json_decode($body, true);
+				$json = json_decode((string)$body, true);
+				if (!is_array($json)) {
+					return ['error' => $this->l10n->t('Error')];
+				}
 
 				// default cache duration is one hour
 				$cacheDuration = 60 * 60;
