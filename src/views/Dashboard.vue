@@ -7,8 +7,11 @@
 		<template v-else>
 			<header class="salattime-widget__header">
 				<h3>{{ widgetData.hijri }}</h3>
-				<span v-if="widgetData.city">{{ widgetData.city }}</span>
 			</header>
+			<div v-if="widgetData.nextPrayer" class="salattime-widget__next">
+				<span>{{ t('Next') }}: {{ widgetData.nextPrayer.label }}</span>
+				<strong>{{ widgetData.remaining }}</strong>
+            </div>
 			<ul class="salattime-widget__prayers">
 				<li v-for="prayer in widgetData.prayers"
 					:key="prayer.key"
@@ -17,9 +20,8 @@
 					<strong>{{ prayer.time }}</strong>
 				</li>
 			</ul>
-			<footer v-if="widgetData.nextPrayer" class="salattime-widget__next">
-				<span>{{ t('Next') }}: {{ widgetData.nextPrayer.label }}</span>
-				<strong>{{ widgetData.remaining }}</strong>
+			<footer v-if="widgetData.city">
+                {{ widgetData.city }}
 			</footer>
 		</template>
 	</div>

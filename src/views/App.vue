@@ -7,7 +7,14 @@
 					:key="item.view"
 					:name="item.label"
 					:href="item.href"
-					:active="view === item.view" />
+					:active="view === item.view" >
+                    <template #icon>
+                        <ThemeLightDark v-if="item.view === 'overview'" />
+                        <HomeCityOutline v-else-if="item.view === 'prayers'" />
+                        <WrenchClockOutline v-else-if="item.view === 'adjustments'" />
+                        <ViewListOutline v-else-if="item.view === 'settings'" />
+                    </template>
+                </NcAppNavigationItem>
 			</template>
 			<template #footer>
 				<NcAppNavigationSettings :name="t('Settings')">
@@ -268,6 +275,10 @@ import NcAppNavigationItem from '@nextcloud/vue/components/NcAppNavigationItem'
 import NcAppNavigationSettings from '@nextcloud/vue/components/NcAppNavigationSettings'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
 import NcContent from '@nextcloud/vue/components/NcContent'
+import ThemeLightDark from 'vue-material-design-icons/ThemeLightDark.vue'
+import HomeCityOutline from 'vue-material-design-icons/HomeCityOutline.vue'
+import ViewListOutline from 'vue-material-design-icons/ViewListOutline.vue'
+import WrenchClockOutline from 'vue-material-design-icons/WrenchClockOutline.vue'
 
 export default {
 	name: 'SalatTimeApp',

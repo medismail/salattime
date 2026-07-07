@@ -71,11 +71,11 @@ def main(args):
     print(sunrise)
     print(sunset)
     timeEnd = midTime.AddDays(1)
-    if moonrise <= timeEnd:
+    if ((moonrise) and (moonrise <= timeEnd)):
         print(moonrise)
     else:
         print('')
-    if moonset <= timeEnd:
+    if ((moonset) and (moonset <= timeEnd)):
         print(moonset)
     else:
         print('')
