@@ -10,9 +10,9 @@
 					:active="view === item.view">
 					<template #icon>
 						<ThemeLightDark v-if="item.view === 'overview'" />
-						<HomeCityOutline v-else-if="item.view === 'prayers'" />
+						<HomeCityOutline v-else-if="item.view === 'settings'" />
 						<WrenchClockOutline v-else-if="item.view === 'adjustments'" />
-						<ViewListOutline v-else-if="item.view === 'settings'" />
+						<ViewListOutline v-else-if="item.view === 'prayers'" />
 					</template>
 				</NcAppNavigationItem>
 			</template>
