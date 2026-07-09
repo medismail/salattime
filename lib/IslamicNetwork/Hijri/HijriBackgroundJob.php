@@ -29,6 +29,8 @@ declare(strict_types=1);
 
 namespace OCA\SalatTime\IslamicNetwork\Hijri;
 
+use DateTime;
+use DateTimeZone;
 use OCA\SalatTime\Service\CalculationService;
 use OCA\SalatTime\Tools\Helper;
 use OCP\BackgroundJob\TimedJob;
@@ -68,14 +70,14 @@ class HijriBackgroundJob extends TimedJob {
 	 */
 	protected function updateUserHijriDate($uid) {
 		$adjustments = $this->calculationService->getConfigAdjustments($uid);
-		$date = new DateTime('', new DateTimezone('UTC'));
+		$date = new DateTime('', new DateTimeZone('UTC'));
 		$curtime = strtotime($date->format('d-m-Y H:i:s'));
 		$hijri = new HijriDate($curtime);
 		$hijri->tune($adjustments['Day'], $adjustments['NMA']);
 		if ($hijri->get_day() == 29) {
 			$output = null;
 			$retval = null;
-			$date = new DateTime('today +1 day', new DateTimezone('UTC'));
+			$date = new DateTime('today +1 day', new DateTimeZone('UTC'));
 			$p_settings = $this->calculationService->getConfigSettings($uid);  //$p_settings['timezone']
 			exec('python3 ' . __DIR__ . '/../../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $date->format('Y-m-d\TH:i:s.u\Z') . ' 30', $output, $retval);
 			$adjust = (int)$output[0];
@@ -85,7 +87,7 @@ class HijriBackgroundJob extends TimedJob {
 			if (($adjust == 0) && ($hijri->get_day() == 1)) {
 				$adjustments['NMA'] = -$hijri->get_month();
 				$this->calculationService->setConfigAdjustments($uid, $adjustments);
-			} elseif (($adjust == 1)($hijri->get_day() == 30)) {
+			} elseif (($adjust == 1) && ($hijri->get_day() == 30)) {
 				$adjustments['NMA'] = $hijri->get_month();
 				$this->calculationService->setConfigAdjustments($uid, $adjustments);
 			}

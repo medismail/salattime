@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.1
+### Fixed
+- Fix HijriBackground auto adjust
+
 ## 0.9.0
 ### Added
 - Add get current location from device
