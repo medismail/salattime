@@ -36,6 +36,8 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 	private $name;
 	/** @var VCalendar */
 	private $calendarObject;
+	/** @var string|null */
+	private $serializedCalendar = null;
 	/**
 	 * CalendarObject constructor.
 	 *
@@ -74,9 +76,10 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 	}
 
 	public function get() {
-		if ($this->calendarObject) {
-			return $this->calendarObject->serialize();
+		if ($this->serializedCalendar === null) {
+			$this->serializedCalendar = $this->calendarObject->serialize();
 		}
+		return $this->serializedCalendar;
 	}
 
 	public function getContentType() {
@@ -89,7 +92,7 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 	}
 
 	public function getSize() {
-		return mb_strlen($this->calendarObject->serialize());
+		return mb_strlen($this->get());
 	}
 
 	public function delete() {
@@ -105,7 +108,7 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 	}
 
 	public function getLastModified() {
-		return time();
+		return null;
 		///            return $this->sourceItem->getLastModified();
 	}
 
