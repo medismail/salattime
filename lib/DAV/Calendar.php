@@ -43,6 +43,9 @@ class Calendar extends ExternalCalendar {
 	/** @const HOURS_13_TO_SECONDS */
 	private const HOURS_13_TO_SECONDS = 46800;
 
+	/** @const CACHE_TTL_SECONDS */
+	private const CACHE_TTL_SECONDS = 3600;
+
 	/** @const prayertimeCalendar */
 	private const prayertimeCalendar = 'prayertime-cal';
 
@@ -59,7 +62,7 @@ class Calendar extends ExternalCalendar {
 	private $calculationService;
 
 	/** @var array */
-	private $objectData;
+	private $objectData = [];
 
 	/** @var string */
 	private $calendarName;
@@ -72,6 +75,9 @@ class Calendar extends ExternalCalendar {
 
 	/** @var IL10N */
 	private $l10n;
+
+	/** @var string|null */
+	private $cachePrefix = null;
 
 	/**
 	 * Calendar constructor.
@@ -152,18 +158,27 @@ class Calendar extends ExternalCalendar {
 		$timeRange = $this->extractTimeRange($filters);
 		$startDateTime = new \DateTime('', new \DateTimezone('UTC'));
 		$endDateTime = new \DateTime('next year', new \DateTimezone('UTC'));
-		if ($timeRange['start']) {
+		if ($timeRange !== null && $timeRange['start']) {
 			$startDateTime->setTimestamp($timeRange['start']->getTimestamp());
 		}
-		if ($timeRange['end']) {
+		if ($timeRange !== null && $timeRange['end']) {
 			$endDateTime->setTimestamp($timeRange['end']->getTimestamp());
 		}
+
+		$queryCacheKey = $this->getQueryCacheKey($startDateTime, $endDateTime);
+		$cachedQuery = $this->cache->get($queryCacheKey);
+		if (is_array($cachedQuery)) {
+			return $cachedQuery;
+		}
+
 		$co = [];
 		if ($this->calendarUri == self::prayertimeCalendar) {
 			$co = $this->getSTCalendarObjectsFromTimeRange($startDateTime, $endDateTime);
 		} elseif ($this->calendarUri == self::hijriCalendar) {
 			$co = $this->getHDCalendarObjectsFromTimeRange($startDateTime, $endDateTime);
 		}
+
+		$this->cache->set($queryCacheKey, $co, self::CACHE_TTL_SECONDS);
 		return $co;
 	}
 
@@ -172,7 +187,7 @@ class Calendar extends ExternalCalendar {
 		$children = ['salat_00000000.ics'];
 
 		// Obtain the calendar objects for each of them
-		//$children = array_map(function ($childName) using ($this) { return $this->getChild($childName); });
+		//$children = array_map(function ($childName) use ($this) { return $this->getChild($childName); });
 
 		return $children;
 	}
@@ -186,19 +201,22 @@ class Calendar extends ExternalCalendar {
 	public function childExists($name) {
 		//return preg_match('/^salat_\d{4}-\d{2}-\d{2}\.ics$/', $name);
 		$parts = explode('_', substr($name, 0, -4));
-		if ((count($parts) === 2) && ($this->objectData) && (isset($this->objectData[$parts[1]]))) {
-			return true;
-		} else {
-			$cacheKey = $this->principalUri . '/' . $this->calendarUri . '/' . $parts[1];
-			$cacheValue = $this->cache->get($cacheKey);
-			if ($cacheValue !== null) {
-				$this->objectData[$parts[1]] = $cacheValue;
-				return true;
-			}
+		if (count($parts) !== 2) {
+			return false;
 		}
 
-		/*$logger = \OC::$server->getLogger();
-		$logger->error("Child name={$name}, user={$this->principalUri}, calendar={$this->calendarUri}.", ['app' => 'salattime']);*/
+		$event = $parts[0];
+		$date = $parts[1];
+		if (isset($this->objectData[$date][$event])) {
+			return true;
+		}
+
+		$cacheValue = $this->cache->get($this->getObjectCacheKey($date));
+		if (is_array($cacheValue)) {
+			$this->objectData[$date] = $cacheValue;
+			return isset($this->objectData[$date][$event]);
+		}
+
 		return false;
 	}
 
@@ -209,14 +227,14 @@ class Calendar extends ExternalCalendar {
 	}
 
 	public function getLastModified() {
-		return time();
+		return null;
 	}
 
 	public function delete() {
 		return null;
 	}
 
-	public function getEventData(int $date, string $event): array {
+	public function getEventData(string $date, string $event): array {
 		return $this->objectData[$date][$event];
 	}
 
@@ -336,7 +354,7 @@ class Calendar extends ExternalCalendar {
 			$timeRange = $this->recursiveSearch($filterArray);
 		}
 
-		// Normalize the timeRange output to include 'tart' and 'end' with expected formats
+		// Normalize the timeRange output to include 'start' and 'end' with expected formats
 		if ($timeRange) {
 			$normalizedTimeRange = [
 				'start' => $timeRange['start'],
@@ -377,10 +395,33 @@ class Calendar extends ExternalCalendar {
 	private function updateCache() {
 		if ($this->objectData) {
 			foreach ($this->objectData as $eDate => $eData) {
-				$cacheKey = $this->principalUri . '/' . $this->calendarUri . '/' . $eDate;
-				$this->cache->set($cacheKey, $eData, 3600);
+				$this->cache->set($this->getObjectCacheKey((string)$eDate), $eData, self::CACHE_TTL_SECONDS);
 			}
 		}
+	}
+
+	private function getQueryCacheKey(\DateTime $startDateTime, \DateTime $endDateTime): string {
+		return $this->getCachePrefix()
+			. '/query/'
+			. $startDateTime->format('Ymd\THis\Z')
+			. '/'
+			. $endDateTime->format('Ymd\THis\Z');
+	}
+
+	private function getObjectCacheKey(string $date): string {
+		return $this->getCachePrefix() . '/object/' . $date;
+	}
+
+	private function getCachePrefix(): string {
+		if ($this->cachePrefix === null) {
+			$userId = basename($this->principalUri);
+			$settings = $this->calculationService->getConfigSettings($userId);
+			$adjustments = $this->calculationService->getConfigAdjustments($userId);
+			$token = substr(hash('sha256', json_encode([$settings, $adjustments])), 0, 16);
+			$this->cachePrefix = $this->principalUri . '/' . $this->calendarUri . '/' . $token;
+		}
+
+		return $this->cachePrefix;
 	}
 
 	private function getCalendarName(string $calendarUri):?string {
