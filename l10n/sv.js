@@ -10,6 +10,7 @@ OC.L10N.register(
     "after" : "efter",
     "Sunrise" : "Soluppgång",
     "Sunset" : "Solnedgång",
+    "Altitude" : "Höjd",
     "Timezone:" : "Tidszon:",
     "Qatar" : "Qatar",
     "Kuwait" : "Kuwait",
