@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2022 Mohamed-Ismail MEJRI <imejri@hotmail.com>
  *
@@ -24,9 +25,9 @@ namespace OCA\SalatTime\Tools;
 use OCP\IRequest;
 use OCP\IUser;
 use OCP\IUserSession;
-use OCP\Share\IShare;
 use OCP\Share\Exceptions\ShareNotFound;
 use OCP\Share\IManager;
+use OCP\Share\IShare;
 
 class CurrentUser {
 	/** @var IUserSession */
@@ -89,7 +90,7 @@ class CurrentUser {
 		if ($this->sessionUser === false) {
 			$user = $this->userSession->getUser();
 			if ($user instanceof IUser) {
-				$this->sessionUser = (string) $user->getUID();
+				$this->sessionUser = (string)$user->getUID();
 			} else {
 				$this->sessionUser = null;
 			}
@@ -106,7 +107,7 @@ class CurrentUser {
 		if ($this->cloudId === false) {
 			$user = $this->userSession->getUser();
 			if ($user instanceof IUser) {
-				$this->cloudId = (string) $user->getCloudId();
+				$this->cloudId = (string)$user->getCloudId();
 			} else {
 				$this->cloudId = $this->getCloudIDFromToken();
 			}

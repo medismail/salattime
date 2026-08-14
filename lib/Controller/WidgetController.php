@@ -31,7 +31,7 @@ class WidgetController extends OCSController {
 		string $appName,
 		IRequest $request,
 		CalculationService $calculationService,
-		?string $userId
+		?string $userId,
 	) {
 		parent::__construct($appName, $request);
 		$this->calculationService = $calculationService;

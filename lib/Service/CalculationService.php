@@ -39,23 +39,23 @@ require_once __DIR__ . '/../Tools/Helper.php';
 require_once __DIR__ . '/../Service/ConfigService.php';
 require_once __DIR__ . '/CalculationServiceHelpers.php';
 
-use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
-use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
-use OCA\SalatTime\IslamicNetwork\SunMoonCalc\SunCalc;
-use OCA\SalatTime\IslamicNetwork\QiblaDirection\Calculation;
-use OCP\Accounts\IAccountManager;
-use OCP\IUserManager;
-use OCP\Http\Client\IClientService;
-use OCP\Http\Client\IClient;
-use OCP\ICacheFactory;
-use OCP\ICache;
-use OCP\App\IAppManager;
-use Psr\Log\LoggerInterface;
-use OCP\IL10N;
-use DateTime;
-use DateTimezone;
 use DateInterval;
 use DatePeriod;
+use DateTime;
+use DateTimezone;
+use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
+use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
+use OCA\SalatTime\IslamicNetwork\QiblaDirection\Calculation;
+use OCA\SalatTime\IslamicNetwork\SunMoonCalc\SunCalc;
+use OCP\Accounts\IAccountManager;
+use OCP\App\IAppManager;
+use OCP\Http\Client\IClient;
+use OCP\Http\Client\IClientService;
+use OCP\ICache;
+use OCP\ICacheFactory;
+use OCP\IL10N;
+use OCP\IUserManager;
+use Psr\Log\LoggerInterface;
 
 class CalculationService {
 	use CalculationServiceHelpers;
@@ -151,15 +151,15 @@ class CalculationService {
 	private $l10n;
 
 	public function __construct(
-					   ConfigService $configService,
-					   IAccountManager $accountManager,
-					   IUserManager $userManager,
-					   IClientService $clientService,
-					   ICacheFactory $cacheFactory,
-					   IAppManager $appManager,
-					   LoggerInterface $logger,
-					   IL10N $l
-				   ) {
+		ConfigService $configService,
+		IAccountManager $accountManager,
+		IUserManager $userManager,
+		IClientService $clientService,
+		ICacheFactory $cacheFactory,
+		IAppManager $appManager,
+		LoggerInterface $logger,
+		IL10N $l,
+	) {
 		$this->configService = $configService;
 		$this->accountManager = $accountManager;
 		$this->userManager = $userManager;
@@ -202,7 +202,7 @@ class CalculationService {
 		}
 
 		$hijri = new HijriDate($curtime, $this->l10n);
-		if ($adjustments['Day'] != "") {
+		if ($adjustments['Day'] != '') {
 			if ($adjustments['NMA'] == '15') {
 				$hijri->tune($adjustments['Day'], '0');
 			} else {
@@ -214,7 +214,7 @@ class CalculationService {
 		$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
 		$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
 		$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
-		$times['SpecialDay'] = implode(" ", $hijri->get_day_special_name());
+		$times['SpecialDay'] = implode(' ', $hijri->get_day_special_name());
 		if (date('N', $curtime) == 5) {
 			$times['Jumaa'] = "Juma'a";
 			if ($times[PrayerTimes::SALAT] == PrayerTimes::ZHUHR) {
@@ -222,13 +222,13 @@ class CalculationService {
 			}
 		}
 		if ($hijri->get_month() != 9) { //Ramadhane
-			$times[PrayerTimes::IMSAK] = "";
+			$times[PrayerTimes::IMSAK] = '';
 		}
-		if ($p_settings['city'] != "") {
+		if ($p_settings['city'] != '') {
 			$times['City'] = $p_settings['city'];
 		} else {
 			$times['City'] = $this->getNameFromGeo($p_settings['latitude'], $p_settings['longitude']);
-			if ($times['City'] != "") {
+			if ($times['City'] != '') {
 				$this->configService->setCityValue($userId, $times['City']);
 			} else {
 				$times['City'] = $this->l10n->t('Unknown city');
@@ -309,12 +309,12 @@ class CalculationService {
 			if ($moonTimes['moonrise']) {
 				$sunMoonTimes['Moonrise'] = $moonTimes['moonrise']->format($textFormat_12_24);
 			} else {
-				$sunMoonTimes['Moonrise'] = "";
+				$sunMoonTimes['Moonrise'] = '';
 			}
 			if ($moonTimes['moonset']) {
 				$sunMoonTimes['Moonset'] = $moonTimes['moonset']->format($textFormat_12_24);
 			} else {
-				$sunMoonTimes['Moonset'] = "";
+				$sunMoonTimes['Moonset'] = '';
 			}
 			$moonIl = $sc->getMoonIllumination();
 			$sunMoonTimes['MoonPhase'] = number_format($moonIl['phase'] * 100, 1);
@@ -382,7 +382,7 @@ class CalculationService {
 		$previousSettings = $this->configService->getSettingsValue($userId);
 		$settings = $this->normalizeSettings($settings, $previousSettings);
 
-		if ($settings['city'] != "") {
+		if ($settings['city'] != '') {
 			$addressInfo = $this->getGeoCode($settings['city']);
 			if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
 				$settings['latitude'] = $addressInfo['latitude'];
@@ -399,10 +399,10 @@ class CalculationService {
 				$settings['longitude'] = $previousSettings['longitude'];
 				$settings['elevation'] = $previousSettings['elevation'];
 			}
-		} elseif (($settings['latitude'] == "0") && ($settings['longitude'] == "0")) {
+		} elseif (($settings['latitude'] == '0') && ($settings['longitude'] == '0')) {
 			$settings['latitude'] = $previousSettings['latitude'];
 			$settings['longitude'] = $previousSettings['longitude'];
-			if ($settings['timezone'] == "") {
+			if ($settings['timezone'] == '') {
 				$settings['timezone'] = $previousSettings['timezone'];
 			}
 		} else {
@@ -454,7 +454,7 @@ class CalculationService {
 	 * @param DateTime endDate
 	 * @return array Full paryers times for multidays in specific date
 	 */
-	public function getPrayerTimesFromDate(string $userId, DateTime $startDate, DateTime $endDate, string $dateFormat = null): array {
+	public function getPrayerTimesFromDate(string $userId, DateTime $startDate, DateTime $endDate, ?string $dateFormat = null): array {
 		$p_settings = $this->configService->getSettingsValue($userId);
 		$adjustments = $this->configService->getAdjustmentsValue($userId);
 
@@ -499,7 +499,7 @@ class CalculationService {
 			$times = $pt->getTimes($date, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format);
 			$curtime = strtotime($date->format('d-m-Y H:i:s'));
 			$hijri = new HijriDate($curtime, $this->l10n);
-			if ($confAdjustments['Day'] != "") {
+			if ($confAdjustments['Day'] != '') {
 				$hijri->tune($confAdjustments['Day']);
 			}
 
@@ -531,7 +531,6 @@ class CalculationService {
 
 		return $rows;
 	}
-
 
 	/**
 	 * get Prayers times from known date by number of days
@@ -577,7 +576,7 @@ class CalculationService {
 		$dateRange = new DatePeriod($startDate, $interval, $endDate, DatePeriod::INCLUDE_END_DATE);
 
 		$times = [];
-		if (($adjustments['NMA'] != "") && ($adjustments['NMA'] != "0")) {
+		if (($adjustments['NMA'] != '') && ($adjustments['NMA'] != '0')) {
 			$p_settings = $this->configService->getSettingsValue($userId);
 			$hijri = new HijriDate(strtotime($startDate->format('Ymd\THis\Z')), $this->l10n);
 			$hijriWeekdays = $hijri->hijriWeekdays();
@@ -664,7 +663,7 @@ class CalculationService {
 				//$curDate->format('d-m-Y H:i:s');
 				$strDate = $curDate->format('Ymd\THis\Z');
 				$hijri = new HijriDate(strtotime($strDate), $this->l10n);
-				if ($adjustments['Day'] != "") {
+				if ($adjustments['Day'] != '') {
 					$hijri->tune($adjustments['Day']);
 				}
 				$curTime = [$strDate, $hijri->get_day_name(), $hijri->get_day(), $hijri->get_month_name(), $hijri->get_month(), $hijri->get_year(), $hijri->is_day_special()];
@@ -685,7 +684,7 @@ class CalculationService {
 		$daylength = strtotime($sunset) - strtotime($sunrise);
 		$minutes = $this->twoDigitsFormat((int)(($daylength) / 60) % 60);
 		$hours = $this->twoDigitsFormat((int)(($daylength) / 3600));
-		return $hours . ":" . $minutes;
+		return $hours . ':' . $minutes;
 	}
 
 	/**
@@ -696,8 +695,8 @@ class CalculationService {
 	 * @param string format
 	 * @return string of php time
 	 */
-	private function timeConversion(string $time = null, DateTimeZone $timezone, string $format): string {
-		$ret = "";
+	private function timeConversion(?string $time = null, DateTimeZone $timezone, string $format): string {
+		$ret = '';
 		if ($time) {
 			$date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $time, new DateTimezone('UTC'));
 			if ($date) {
@@ -714,6 +713,6 @@ class CalculationService {
 	 * @return string of two digits format
 	 */
 	private function twoDigitsFormat(int $num): string {
-		return ($num < 10) ? '0'. $num : $num;
+		return ($num < 10) ? '0' . $num : $num;
 	}
 }

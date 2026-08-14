@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2022 Mohamed-Ismail MEJRI <imejri@hotmail.com>
  *
@@ -23,13 +24,12 @@
 
 namespace OCA\SalatTime\Dashboard;
 
+use OCA\SalatTime\AppInfo\Application;
 use OCP\Dashboard\IWidget;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Util;
-
-use OCA\SalatTime\AppInfo\Application;
 
 class SalatTimeWidget implements IWidget {
 	/** @var IL10N */
@@ -44,8 +44,8 @@ class SalatTimeWidget implements IWidget {
 	private $url;
 
 	public function __construct(IL10N $l10n,
-								IURLGenerator $url,
-								IConfig $config) {
+		IURLGenerator $url,
+		IConfig $config) {
 		$this->l10n = $l10n;
 		$this->config = $config;
 		$this->url = $url;

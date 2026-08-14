@@ -27,10 +27,10 @@
 
 namespace OCA\SalatTime\DAV;
 
-use OCA\SalatTime\AppInfo\Application;
-use OCA\SalatTime\Service\CalculationService;
 use OCA\DAV\CalDAV\Integration\ExternalCalendar;
 use OCA\DAV\CalDAV\Integration\ICalendarProvider;
+use OCA\SalatTime\AppInfo\Application;
+use OCA\SalatTime\Service\CalculationService;
 use OCP\ICacheFactory;
 use OCP\IL10N;
 
@@ -61,7 +61,7 @@ class CalendarPlugin implements ICalendarProvider {
 	}
 
 	public function fetchAllForCalendarHome(string $principalUri): array {
-		if ($this->calculationService->getUserCalendar(basename($principalUri)) == "true") {
+		if ($this->calculationService->getUserCalendar(basename($principalUri)) == 'true') {
 			return [
 				new Calendar($principalUri, self::hijriCalendar, $this->calculationService, $this->cache, $this->l10n),
 				new Calendar($principalUri, self::prayertimeCalendar, $this->calculationService, $this->cache, $this->l10n),
@@ -72,7 +72,7 @@ class CalendarPlugin implements ICalendarProvider {
 	}
 
 	public function hasCalendarInCalendarHome(string $principalUri, string $calendarUri): bool {
-		if ($this->calculationService->getUserCalendar(basename($principalUri)) == "true") {
+		if ($this->calculationService->getUserCalendar(basename($principalUri)) == 'true') {
 			return $calendarUri === self::prayertimeCalendar || $calendarUri === self::hijriCalendar;
 		}
 

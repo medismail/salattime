@@ -28,12 +28,12 @@
 namespace OCA\SalatTime\Controller;
 
 use OCA\SalatTime\Notification\BackgroundJob;
+use OCA\SalatTime\Service\ConfigService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\BackgroundJob\IJobList;
-use OCP\Notification\IManager;
-use OCA\SalatTime\Service\ConfigService;
 use OCP\IRequest;
+use OCP\Notification\IManager;
 
 class NotificationController extends Controller {
 	private IJobList $jobList;
@@ -81,7 +81,7 @@ class NotificationController extends Controller {
 	 * Remove old notifications
 	 */
 	private function clearOldNotifications() {
-		$salawat = array('Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
+		$salawat = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 		foreach ($salawat as $salat) {
 			$notification = $this->notificationManager->createNotification();
 			try {

@@ -29,9 +29,9 @@ declare(strict_types=1);
 
 namespace OCA\SalatTime\AppInfo;
 
-use OCP\AppFramework\App;
 use OCA\SalatTime\Dashboard\SalatTimeWidget;
 use OCA\SalatTime\Notification\Notifier;
+use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;

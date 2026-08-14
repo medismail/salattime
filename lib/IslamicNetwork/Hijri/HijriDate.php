@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Get hijri date from gregorian
  *
@@ -25,7 +26,7 @@ class HijriDate {
 	/** @var IL10N */
 	private $l10n;
 
-	public function __construct($time = false, IL10N $l = null) {
+	public function __construct($time = false, ?IL10N $l = null) {
 		if (!$time) {
 			$time = time();
 		}
@@ -98,8 +99,8 @@ class HijriDate {
 
 	public function getHijriHolidays($day, $month) {
 		$holydays = [];
-		$day = (int) $day;
-		$month = (int) $month;
+		$day = (int)$day;
+		$month = (int)$month;
 		foreach ($this->specialDays() as $hol) {
 			if ($hol['day'] == $day && $hol['month'] == $month) {
 				$holydays[] = $hol['tx'];
@@ -237,26 +238,26 @@ class HijriDate {
 		$jd = $jd + 0.5 - 1948440 + 10632;
 		$n = (int)(($jd - 1) / 10631);
 		$jd = $jd - 10631 * $n + 354;
-		$j = ((int)((10985 - $jd) / 5316)) *
-			((int)(50 * $jd / 17719)) +
-			((int)($jd / 5670)) *
-			((int)(43 * $jd / 15238));
-		$jd = $jd - ((int)((30 - $j) / 15)) *
-			((int)((17719 * $j) / 50)) -
-			((int)($j / 16)) *
-			((int)((15238 * $j) / 43)) + 29;
+		$j = ((int)((10985 - $jd) / 5316))
+			* ((int)(50 * $jd / 17719))
+			+ ((int)($jd / 5670))
+			* ((int)(43 * $jd / 15238));
+		$jd = $jd - ((int)((30 - $j) / 15))
+			* ((int)((17719 * $j) / 50))
+			- ((int)($j / 16))
+			* ((int)((15238 * $j) / 43)) + 29;
 		$m = (int)(24 * $jd / 709);
 		$d = $jd - (int)(709 * $m / 24);
 		$y = 30 * $n + $j - 30;
 
-		return array($m, $d, $y);
+		return [$m, $d, $y];
 	}
 
 	// Hijri To Julian Day Count
 	private function HijriToJD($m, $d, $y) {
-		return (int)((11 * $y + 3) / 30) +
-			354 * $y + 30 * $m -
-			(int)(($m - 1) / 2) + $d + 1948440 - 385;
+		return (int)((11 * $y + 3) / 30)
+			+ 354 * $y + 30 * $m
+			- (int)(($m - 1) / 2) + $d + 1948440 - 385;
 	}
 
 	private function GregorianToJulian($Month, $Day, $Year) {
@@ -298,6 +299,6 @@ class HijriDate {
 			$year = $year + 1;
 		}
 
-		return array($month, $day, $year);
+		return [$month, $day, $year];
 	}
 }

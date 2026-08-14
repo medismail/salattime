@@ -30,8 +30,8 @@ declare(strict_types=1);
 namespace OCA\SalatTime\Notification;
 
 use OCA\SalatTime\Service\CalculationService;
-use OCP\BackgroundJob\TimedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\BackgroundJob\TimedJob;
 use OCP\Notification\IManager;
 
 class BackgroundJob extends TimedJob {
@@ -42,8 +42,8 @@ class BackgroundJob extends TimedJob {
 	protected $calculationService;
 
 	public function __construct(ITimeFactory $timeFactory,
-								IManager $notificationManager,
-								CalculationService $calculationService) {
+		IManager $notificationManager,
+		CalculationService $calculationService) {
 		parent::__construct($timeFactory);
 		// Run once a day
 		$this->setInterval(60 * 60 * 24);
@@ -74,8 +74,8 @@ class BackgroundJob extends TimedJob {
 	protected function sendSalatNotifications($uid) {
 		$PrayerTime = new \DateTime();
 		$PrayerTimeEnd = new \DateTime();
-		$salawat = array(CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
-		$endTimes = array(CalculationService::SUNRISE, 'Asr', 'Maghrib', 'Isha', 'Lastthird');
+		$salawat = [CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+		$endTimes = [CalculationService::SUNRISE, 'Asr', 'Maghrib', 'Isha', 'Lastthird'];
 		$offset = [CalculationService::FAJR => 0, 'Dhuhr' => 0, 'Asr' => 0, 'Maghrib' => 0, 'Isha' => 0];
 		$pSettings = $this->calculationService->getConfigSettings($uid);
 		$timeFormat = $this->getTimeFormat($pSettings['format_12_24']);
@@ -127,7 +127,7 @@ class BackgroundJob extends TimedJob {
 	 * @param string $uid
 	 */
 	protected function clearOldNotifications($uid) {
-		$salawat = array(CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
+		$salawat = [CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 		foreach ($salawat as $salat) {
 			$notification = $this->notificationManager->createNotification();
 			try {

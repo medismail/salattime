@@ -45,7 +45,7 @@
 						<div class="salattime-next-card">
 							<span>{{ t('Next') }}</span>
 							<strong>{{ t(state.Salat || 'Salat') }}</strong>
-							<small>{{ t('after') }} </small>
+							<span>{{ t('after') }} </span>
 							<strong>{{ state.Remain || '--:--' }}</strong>
 						</div>
 					</div>

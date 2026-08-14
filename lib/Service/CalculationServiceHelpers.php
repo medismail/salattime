@@ -26,7 +26,6 @@ trait CalculationServiceHelpers {
 		return ['error' => $this->l10n->t('No result.')];
 	}
 
-
 	private function getNameFromGeo(string $lat, string $lon):?string {
 		$city_name = null;
 		$city_info = $this->requestJSON('https://nominatim.openstreetmap.org/reverse', [
@@ -57,9 +56,9 @@ trait CalculationServiceHelpers {
 			if (is_array($city_detail) && isset($city_detail['city_name']['names']['name:en'])) {
 				$city_name = $city_detail['city_name']['names']['name:en'];
 				if (isset($city_detail['city_name']['addresstags']['state'])) {
-					$city_name = $city_name . ", " . $city_detail['city_name']['addresstags']['state'];
+					$city_name = $city_name . ', ' . $city_detail['city_name']['addresstags']['state'];
 				} elseif (isset($city_info['address']['state'])) {
-					$city_name = $city_name . ", " . $city_info['address']['state'];
+					$city_name = $city_name . ', ' . $city_info['address']['state'];
 				}
 			}
 		}
@@ -77,13 +76,13 @@ trait CalculationServiceHelpers {
 			}
 			if (isset($city_info['address']['county'])) {
 				if ($city_name) {
-					$city_name = $city_name . ", " . $city_info['address']['county'];
+					$city_name = $city_name . ', ' . $city_info['address']['county'];
 				} else {
 					$city_name = $city_info['address']['county'];
 				}
 			} elseif (isset($city_info['address']['state'])) {
 				if ($city_name) {
-					$city_name = $city_name . ", " . $city_info['address']['state'];
+					$city_name = $city_name . ', ' . $city_info['address']['state'];
 				} else {
 					$city_name = $city_info['address']['state'];
 				}
@@ -102,13 +101,13 @@ trait CalculationServiceHelpers {
 	}
 
 	private function getCountryName(string $countryCode): string {
-		$countryCode = strtoupper(trim($countryCode));
-		if (!preg_match('/^[A-Z]{2}$/', $countryCode)) {
+		$capitalCountryCode = strtoupper(trim($countryCode));
+		if (!preg_match('/^[A-Z]{2}$/', $capitalCountryCode)) {
 			return '';
 		}
 
 		if (class_exists('\Locale')) {
-			$countryName = \Locale::getDisplayRegion('-' . $countryCode, 'en');
+			$countryName = \Locale::getDisplayRegion('-' . $capitalCountryCode, $countryCode);
 			if (is_string($countryName) && $countryName !== '') {
 				return $countryName;
 			}

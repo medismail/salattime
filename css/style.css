@@ -28,7 +28,7 @@
 .salattime-next-card small,
 .salattime-card-header span,
 .salattime-table small {
-	color: var(--color-primary-element-text);
+	color: var(--color-element-info);
 }
 
 .salattime-nav-icon {
@@ -270,7 +270,7 @@
 .salattime-page-title {
 	margin-bottom: 18px;
 	background:
-		radial-gradient(circle at top left, rgba(4, 170, 109, .14), transparent 26%),
+		radial-gradient(circle at top left, rgba(4, 170, 60, .34), transparent 30%),
 		var(--color-main-background);
 }
 

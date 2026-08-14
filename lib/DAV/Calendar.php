@@ -27,10 +27,10 @@
 
 namespace OCA\SalatTime\DAV;
 
-use OCA\SalatTime\AppInfo\Application;
-use OCA\SalatTime\Service\CalculationService;
 use OCA\DAV\CalDAV\Integration\ExternalCalendar;
 use OCA\DAV\CalDAV\Plugin;
+use OCA\SalatTime\AppInfo\Application;
+use OCA\SalatTime\Service\CalculationService;
 use OCP\ICache;
 use OCP\IL10N;
 use Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet;
@@ -245,8 +245,8 @@ class Calendar extends ExternalCalendar {
 		$extendEndDateTime->setTimestamp($endDateTime->getTimestamp() + self::HOURS_13_TO_SECONDS);
 		$config = $this->getConfigSettings(basename($this->principalUri));
 		$times = $this->calculationService->getPrayerTimesFromDate(basename($this->principalUri), $extendStartDateTime, $extendEndDateTime, self::TIME_FORMAT_ISO8601);
-		$salawat = array(CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
-		$salatEndTime = array('Sunrise', 'Asr', 'Maghrib', 'Isha', 'Lastthird');
+		$salawat = [CalculationService::FAJR, 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+		$salatEndTime = ['Sunrise', 'Asr', 'Maghrib', 'Isha', 'Lastthird'];
 		$lastId = count($times) - 2;
 		$co = [];
 		foreach ($times as $id => $dayTime) {
@@ -277,7 +277,7 @@ class Calendar extends ExternalCalendar {
 		$this->objectData[$date][$salat]['Summary'] = $this->l10n->t('Salat %s', [$tSalat]);
 		$endDate->setTimezone(new \DateTimeZone($config['TimeZone']));
 		$eDate->setTimezone(new \DateTimeZone($config['TimeZone']));
-		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('The Adhan for salat %s is at %s, the prayer time ends at %s.', [$tSalat, $eDate->format($config['TimeFormat']) . $config['suffixes'][$eDate->format('a')], $endDate->format($config['TimeFormat']) . $config['suffixes'][$endDate->format('a')]]) .chr(0x0D).chr(0x0A). $this->l10n->t('Performing prayers is a duty on the believers at the appointed times.');
+		$this->objectData[$date][$salat]['Description'] = $this->l10n->t('The Adhan for salat %s is at %s, the prayer time ends at %s.', [$tSalat, $eDate->format($config['TimeFormat']) . $config['suffixes'][$eDate->format('a')], $endDate->format($config['TimeFormat']) . $config['suffixes'][$endDate->format('a')]]) . chr(0x0D) . chr(0x0A) . $this->l10n->t('Performing prayers is a duty on the believers at the appointed times.');
 		$this->objectData[$date][$salat]['Duration'] = 'PT10M';
 		$this->objectData[$date][$salat]['Transp'] = 'OPAQUE';
 		$this->objectData[$date][$salat]['Location'] = $config['Location'];
@@ -295,7 +295,7 @@ class Calendar extends ExternalCalendar {
 		foreach ($times as $id => $dayData) {
 			$spday = '';
 			if ($dayData[6]) {
-				$spday = ' (' . $dayData[6] .')';
+				$spday = ' (' . $dayData[6] . ')';
 			}
 			$co[] = $this->fillHDCalendarObjectData($dayData, $spday);
 		}

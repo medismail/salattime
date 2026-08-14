@@ -27,10 +27,10 @@
 
 namespace OCA\SalatTime\Service;
 
-use OCP\IUserManager;
+use OCA\SalatTime\AppInfo\Application;
 use OCP\IConfig;
 use OCP\IUser;
-use OCA\SalatTime\AppInfo\Application;
+use OCP\IUserManager;
 
 class ConfigService {
 	private IConfig $config;
@@ -66,36 +66,36 @@ class ConfigService {
 		$p_settings = json_decode($settings, true);
 		$needsSave = false;
 		if (!is_array($p_settings)) {
-			$p_settings = explode(":", $settings);
+			$p_settings = explode(':', $settings);
 			if (count($p_settings) > 2) {
 				$ret['latitude'] = $p_settings[0];
-				if ($ret['latitude'] == "") {
+				if ($ret['latitude'] == '') {
 					$ret['latitude'] = 21.3890824;
 				}
 				$ret['longitude'] = $p_settings[1];
-				if ($ret['longitude'] == "") {
+				if ($ret['longitude'] == '') {
 					$ret['longitude'] = 39.8579118;
 				}
 				$ret['timezone'] = $p_settings[2];
-				if ($ret['timezone'] == "") {
+				if ($ret['timezone'] == '') {
 					$ret['timezone'] = '+0300';
 				}
-				if (isset($p_settings[3]) && ($p_settings[3] != "")) {
+				if (isset($p_settings[3]) && ($p_settings[3] != '')) {
 					$ret['elevation'] = $p_settings[3];
 				} else {
 					$ret['elevation'] = 0.0;
 				}
-				if (isset($p_settings[4]) && ($p_settings[4] != "")) {
+				if (isset($p_settings[4]) && ($p_settings[4] != '')) {
 					$ret['method'] = $p_settings[4];
 				} else {
 					$ret['method'] = 'MWL';
 				}
-				if (isset($p_settings[5]) && ($p_settings[5] != "")) {
+				if (isset($p_settings[5]) && ($p_settings[5] != '')) {
 					$ret['format_12_24'] = $p_settings[5];
 				} else {
 					$ret['format_12_24'] = '12h';
 				}
-				if (isset($p_settings[6]) && ($p_settings[6] != "")) {
+				if (isset($p_settings[6]) && ($p_settings[6] != '')) {
 					$ret['city'] = $p_settings[6];
 				} else {
 					$ret['city'] = '';
@@ -111,10 +111,10 @@ class ConfigService {
 			}
 			$needsSave = true;
 		} else {
-			$ret = (array) $p_settings;
+			$ret = (array)$p_settings;
 		}
 		$ret = $this->normalizeSettings($ret);
-		if ($needsSave || $ret !== (array) $p_settings) {
+		if ($needsSave || $ret !== (array)$p_settings) {
 			$this->setUserValue($userId, 'settings', $ret);
 		}
 		return $ret;
@@ -125,7 +125,7 @@ class ConfigService {
 		$adjustments = json_decode($v_adjustments, true);
 		$needsSave = false;
 		if (!is_array($adjustments)) {
-			$adjustments = explode(",", $v_adjustments);
+			$adjustments = explode(',', $v_adjustments);
 			if (count($adjustments) == 7) {
 				$ret['Day'] = $adjustments[0];
 				$ret['Fajr'] = $adjustments[1];
@@ -153,10 +153,10 @@ class ConfigService {
 			}
 			$needsSave = true;
 		} else {
-			$ret = (array) $adjustments;
+			$ret = (array)$adjustments;
 		}
 		$ret = $this->normalizeAdjustments($ret);
-		if ($needsSave || $ret !== (array) $adjustments) {
+		if ($needsSave || $ret !== (array)$adjustments) {
 			$this->setUserValue($userId, 'adjustments', $ret);
 		}
 		$this->setUserAutoHijriDate($userId, $this->isAutoHijriEnabled($ret));

@@ -38,8 +38,8 @@ class PrayerTimes {
 	public $d;
 	public $dyy;
 	public $hemisphere;
-	public const DYY_NORTH_0 = "12-21";
-	public const DYY_SOUTH_0 = "06-21";
+	public const DYY_NORTH_0 = '12-21';
+	public const DYY_SOUTH_0 = '06-21';
 
 	public function __construct(DateTime $date, float $latitude) {
 		$this->date = $date;

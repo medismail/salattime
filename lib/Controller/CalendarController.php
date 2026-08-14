@@ -27,9 +27,9 @@
 
 namespace OCA\SalatTime\Controller;
 
+use OCA\SalatTime\Service\ConfigService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
-use OCA\SalatTime\Service\ConfigService;
 use OCP\IRequest;
 
 class CalendarController extends Controller {

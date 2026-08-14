@@ -32,7 +32,7 @@ use RuntimeException;
 class Helper {
 	public const APP_ID = 'salattime';
 
-	public static function runPythonScriptProcOpen(string $scriptPath, array $args, array &$output = null, int &$retval = null, string $pythonPath = 'python3', string &$stderrOutput = null): void {
+	public static function runPythonScriptProcOpen(string $scriptPath, array $args, ?array &$output = null, ?int &$retval = null, string $pythonPath = 'python3', ?string &$stderrOutput = null): void {
 		$cmd = array_merge([$pythonPath, $scriptPath], array_map('strval', $args));
 
 		$descriptorSpec = [
@@ -43,7 +43,7 @@ class Helper {
 		$process = proc_open($cmd, $descriptorSpec, $pipes);
 
 		if (!is_resource($process)) {
-			throw new RuntimeException("Cannot start process");
+			throw new RuntimeException('Cannot start process');
 		}
 
 		stream_set_blocking($pipes[1], false);
@@ -100,7 +100,7 @@ class Helper {
 			return $memcache->get($program);
 		}
 
-		$paths = ['/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin', '/opt/bin', $dataPath . "/bin"];
+		$paths = ['/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin', '/opt/bin', $dataPath . '/bin'];
 		$result = $default;
 		$exeSniffer = new ExecutableFinder();
 		// Returns null if nothing is found

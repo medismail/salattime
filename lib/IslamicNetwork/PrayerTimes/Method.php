@@ -282,7 +282,6 @@ class Method {
 					'latitude' => 54.73479099999999,
 					'longitude' => 55.9578555
 				]
-
 			],
 			self::METHOD_MOONSIGHTING => [
 				'id' => 15,
@@ -302,7 +301,6 @@ class Method {
 					'latitude' => 36.7960786,
 					'longitude' => 10.1868741
 				]
-
 			],
 			self::METHOD_INDONESIA => [
 				'id' => 17,
@@ -315,7 +313,6 @@ class Method {
 					'latitude' => -6.2129222,
 					'longitude' => 106.8487229
 				]
-
 			],
 			self::METHOD_MOROCCO => [
 				'id' => 18,
@@ -328,7 +325,6 @@ class Method {
 					'latitude' => 33.999501,
 					'longitude' => -6.8496529
 				]
-
 			],
 			self::METHOD_JAKIM => [
 				'id' => 19,

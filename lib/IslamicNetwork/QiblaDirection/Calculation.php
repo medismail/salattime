@@ -37,7 +37,6 @@ class Calculation {
 	 */
 	public const KAABA_LONGITUDE = 39.826166;
 
-
 	/**
 	 * Calculates the Qibla direction.
 	 *
@@ -69,7 +68,7 @@ class Calculation {
 	 * Returns the cotangent of the $arg parameter.
 	 *
 	 * @param float $arg
-	 *   A value in radians.
+	 *                   A value in radians.
 	 *
 	 * @return
 	 *   The cotangent of $arg.

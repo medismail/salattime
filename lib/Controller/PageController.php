@@ -18,17 +18,17 @@ require_once __DIR__ . '/../Service/CalculationService.php';
 
 use DateTime;
 use DateTimeZone;
-use OCP\IRequest;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\RedirectResponse;
-use OCP\Appframework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\Attribute\NoAdminRequired;
-use OCP\AppFramework\Controller;
 use OCA\SalatTime\AppInfo\Application;
-use OCP\IURLGenerator;
-use OCP\IL10N;
-use OCA\SalatTime\Tools\CurrentUser;
 use OCA\SalatTime\Service\CalculationService;
+use OCA\SalatTime\Tools\CurrentUser;
+use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\Appframework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\RedirectResponse;
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\IL10N;
+use OCP\IRequest;
+use OCP\IURLGenerator;
 
 class PageController extends Controller {
 	private const MAX_PRAYER_RANGE_DAYS = 31;
@@ -48,14 +48,14 @@ class PageController extends Controller {
 	private $l10n;
 
 	public function __construct($AppName, IRequest $request,
-							IURLGenerator $urlGenerator,
-							CurrentUser $currentUser,
-							CalculationService $calculationService,
-							IL10N $l10n,
-							$userId) {
+		IURLGenerator $urlGenerator,
+		CurrentUser $currentUser,
+		CalculationService $calculationService,
+		IL10N $l10n,
+		$userId) {
 		parent::__construct($AppName, $request);
 		$this->userId = $userId;
-		$this->user = (string) $currentUser->getUID();
+		$this->user = (string)$currentUser->getUID();
 		$this->urlGenerator = $urlGenerator;
 		$this->calculationService = $calculationService;
 		$this->l10n = $l10n;
@@ -178,7 +178,7 @@ class PageController extends Controller {
 			$message = $this->l10n->t('End date was adjusted because it was before the start date.');
 		}
 
-		$days = (int) $startDate->diff($endDate)->days + 1;
+		$days = (int)$startDate->diff($endDate)->days + 1;
 		if ($days > self::MAX_PRAYER_RANGE_DAYS) {
 			$endDate = clone $startDate;
 			$endDate->modify('+' . (self::MAX_PRAYER_RANGE_DAYS - 1) . ' days');
@@ -206,10 +206,10 @@ class PageController extends Controller {
 	}
 
 	private function stringParam($value): string {
-		return is_scalar($value) ? trim((string) $value) : '';
+		return is_scalar($value) ? trim((string)$value) : '';
 	}
 
 	private function intParam($value): int {
-		return is_numeric($value) ? (int) $value : 0;
+		return is_numeric($value) ? (int)$value : 0;
 	}
 }

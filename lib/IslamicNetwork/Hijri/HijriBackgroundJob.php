@@ -33,15 +33,15 @@ use DateTime;
 use DateTimeZone;
 use OCA\SalatTime\Service\CalculationService;
 use OCA\SalatTime\Tools\Helper;
-use OCP\BackgroundJob\TimedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\BackgroundJob\TimedJob;
 
 class HijriBackgroundJob extends TimedJob {
 	/** @var CalculationService */
 	protected $calculationService;
 
 	public function __construct(ITimeFactory $timeFactory,
-								CalculationService $calculationService) {
+		CalculationService $calculationService) {
 		parent::__construct($timeFactory);
 		// Run once a day
 		$this->setInterval(60 * 60 * 24);

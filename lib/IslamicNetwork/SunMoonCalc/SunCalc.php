@@ -30,7 +30,6 @@ use DateInterval;
 define('PI', M_PI);
 define('rad', PI / 180);
 
-
 // date/time constants and conversions
 define('daySec', 60 * 60 * 24);
 define('J1970', 2440588);
@@ -39,13 +38,12 @@ define('J2000', 2451545);
 define('e', rad * 23.4397); // obliquity of the Earth
 define('J0', 0.0009);
 
-
 function toJulian($date) {
 	return $date->getTimestamp() / daySec - 0.5 + J1970;
 }
 function fromJulian($j, $d) {
 	if (!is_nan($j)) {
-		$dt = new \DateTime("@".round(($j + 0.5 - J1970) * daySec));
+		$dt = new \DateTime('@' . round(($j + 0.5 - J1970) * daySec));
 		$dt->setTimezone($d->getTimezone());
 		return $dt;
 	}
@@ -108,7 +106,7 @@ function eclipticLongitude($M) {
 
 function hoursLater($date, $h) {
 	$dt = clone $date;
-	return $dt->add(new DateInterval('PT'.round($h * 3600).'S'));
+	return $dt->add(new DateInterval('PT' . round($h * 3600) . 'S'));
 }
 
 class DecRa {
@@ -174,7 +172,6 @@ function moonCoords($d) { // geocentric ecliptic coordinates of the moon
 		$dt
 	);
 }
-
 
 class SunCalc {
 	public $date;
@@ -250,7 +247,6 @@ class SunCalc {
 		return $result;
 	}
 
-
 	public function getMoonPosition($date) {
 		$lw = rad * -$this->lng;
 		$phi = rad * $this->lat;
@@ -269,7 +265,6 @@ class SunCalc {
 			$c->dist
 		);
 	}
-
 
 	public function getMoonIllumination() {
 		$d = toDays($this->date);
