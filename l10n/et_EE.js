@@ -13,6 +13,7 @@ OC.L10N.register(
     "Maghrib" : "Maghrib",
     "Isha" : "Isha",
     "Location" : "Asukoht",
+    "City" : "Linn",
     "Next" : "Järgmine",
     "after" : "pärast",
     "Day Information" : "Päeva teave",
