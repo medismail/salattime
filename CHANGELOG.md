@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.2
+### Fixed
+- Fix Helper null memcache
+
 ## 0.9.1
 ### Fixed
 - Fix HijriBackground auto adjust

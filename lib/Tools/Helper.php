@@ -70,7 +70,7 @@ class Helper {
 		$exeSniffer = new ExecutableFinder();
 		// Returns null if nothing is found
 		$result = $exeSniffer->find($program, $default, $paths);
-		if ($result and $memcache) {
+		if ($result && $memcache) {
 			// store the value for 5 minutes
 			$memcache->set($program, $result, 300);
 		}
