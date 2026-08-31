@@ -28,13 +28,12 @@
 namespace OCA\SalatTime\Controller;
 
 use OCA\SalatTime\Notification\BackgroundJob;
+use OCA\SalatTime\Service\ConfigService;
 use OCP\AppFramework\Controller;
-use OCP\Appframework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\BackgroundJob\IJobList;
-use OCP\Notification\IManager;
-use OCA\SalatTime\Service\ConfigService;
 use OCP\IRequest;
+use OCP\Notification\IManager;
 
 class NotificationController extends Controller {
 	private IJobList $jobList;
@@ -45,8 +44,8 @@ class NotificationController extends Controller {
 	/** @var ConfigService */
 	private ConfigService $config;
 
-	/** @var UserId */
-	private $UserId;
+	/** @var userId */
+	private $userId;
 
 	public function __construct(string $appName, IRequest $request, IJobList $jobList, IManager $notificationManager, ConfigService $configService, $UserId) {
 		parent::__construct($appName, $request);
@@ -60,22 +59,16 @@ class NotificationController extends Controller {
 	/**
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	public function addJob() {
 		$this->config->setUserNotification($this->userId);
-		$this->jobList->add(BackgroundJob::class, null);
-		/*if ($this->jobList->has(BackgroundJob::class, null) == false) {
+		if (!$this->jobList->has(BackgroundJob::class, null)) {
 			$this->jobList->add(BackgroundJob::class, null);
-		} else {
-			$job = $this->jobList->getJobs(BackgroundJob::class, )
-			$this->jobList->resetBackgroundJob($job);
-		}*/
+		}
 	}
 
 	/**
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	public function removeJob() {
 		$this->config->unsetUserNotification($this->userId);
 		$this->clearOldNotifications();
@@ -88,7 +81,7 @@ class NotificationController extends Controller {
 	 * Remove old notifications
 	 */
 	private function clearOldNotifications() {
-		$salawat = array('Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha');
+		$salawat = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 		foreach ($salawat as $salat) {
 			$notification = $this->notificationManager->createNotification();
 			try {
@@ -97,7 +90,7 @@ class NotificationController extends Controller {
 					->setObject('Adhan', $salat);
 				$notification->setUser($this->userId);
 			} catch (\InvalidArgumentException $e) {
-				return;
+				continue;
 			}
 			$this->notificationManager->markProcessed($notification);
 		}

@@ -1,8 +1,17 @@
 # Changelog
 
+## 1.0.0
+### Added
+- New look for APP
+- Paryers times with calendar choice for dates
+- Add support for Nextcloud 34
+### Changed
+- Use of nextcloud Vuejs instead of old templates
+- Use of json instead of Markdown in the widget
+
 ## 0.9.2
 ### Fixed
-- Fix Helper null memcache
+- Auto Adjustment of Hijri Date not working in the background
 
 ## 0.9.1
 ### Fixed

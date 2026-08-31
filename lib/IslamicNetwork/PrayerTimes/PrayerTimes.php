@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PrayTimes.js: Prayer Times Calculator (ver 2.3)
  * Copyright (C) 2007-2011 PrayTimes.org
@@ -154,7 +155,6 @@ class PrayerTimes {
 	 */
 	private $offset = [];
 
-
 	/**
 	 * @param string $method
 	 * @param string $school
@@ -170,7 +170,6 @@ class PrayerTimes {
 		}
 		$this->loadSettings();
 	}
-
 
 	public function setShafaq(string $shafaq) {
 		$this->shafaq = $shafaq;
@@ -349,7 +348,7 @@ class PrayerTimes {
 	 * @return string
 	 */
 	private function twoDigitsFormat($num) {
-		return ($num < 10) ? '0'. $num : $num;
+		return ($num < 10) ? '0' . $num : $num;
 	}
 
 	/**
@@ -588,7 +587,6 @@ class PrayerTimes {
 		return 0.833 + $angle;
 	}
 
-
 	/**
 	 * @param $julianDate
 	 * @return stdClass
@@ -746,7 +744,6 @@ class PrayerTimes {
 		];
 	}
 
-
 	/**
 	 * Loads all the default settings for calculation methods
 	 */
@@ -771,7 +768,6 @@ class PrayerTimes {
 	public function getMethod() {
 		return $this->method;
 	}
-
 
 	public function getMeta(): array {
 		$result = [
@@ -801,7 +797,7 @@ class PrayerTimes {
 	 * @param sting prayer
 	 * @return array of Prayer Name and Remaing time
 	 */
-	public function getNextPrayer(array $times, string $prayer = null) {
+	public function getNextPrayer(array $times, ?string $prayer = null) {
 		return $this->getNextPrayerFromDate($this->date, $times, $prayer);
 	}
 
@@ -812,7 +808,7 @@ class PrayerTimes {
 	 * @param sting prayer
 	 * @return array of Prayer Name and Remaing time
 	 */
-	public function getNextPrayerFromDate(DateTime $date, array $times, string $prayer = null) {
+	public function getNextPrayerFromDate(DateTime $date, array $times, ?string $prayer = null) {
 		$curtime = strtotime($date->format('H:i'));
 
 		//$times = $this->computeTimes();
@@ -846,7 +842,7 @@ class PrayerTimes {
 		$seconds = strtotime($times[$salat]) + $offset - $curtime;
 		$minutes = $this->twoDigitsFormat((int)($seconds / 60) % 60);
 		$hours = $this->twoDigitsFormat((int)($seconds / 3600));
-		$remain = $hours . ":" . $minutes;
+		$remain = $hours . ':' . $minutes;
 		return [
 			self::SALAT => $salat,
 			self::REMAIN => $remain,

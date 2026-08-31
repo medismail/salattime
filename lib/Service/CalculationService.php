@@ -37,29 +37,29 @@ require_once __DIR__ . '/../IslamicNetwork/SunMoonCalc/SunCalc.php';
 require_once __DIR__ . '/../IslamicNetwork/QiblaDirection/Calculation.php';
 require_once __DIR__ . '/../Tools/Helper.php';
 require_once __DIR__ . '/../Service/ConfigService.php';
+require_once __DIR__ . '/CalculationServiceHelpers.php';
 
-use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
-use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
-use OCA\SalatTime\IslamicNetwork\SunMoonCalc\SunCalc;
-use OCA\SalatTime\IslamicNetwork\QiblaDirection\Calculation;
-use OCA\SalatTime\Tools\Helper;
-use OCA\SalatTime\AppInfo\Application;
-use OCP\Accounts\IAccountManager;
-use OCP\Accounts\PropertyDoesNotExistException;
-use OCP\IUserManager;
-use OCP\Http\Client\IClientService;
-use OCP\Http\Client\IClient;
-use OCP\ICacheFactory;
-use OCP\ICache;
-use OCP\App\IAppManager;
-use Psr\Log\LoggerInterface;
-use OCP\IL10N;
-use DateTime;
-use DateTimezone;
 use DateInterval;
 use DatePeriod;
+use DateTime;
+use DateTimezone;
+use OCA\SalatTime\IslamicNetwork\Hijri\HijriDate;
+use OCA\SalatTime\IslamicNetwork\PrayerTimes\PrayerTimes;
+use OCA\SalatTime\IslamicNetwork\QiblaDirection\Calculation;
+use OCA\SalatTime\IslamicNetwork\SunMoonCalc\SunCalc;
+use OCP\Accounts\IAccountManager;
+use OCP\App\IAppManager;
+use OCP\Http\Client\IClient;
+use OCP\Http\Client\IClientService;
+use OCP\ICache;
+use OCP\ICacheFactory;
+use OCP\IL10N;
+use OCP\IUserManager;
+use Psr\Log\LoggerInterface;
 
 class CalculationService {
+	use CalculationServiceHelpers;
+
 	/** @var IMSAK name */
 	public const IMSAK = PrayerTimes::IMSAK;
 
@@ -93,6 +93,36 @@ class CalculationService {
 	/** @const TIME_FORMAT_12H */
 	public const TIME_FORMAT_12H = PrayerTimes::TIME_FORMAT_12H;
 
+	private const METHODS = [
+		'MWL',
+		'MAKKAH',
+		'KARACHI',
+		'ISNA',
+		'JAFARI',
+		'GULF',
+		'MOONSIGHTING',
+		'TURKEY',
+		'TEHRAN',
+		'EGYPT',
+		'QATAR',
+		'KUWAIT',
+		'TUNISIA',
+		'INDONESIA',
+		'MOROCCO',
+		'JAKIM',
+		'JORDAN',
+		'ALGERIA',
+		'RUSSIA',
+		'FRANCE',
+		'PORTUGAL',
+		'SINGAPORE',
+	];
+
+	private const TIME_FORMATS = [
+		PrayerTimes::TIME_FORMAT_12H,
+		PrayerTimes::TIME_FORMAT_24H,
+	];
+
 	/** @var ConfigService */
 	private $configService;
 
@@ -121,15 +151,15 @@ class CalculationService {
 	private $l10n;
 
 	public function __construct(
-					   ConfigService $configService,
-					   IAccountManager $accountManager,
-					   IUserManager $userManager,
-					   IClientService $clientService,
-					   ICacheFactory $cacheFactory,
-					   IAppManager $appManager,
-					   LoggerInterface $logger,
-					   IL10N $l
-				   ) {
+		ConfigService $configService,
+		IAccountManager $accountManager,
+		IUserManager $userManager,
+		IClientService $clientService,
+		ICacheFactory $cacheFactory,
+		IAppManager $appManager,
+		LoggerInterface $logger,
+		IL10N $l,
+	) {
 		$this->configService = $configService;
 		$this->accountManager = $accountManager;
 		$this->userManager = $userManager;
@@ -172,7 +202,7 @@ class CalculationService {
 		}
 
 		$hijri = new HijriDate($curtime, $this->l10n);
-		if ($adjustments['Day'] != "") {
+		if ($adjustments['Day'] != '') {
 			if ($adjustments['NMA'] == '15') {
 				$hijri->tune($adjustments['Day'], '0');
 			} else {
@@ -184,18 +214,21 @@ class CalculationService {
 		$times[PrayerTimes::SALAT] = $next[PrayerTimes::SALAT];
 		$times[PrayerTimes::REMAIN] = $next[PrayerTimes::REMAIN];
 		$times['DayLength'] = $this->getDayLength($times[PrayerTimes::SUNRISE], $times[PrayerTimes::SUNSET]);
-		$times['SpecialDay'] = implode(" ", $hijri->get_day_special_name());
+		$times['SpecialDay'] = implode(' ', $hijri->get_day_special_name());
 		if (date('N', $curtime) == 5) {
 			$times['Jumaa'] = "Juma'a";
+			if ($times[PrayerTimes::SALAT] == PrayerTimes::ZHUHR) {
+				$times[PrayerTimes::SALAT] = 'Juma\'a';
+			}
 		}
 		if ($hijri->get_month() != 9) { //Ramadhane
-			$times[PrayerTimes::IMSAK] = "";
+			$times[PrayerTimes::IMSAK] = '';
 		}
-		if ($p_settings['city'] != "") {
+		if ($p_settings['city'] != '') {
 			$times['City'] = $p_settings['city'];
 		} else {
 			$times['City'] = $this->getNameFromGeo($p_settings['latitude'], $p_settings['longitude']);
-			if ($times['City'] != "") {
+			if ($times['City'] != '') {
 				$this->configService->setCityValue($userId, $times['City']);
 			} else {
 				$times['City'] = $this->l10n->t('Unknown city');
@@ -224,43 +257,40 @@ class CalculationService {
 
 		$udtz = new DateTimezone($p_settings['timezone']);
 		$date = new DateTime('', $udtz);
-		if (Helper::pythonInstalled($this->cache, $this->getAppDataFolder())) {
-			$mphase = [
-				0 => $this->l10n->t('New Moon'),
-				1 => $this->l10n->t('Waxing Crescent Moon'),
-				2 => $this->l10n->t('Waxing Crescent Moon'),
-				3 => $this->l10n->t('Waxing Crescent Moon'),
-				4 => $this->l10n->t('First Quarter Moon'),
-				5 => $this->l10n->t('Waxing Gibbous Moon'),
-				6 => $this->l10n->t('Waxing Gibbous Moon'),
-				7 => $this->l10n->t('Waxing Gibbous Moon'),
-				8 => $this->l10n->t('Full Moon'),
-				9 => $this->l10n->t('Waning Gibbous Moon'),
-				10 => $this->l10n->t('Waning Gibbous Moon'),
-				11 => $this->l10n->t('Waning Gibbous Moon'),
-				12 => $this->l10n->t('Third Quarter Moon'),
-				13 => $this->l10n->t('Waning Crescent Moon'),
-				14 => $this->l10n->t('Waning Crescent Moon'),
-				15 => $this->l10n->t('Waning Crescent Moon'),
-				16 => $this->l10n->t('New Moon')
-			];
-			$output = null;
-			$retval = null;
-			// salattime.py call
-			// exec('python3 ' . __DIR__ . '/../bin/salattime.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $udtz->getOffset($date) + $dayoffset, $output, $retval);
-			$scriptPath = __DIR__ . '/../bin/salattime.py';
-			$args = [
-				(float)$p_settings['latitude'],
-				(float)$p_settings['longitude'],
-				(float)$p_settings['elevation'],
-				(int)$udtz->getOffset($date) + (int)$dayoffset,
-			];
-			Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
+		$mphase = [
+			0 => $this->l10n->t('New Moon'),
+			1 => $this->l10n->t('Waxing Crescent Moon'),
+			2 => $this->l10n->t('Waxing Crescent Moon'),
+			3 => $this->l10n->t('Waxing Crescent Moon'),
+			4 => $this->l10n->t('First Quarter Moon'),
+			5 => $this->l10n->t('Waxing Gibbous Moon'),
+			6 => $this->l10n->t('Waxing Gibbous Moon'),
+			7 => $this->l10n->t('Waxing Gibbous Moon'),
+			8 => $this->l10n->t('Full Moon'),
+			9 => $this->l10n->t('Waning Gibbous Moon'),
+			10 => $this->l10n->t('Waning Gibbous Moon'),
+			11 => $this->l10n->t('Waning Gibbous Moon'),
+			12 => $this->l10n->t('Third Quarter Moon'),
+			13 => $this->l10n->t('Waning Crescent Moon'),
+			14 => $this->l10n->t('Waning Crescent Moon'),
+			15 => $this->l10n->t('Waning Crescent Moon'),
+			16 => $this->l10n->t('New Moon')
+		];
+		$scriptPath = __DIR__ . '/../bin/salattime.py';
+		$args = [
+			(float)$p_settings['latitude'],
+			(float)$p_settings['longitude'],
+			(float)$p_settings['elevation'],
+			(int)$udtz->getOffset($date) + (int)$dayoffset,
+		];
+		$output = $this->runPythonScript($scriptPath, $args, 13);
+		if ($output !== null) {
 			$sunMoonTimes['Sunrise'] = $this->timeConversion($output[1], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Sunset'] = $this->timeConversion($output[2], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonrise'] = $this->timeConversion($output[3], $udtz, $textFormat_12_24);
 			$sunMoonTimes['Moonset'] = $this->timeConversion($output[4], $udtz, $textFormat_12_24);
-			$sunMoonTimes['MoonPhase'] = $mphase[(int)($output[5] * 10 / 225)];
+			$moonPhaseIndex = max(0, min(16, (int)($output[5] * 10 / 225)));
+			$sunMoonTimes['MoonPhase'] = $mphase[$moonPhaseIndex];
 			$sunMoonTimes['MoonPhaseAngle'] = $output[5];
 			$sunMoonTimes['IlluminatedFraction'] = $output[6];
 			$sunMoonTimes['SunAzimuth'] = $output[7];
@@ -279,12 +309,12 @@ class CalculationService {
 			if ($moonTimes['moonrise']) {
 				$sunMoonTimes['Moonrise'] = $moonTimes['moonrise']->format($textFormat_12_24);
 			} else {
-				$sunMoonTimes['Moonrise'] = "";
+				$sunMoonTimes['Moonrise'] = '';
 			}
 			if ($moonTimes['moonset']) {
 				$sunMoonTimes['Moonset'] = $moonTimes['moonset']->format($textFormat_12_24);
 			} else {
-				$sunMoonTimes['Moonset'] = "";
+				$sunMoonTimes['Moonset'] = '';
 			}
 			$moonIl = $sc->getMoonIllumination();
 			$sunMoonTimes['MoonPhase'] = number_format($moonIl['phase'] * 100, 1);
@@ -294,7 +324,7 @@ class CalculationService {
 		return $sunMoonTimes;
 	}
 
-	public function gretNames(): array {
+	public function getNames(): array {
 		return [
 			'IMSAK' => $this->l10n->t(PrayerTimes::IMSAK),
 			'FAJR' => $this->l10n->t(PrayerTimes::FAJR),
@@ -336,7 +366,7 @@ class CalculationService {
 	}
 
 	public function getAllUserAutoHijriDate(): array {
-		return $this->configService->getUsersWithConfigMatching('adjustments', ['NMA' => '!0']);
+		return $this->configService->getAllUserAutoHijriDate();
 	}
 
 	public function getAppDataFolder(): string {
@@ -349,7 +379,10 @@ class CalculationService {
 	 * @param array settings
 	 */
 	public function setConfigSettings(string $userId, array $settings) {
-		if ($settings['city'] != "") {
+		$previousSettings = $this->configService->getSettingsValue($userId);
+		$settings = $this->normalizeSettings($settings, $previousSettings);
+
+		if ($settings['city'] != '') {
 			$addressInfo = $this->getGeoCode($settings['city']);
 			if ((isset($addressInfo['latitude'])) && isset($addressInfo['longitude'])) {
 				$settings['latitude'] = $addressInfo['latitude'];
@@ -357,20 +390,24 @@ class CalculationService {
 				if (isset($addressInfo['elevation'])) {
 					$settings['elevation'] = $addressInfo['elevation'];
 				}
-				$settings['timezone'] = $this->configService->getUserTimeZone($userId);
+				$userTimezone = $this->configService->getUserTimeZone($userId);
+				$settings['timezone'] = $this->normalizeTimezone($userTimezone, $settings['timezone']);
 				$settings['city'] = $addressInfo['city'];
+			} else {
+				$settings['city'] = $previousSettings['city'];
+				$settings['latitude'] = $previousSettings['latitude'];
+				$settings['longitude'] = $previousSettings['longitude'];
+				$settings['elevation'] = $previousSettings['elevation'];
 			}
-		} elseif (($settings['latitude'] == "0") && ($settings['longitude'] == "0")) {
-			$op_settings = $this->configService->getSettingsValue($userId);
-			$settings['latitude'] = $op_settings['latitude'];
-			$settings['longitude'] = $op_settings['longitude'];
-			if ($settings['timezone'] == "") {
-				$settings['timezone'] = $op_settings['timezone'];
+		} elseif (($settings['latitude'] == '0') && ($settings['longitude'] == '0')) {
+			$settings['latitude'] = $previousSettings['latitude'];
+			$settings['longitude'] = $previousSettings['longitude'];
+			if ($settings['timezone'] == '') {
+				$settings['timezone'] = $previousSettings['timezone'];
 			}
 		} else {
-			$op_settings = $this->configService->getSettingsValue($userId);
-			if (($settings['latitude'] == $op_settings['latitude']) && ($settings['longitude'] == $op_settings['longitude'])) {
-				$settings['city'] = $op_settings['city'];
+			if (($settings['latitude'] == $previousSettings['latitude']) && ($settings['longitude'] == $previousSettings['longitude'])) {
+				$settings['city'] = $previousSettings['city'];
 			}
 		}
 		$this->configService->setUserValue($userId, 'settings', $settings);
@@ -382,7 +419,9 @@ class CalculationService {
 	 * @param array adjustments
 	 */
 	public function setConfigAdjustments(string $userId, array $adjustments) {
+		$adjustments = $this->normalizeAdjustments($adjustments);
 		$this->configService->setUserValue($userId, 'adjustments', $adjustments);
+		$this->configService->setUserAutoHijriDate($userId, (string)$adjustments['NMA'] !== '0');
 	}
 
 	/**
@@ -391,21 +430,17 @@ class CalculationService {
 	 * @return int adjustments days
 	 */
 	public function getDayAutoAdjustments(string $userId) {
-		if (Helper::pythonInstalled($this->cache, $this->getAppDataFolder())) {
-			$p_settings = $this->configService->getSettingsValue($userId);
-			$hijri = new HijriDate(false, $this->l10n);
-			$output = null;
-			$retval = null;
-			// hijriadjust.py call
-			// exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $hijri->get_day(), $output, $retval);
-			$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
-			$args = [
-				(float)$p_settings['latitude'],
-				(float)$p_settings['longitude'],
-				(float)$p_settings['elevation'],
-				(int)$hijri->get_day(),
-			];
-			Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
+		$p_settings = $this->configService->getSettingsValue($userId);
+		$hijri = new HijriDate(false, $this->l10n);
+		$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
+		$args = [
+			(float)$p_settings['latitude'],
+			(float)$p_settings['longitude'],
+			(float)$p_settings['elevation'],
+			(int)$hijri->get_day(),
+		];
+		$output = $this->runPythonScript($scriptPath, $args, 1);
+		if ($output !== null) {
 			return (int)$output[0];
 		}
 		return 0;
@@ -419,7 +454,7 @@ class CalculationService {
 	 * @param DateTime endDate
 	 * @return array Full paryers times for multidays in specific date
 	 */
-	public function getPrayerTimesFromDate(string $userId, DateTime $startDate, DateTime $endDate, string $dateFormat = null): array {
+	public function getPrayerTimesFromDate(string $userId, DateTime $startDate, DateTime $endDate, ?string $dateFormat = null): array {
 		$p_settings = $this->configService->getSettingsValue($userId);
 		$adjustments = $this->configService->getAdjustmentsValue($userId);
 
@@ -439,6 +474,62 @@ class CalculationService {
 			$times[] = $curTime;
 		}
 		return $times;
+	}
+
+	public function getPrayerRows(string $userId, DateTime $startDate, DateTime $endDate): array {
+		$confSettings = $this->configService->getSettingsValue($userId);
+		$confAdjustments = $this->configService->getAdjustmentsValue($userId);
+
+		$latitude = $confSettings['latitude'] !== '' ? $confSettings['latitude'] : 21.3890824;
+		$longitude = $confSettings['longitude'] !== '' ? $confSettings['longitude'] : 39.8579118;
+		$timezone = $confSettings['timezone'] !== '' ? $confSettings['timezone'] : '+0300';
+		$elevation = $confSettings['elevation'] !== '' ? $confSettings['elevation'] : null;
+		$method = $confSettings['method'] !== '' ? $confSettings['method'] : 'MWL';
+		$format = $confSettings['format_12_24'] !== '' ? $confSettings['format_12_24'] : PrayerTimes::TIME_FORMAT_12H;
+
+		$pt = new PrayerTimes($method);
+		$pt->tune($imsak = 0, $fajr = $confAdjustments['Fajr'], $sunrise = 0, $dhuhr = $confAdjustments['Dhuhr'], $asr = $confAdjustments['Asr'], $maghrib = $confAdjustments['Maghrib'], $sunset = 0, $isha = $confAdjustments['Isha'], $midnight = 0);
+
+		$interval = DateInterval::createFromDateString('1 day');
+		$dateRange = new DatePeriod($startDate, $interval, $endDate, DatePeriod::INCLUDE_END_DATE);
+		$today = (new DateTime('today', new DateTimeZone($timezone)))->format('Y-m-d');
+
+		$rows = [];
+		foreach ($dateRange as $date) {
+			$times = $pt->getTimes($date, $latitude, $longitude, $elevation, $latitudeAdjustmentMethod = PrayerTimes::LATITUDE_ADJUSTMENT_METHOD_ANGLE, $midnightMode = PrayerTimes::MIDNIGHT_MODE_STANDARD, $format);
+			$curtime = strtotime($date->format('d-m-Y H:i:s'));
+			$hijri = new HijriDate($curtime, $this->l10n);
+			if ($confAdjustments['Day'] != '') {
+				$hijri->tune($confAdjustments['Day']);
+			}
+
+			$specialDay = $hijri->is_day_special();
+			if (is_array($specialDay)) {
+				$specialDay = implode(' ', $specialDay);
+			}
+
+			$rows[] = [
+				'date' => $date->format('Y-m-d'),
+				'isToday' => $date->format('Y-m-d') === $today,
+				'dayName' => $hijri->get_day_name(),
+				'hijriDay' => $hijri->get_day(),
+				'hijriMonth' => $hijri->get_month(),
+				'hijriMonthName' => $hijri->get_month_name(),
+				'hijriYear' => $hijri->get_year(),
+				'specialDay' => $specialDay,
+				'times' => [
+					'Imsak' => $hijri->get_month() == 9 ? $times['Imsak'] : '',
+					'Fajr' => $times['Fajr'],
+					'Sunrise' => $times['Sunrise'],
+					'Dhuhr' => $times['Dhuhr'],
+					'Asr' => $times['Asr'],
+					'Maghrib' => $times['Maghrib'],
+					'Isha' => $times['Isha'],
+				],
+			];
+		}
+
+		return $rows;
 	}
 
 	/**
@@ -485,7 +576,7 @@ class CalculationService {
 		$dateRange = new DatePeriod($startDate, $interval, $endDate, DatePeriod::INCLUDE_END_DATE);
 
 		$times = [];
-		if (($adjustments['NMA'] != "") && ($adjustments['NMA'] != "0")) {
+		if (($adjustments['NMA'] != '') && ($adjustments['NMA'] != '0')) {
 			$p_settings = $this->configService->getSettingsValue($userId);
 			$hijri = new HijriDate(strtotime($startDate->format('Ymd\THis\Z')), $this->l10n);
 			$hijriWeekdays = $hijri->hijriWeekdays();
@@ -493,9 +584,6 @@ class CalculationService {
 			$hday = $hijri->get_day();
 			$hmonth = $hijri->get_month();
 			$hyear = $hijri->get_year();
-			$output = null;
-			$retval = null;
-			// exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $startDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
 			$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
 			$args = [
 				(float)$p_settings['latitude'],
@@ -504,30 +592,27 @@ class CalculationService {
 				(string)$startDate->format('Y-m-d\TH:i:s.u\Z'),
 				(int)$hday,
 			];
-			Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
-			$offsetDays = (int)$output[0];
+			$output = $this->runPythonScript($scriptPath, $args, 1);
+			$offsetDays = $output !== null ? (int)$output[0] : 0;
 			$hday = $hday + $offsetDays;
 			if (($hday < 1) || ($hday > 30)) {
 				if ($hday < 1) {
-					$hday + 30;
+					$hday = $hday + 30;
 					$hmonth--;
 					if ($hmonth < 1) {
 						$hmonth = 12;
 						$hyear--;
 					}
 				} else {
-					$hday - 30;
+					$hday = $hday - 30;
 					$hmonth ++;
 					if ($hmonth > 12) {
 						$hmonth = 1;
 						$hyear++;
 					}
 				}
-				$output = null;
-				$retval = null;
 				$effectstartDate = clone $startDate;
 				$effectstartDate->modify("+$offsetDays days");
-				// exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $effectstartDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
 				$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
 				$args = [
 					(float)$p_settings['latitude'],
@@ -536,16 +621,13 @@ class CalculationService {
 					(string)$effectstartDate->format('Y-m-d\TH:i:s.u\Z'),
 					(int)$hday,
 				];
-				Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
-				$hday = $hday + (int)$output[0];
+				$output = $this->runPythonScript($scriptPath, $args, 1);
+				$hday = $hday + ($output !== null ? (int)$output[0] : 0);
 			}
 			foreach ($dateRange as $curDate) {
 				$strDate = $curDate->format('Ymd\THis\Z');
 				if ($hday > 29) {
 					if ($hday == 30) {
-						$output = null;
-						$retval = null;
-						//exec('python3 ' . __DIR__ . '/../bin/hijriadjust.py ' . $p_settings['latitude'] . ' ' . $p_settings['longitude'] . ' ' . $p_settings['elevation'] . ' ' . $curDate->format('Y-m-d\TH:i:s.u\Z') . ' ' . $hday, $output, $retval);
 						$scriptPath = __DIR__ . '/../bin/hijriadjust.py';
 						$args = [
 							(float)$p_settings['latitude'],
@@ -554,8 +636,8 @@ class CalculationService {
 							(string)$curDate->format('Y-m-d\TH:i:s.u\Z'),
 							(int)$hday,
 						];
-						Helper::runPythonScriptProcOpen($scriptPath, $args, $output, $retval);
-						if ((int)$output[0]) {
+						$output = $this->runPythonScript($scriptPath, $args, 1);
+						if ($output !== null && (int)$output[0]) {
 							$hday = 1;
 							$hmonth++;
 							if ($hmonth > 12) {
@@ -581,8 +663,8 @@ class CalculationService {
 				//$curDate->format('d-m-Y H:i:s');
 				$strDate = $curDate->format('Ymd\THis\Z');
 				$hijri = new HijriDate(strtotime($strDate), $this->l10n);
-				if ($adjustments['day'] != "") {
-					$hijri->tune($adjustments['day']);
+				if ($adjustments['Day'] != '') {
+					$hijri->tune($adjustments['Day']);
 				}
 				$curTime = [$strDate, $hijri->get_day_name(), $hijri->get_day(), $hijri->get_month_name(), $hijri->get_month(), $hijri->get_year(), $hijri->is_day_special()];
 				$times[] = $curTime;
@@ -602,7 +684,7 @@ class CalculationService {
 		$daylength = strtotime($sunset) - strtotime($sunrise);
 		$minutes = $this->twoDigitsFormat((int)(($daylength) / 60) % 60);
 		$hours = $this->twoDigitsFormat((int)(($daylength) / 3600));
-		return $hours . ":" . $minutes;
+		return $hours . ':' . $minutes;
 	}
 
 	/**
@@ -613,8 +695,8 @@ class CalculationService {
 	 * @param string format
 	 * @return string of php time
 	 */
-	private function timeConversion(string $time = null, DateTimeZone $timezone, string $format): string {
-		$ret = "";
+	private function timeConversion(?string $time = null, DateTimeZone $timezone, string $format): string {
+		$ret = '';
 		if ($time) {
 			$date = DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $time, new DateTimezone('UTC'));
 			if ($date) {
@@ -631,213 +713,6 @@ class CalculationService {
 	 * @return string of two digits format
 	 */
 	private function twoDigitsFormat(int $num): string {
-		return ($num < 10) ? '0'. $num : $num;
-	}
-
-	/**
-	 * Ask nominatim information about an unformatted address
-	 *
-	 * @param string Unformatted address
-	 * @return array Full Nominatim result for the given address
-	 */
-	private function searchForAddress(string $address): array {
-		$params = [
-			'q' => $address,
-			'format' => 'json',
-			'addressdetails' => '1',
-			'extratags' => '1',
-			'namedetails' => '1',
-			'limit' => '1',
-		];
-		$url = 'https://nominatim.openstreetmap.org/search';
-		$results = $this->requestJSON($url, $params);
-		if (count($results) > 0) {
-			return $results[0];
-		}
-		return ['error' => $this->l10n->t('No result.')];
-	}
-
-
-	private function getNameFromGeo(string $lat, string $lon):?string {
-		$city_name = null;
-		$opts = array(
-			'http' => array(
-				'method' => "GET",
-				'header' =>
-					"User-agent: NextcloudWeather\r\n".
-					"Accept: */*\r\n".
-					"Accept-language: en\r\n".
-					"Connection: close\r\n",
-			)
-		);
-		$city_info = json_decode(file_get_contents("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&lat=".$lat."&lon=".$lon, false, stream_context_create($opts)), true);
-		if ((isset($city_info['osm_type'])) && (isset($city_info['osm_id']))) {
-			$osm_types = ['node' => 'N', 'relation' => 'R', 'way' => 'W'];
-			$city_detail = json_decode(file_get_contents("https://nominatim.openstreetmap.org/details.php?osmtype=".$osm_types[$city_info['osm_type']]."&osmid=".$city_info['osm_id']."&addressdetails=1&hierarchy=0&group_hierarchy=1&format=json", false, stream_context_create($opts)), true);
-			if (isset($city_detail['city_name']['names']['name:en'])) {
-				$city_name = $city_detail['city_name']['names']['name:en'];
-				if (isset($city_detail['city_name']['addresstags']['state'])) {
-					$city_name = $city_name . ", " . $city_detail['city_name']['addresstags']['state'];
-				} elseif (isset($city_info['address']['state'])) {
-					$city_name = $city_name . ", " . $city_info['address']['state'];
-				}
-			}
-		}
-		if (!$city_name) {
-			if (isset($city_info['address']['suburb'])) {
-				$city_name = $city_info['address']['suburb'];
-			} elseif (isset($city_info['address']['city_district'])) {
-				$city_name = $city_info['address']['city_district'];
-			} elseif (isset($city_info['address']['town'])) {
-				$city_name = $city_info['address']['town'];
-			} elseif (isset($city_info['address']['village'])) {
-				$city_name = $city_info['address']['village'];
-			} elseif (isset($city_info['address']['city'])) {
-				$city_name = $city_info['address']['city'];
-			}
-			if (isset($city_info['address']['county'])) {
-				if ($city_name) {
-					$city_name = $city_name . ", " . $city_info['address']['county'];
-				} else {
-					$city_name = $city_info['address']['county'];
-				}
-			} elseif (isset($city_info['address']['state'])) {
-				if ($city_name) {
-					$city_name = $city_name . ", " . $city_info['address']['state'];
-				} else {
-					$city_name = $city_info['address']['state'];
-				}
-			}
-		}
-
-		if (isset($city_info['address']['country_code'])) {
-			$countryList = array('AF' => 'Afghanistan','AX' => 'Aland Islands','AL' => 'Albania','DZ' => 'Algeria','AS' => 'American Samoa','AD' => 'Andorra','AO' => 'Angola','AI' => 'Anguilla','AQ' => 'Antarctica','AG' => 'Antigua and Barbuda','AR' => 'Argentina','AM' => 'Armenia','AW' => 'Aruba','AU' => 'Australia','AT' => 'Austria','AZ' => 'Azerbaijan','BS' => 'Bahamas the','BH' => 'Bahrain','BD' => 'Bangladesh','BB' => 'Barbados','BY' => 'Belarus','BE' => 'Belgium','BZ' => 'Belize','BJ' => 'Benin','BM' => 'Bermuda','BT' => 'Bhutan','BO' => 'Bolivia','BA' => 'Bosnia and Herzegovina','BW' => 'Botswana','BV' => 'Bouvet Island (Bouvetoya)','BR' => 'Brazil','IO' => 'British Indian Ocean Territory (Chagos Archipelago)','VG' => 'British Virgin Islands','BN' => 'Brunei Darussalam','BG' => 'Bulgaria','BF' => 'Burkina Faso','BI' => 'Burundi','KH' => 'Cambodia','CM' => 'Cameroon','CA' => 'Canada','CV' => 'Cape Verde','KY' => 'Cayman Islands','CF' => 'Central African Republic','TD' => 'Chad','CL' => 'Chile','CN' => 'China','CX' => 'Christmas Island','CC' => 'Cocos (Keeling) Islands','CO' => 'Colombia','KM' => 'Comoros the','CD' => 'Congo','CG' => 'Congo the','CK' => 'Cook Islands','CR' => 'Costa Rica','CI' => 'Cote d\'Ivoire','HR' => 'Croatia','CU' => 'Cuba','CY' => 'Cyprus','CZ' => 'Czech Republic','DK' => 'Denmark','DJ' => 'Djibouti','DM' => 'Dominica','DO' => 'Dominican Republic','EC' => 'Ecuador','EG' => 'Egypt','SV' => 'El Salvador','GQ' => 'Equatorial Guinea','ER' => 'Eritrea','EE' => 'Estonia','ET' => 'Ethiopia','FO' => 'Faroe Islands','FK' => 'Falkland Islands (Malvinas)','FJ' => 'Fiji the Fiji Islands','FI' => 'Finland','FR' => 'France','GF' => 'French Guiana','PF' => 'French Polynesia','TF' => 'French Southern Territories','GA' => 'Gabon','GM' => 'Gambia the','GE' => 'Georgia','DE' => 'Germany','GH' => 'Ghana','GI' => 'Gibraltar','GR' => 'Greece','GL' => 'Greenland','GD' => 'Grenada','GP' => 'Guadeloupe','GU' => 'Guam','GT' => 'Guatemala','GG' => 'Guernsey','GN' => 'Guinea','GW' => 'Guinea-Bissau','GY' => 'Guyana','HT' => 'Haiti','HM' => 'Heard Island and McDonald Islands','VA' => 'Holy See (Vatican City State)','HN' => 'Honduras','HK' => 'Hong Kong','HU' => 'Hungary','IS' => 'Iceland','IN' => 'India','ID' => 'Indonesia','IR' => 'Iran','IQ' => 'Iraq','IE' => 'Ireland','IM' => 'Isle of Man','IT' => 'Italy','JM' => 'Jamaica','JP' => 'Japan','JE' => 'Jersey','JO' => 'Jordan','KZ' => 'Kazakhstan','KE' => 'Kenya','KI' => 'Kiribati','KP' => 'Korea','KR' => 'Korea','KW' => 'Kuwait','KG' => 'Kyrgyz Republic','LA' => 'Lao','LV' => 'Latvia','LB' => 'Lebanon','LS' => 'Lesotho','LR' => 'Liberia','LY' => 'Libyan Arab Jamahiriya','LI' => 'Liechtenstein','LT' => 'Lithuania','LU' => 'Luxembourg','MO' => 'Macao','MK' => 'Macedonia','MG' => 'Madagascar','MW' => 'Malawi','MY' => 'Malaysia','MV' => 'Maldives','ML' => 'Mali','MT' => 'Malta','MH' => 'Marshall Islands','MQ' => 'Martinique','MR' => 'Mauritania','MU' => 'Mauritius','YT' => 'Mayotte','MX' => 'Mexico','FM' => 'Micronesia','MD' => 'Moldova','MC' => 'Monaco','MN' => 'Mongolia','ME' => 'Montenegro','MS' => 'Montserrat','MA' => 'Morocco','MZ' => 'Mozambique','MM' => 'Myanmar','NA' => 'Namibia','NR' => 'Nauru','NP' => 'Nepal','AN' => 'Netherlands Antilles','NL' => 'Netherlands the','NC' => 'New Caledonia','NZ' => 'New Zealand','NI' => 'Nicaragua','NE' => 'Niger','NG' => 'Nigeria','NU' => 'Niue','NF' => 'Norfolk Island','MP' => 'Northern Mariana Islands','NO' => 'Norway','OM' => 'Oman','PK' => 'Pakistan','PW' => 'Palau','PS' => 'Palestinian Territory','PA' => 'Panama','PG' => 'Papua New Guinea','PY' => 'Paraguay','PE' => 'Peru','PH' => 'Philippines','PN' => 'Pitcairn Islands','PL' => 'Poland','PT' => 'Portugal, Portuguese Republic','PR' => 'Puerto Rico','QA' => 'Qatar','RE' => 'Reunion','RO' => 'Romania','RU' => 'Russian Federation','RW' => 'Rwanda','BL' => 'Saint Barthelemy','SH' => 'Saint Helena','KN' => 'Saint Kitts and Nevis','LC' => 'Saint Lucia','MF' => 'Saint Martin','PM' => 'Saint Pierre and Miquelon','VC' => 'Saint Vincent and the Grenadines','WS' => 'Samoa','SM' => 'San Marino','ST' => 'Sao Tome and Principe','SA' => 'Saudi Arabia','SN' => 'Senegal','RS' => 'Serbia','SC' => 'Seychelles','SL' => 'Sierra Leone','SG' => 'Singapore','SK' => 'Slovakia (Slovak Republic)','SI' => 'Slovenia','SB' => 'Solomon Islands','SO' => 'Somalia, Somali Republic','ZA' => 'South Africa','GS' => 'South Georgia and the South Sandwich Islands','ES' => 'Spain','LK' => 'Sri Lanka','SD' => 'Sudan','SR' => 'Suriname','SJ' => 'Svalbard & Jan Mayen Islands','SZ' => 'Swaziland','SE' => 'Sweden','CH' => 'Switzerland, Swiss Confederation','SY' => 'Syrian Arab Republic','TW' => 'Taiwan','TJ' => 'Tajikistan','TZ' => 'Tanzania','TH' => 'Thailand','TL' => 'Timor-Leste','TG' => 'Togo','TK' => 'Tokelau','TO' => 'Tonga','TT' => 'Trinidad and Tobago','TN' => 'Tunisia','TR' => 'Turkey','TM' => 'Turkmenistan','TC' => 'Turks and Caicos Islands','TV' => 'Tuvalu','UG' => 'Uganda','UA' => 'Ukraine','AE' => 'United Arab Emirates','GB' => 'United Kingdom','US' => 'United States of America','UM' => 'United States Minor Outlying Islands','VI' => 'United States Virgin Islands','UY' => 'Uruguay, Eastern Republic of','UZ' => 'Uzbekistan','VU' => 'Vanuatu','VE' => 'Venezuela','VN' => 'Vietnam','WF' => 'Wallis and Futuna','EH' => 'Western Sahara','YE' => 'Yemen','ZM' => 'Zambia','ZW' => 'Zimbabwe');
-			if ($city_name) {
-				$city_name = $city_name . ", " . $countryList[strtoupper($city_info['address']['country_code'])];
-			} else {
-				$city_name = $countryList[strtoupper($city_info['address']['country_code'])];
-			}
-		}
-		return $city_name;
-	}
-
-	/**
-	 * Get altitude from coordinates
-	 *
-	 * @param float $lat Latitude in decimal degree format
-	 * @param float $lon Longitude in decimal degree format
-	 * @return float altitude in meter
-	 */
-	private function getAltitude(float $lat, float $lon): float {
-		$params = [
-			'locations' => $lat . ',' . $lon,
-		];
-		$url = 'https://api.opentopodata.org/v1/srtm30m';
-		$result = $this->requestJSON($url, $params);
-		$altitude = 0;
-		if (isset($result['results']) && is_array($result['results']) && count($result['results']) > 0
-			&& is_array($result['results'][0]) && isset($result['results'][0]['elevation'])) {
-			$altitude = floatval($result['results'][0]['elevation']);
-		}
-		return $altitude;
-	}
-
-	/**
-	 * Get address and resolve it to get coordinates
-	 *
-	 * @param string $address Any approximative or exact address
-	 * @return array with success state and address information (coordinates and formatted address)
-	 */
-	private function getGeoCode(string $address): array {
-		$addressInfo = $this->searchForAddress($address);
-		if (isset($addressInfo['display_name']) && isset($addressInfo['lat']) && isset($addressInfo['lon'])) {
-			// get altitude
-			$altitude = $this->getAltitude(floatval($addressInfo['lat']), floatval($addressInfo['lon']));
-			return [
-				'latitude' => $addressInfo['lat'],
-				'longitude' => $addressInfo['lon'],
-				'elevation' => $altitude,
-				'city' => $addressInfo['display_name'],
-			];
-		} else {
-			return ['success' => false];
-		}
-	}
-
-	/**
-	 * Try to use the address set in user personal settings as weather location
-	 *
-	 * @return array with success state and address information
-	 */
-	private function usePersonalAddress(): array {
-		$account = $this->accountManager->getAccount($this->userManager->get($this->userId));
-		try {
-			$address = $account->getProperty('address')->getValue();
-		} catch (PropertyDoesNotExistException $e) {
-			return ['success' => false];
-		}
-		if ($address === '') {
-			return ['success' => false];
-		}
-		return $this->getGeoCode($address);
-	}
-
-	/**
-	 * Make a HTTP GET request and parse JSON result.
-	 * Request results are cached until the 'Expires' response header says so
-	 *
-	 * @param string $url Base URL to query
-	 * @param array $params GET parameters
-	 * @return array which contains the error message or the parsed JSON result
-	 */
-	private function requestJSON(string $url, array $params = []): array {
-		$cacheKey = $url . '|' . implode(',', $params) . '|' . implode(',', array_keys($params));
-		$cacheValue = $this->cache->get($cacheKey);
-		if ($cacheValue !== null) {
-			return $cacheValue;
-		}
-
-		try {
-			$options = [
-				'headers' => [
-					'User-Agent' => 'NextcloudSalattime/' . Helper::getVersion($this->appManager) . ' nextcloud.com'
-				],
-			];
-
-			$reqUrl = $url;
-			if (count($params) > 0) {
-				$paramsContent = http_build_query($params);
-				$reqUrl = $url . '?' . $paramsContent;
-			}
-
-			$response = $this->client->get($reqUrl, $options);
-			$body = $response->getBody();
-			$headers = $response->getHeaders();
-			$respCode = $response->getStatusCode();
-
-			if ($respCode >= 400) {
-				return ['error' => $this->l10n->t('Error')];
-			} else {
-				$json = json_decode($body, true);
-
-				// default cache duration is one hour
-				$cacheDuration = 60 * 60;
-				if (isset($headers['Expires']) && count($headers['Expires']) > 0) {
-					// if the Expires response header is set, use it to define cache duration
-					$expireTs = (new \Datetime($headers['Expires'][0]))->getTimestamp();
-					$nowTs = (new \Datetime())->getTimestamp();
-					$duration = $expireTs - $nowTs;
-					if ($duration > $cacheDuration) {
-						$cacheDuration = $duration;
-					}
-				}
-				$this->cache->set($cacheKey, $json, $cacheDuration);
-
-				return $json;
-			}
-		} catch (\Exception $e) {
-			$this->logger->warning($url . 'API error : ' . $e, ['app' => Application::APP_ID]);
-			return ['error' => $e->getMessage()];
-		}
+		return ($num < 10) ? '0' . $num : $num;
 	}
 }

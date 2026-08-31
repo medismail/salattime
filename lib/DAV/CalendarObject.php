@@ -34,19 +34,33 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 	private $calendar;
 	/** @var string */
 	private $name;
-	/** @var VCalendar */
-	private $calendarObject;
+	/** @var array */
+	private $eventData;
+	/** @var VCalendar|null */
+	private $calendarObject = null;
+	/** @var string|null */
+	private $serializedCalendar = null;
+	/** @var string|null */
+	private $etag = null;
+
 	/**
 	 * CalendarObject constructor.
 	 *
+	 * Keep construction lightweight because SabreDAV creates one object for
+	 * every result returned by calendarQuery(), even when it only needs ETags.
+	 *
 	 * @param Calendar $calendar
 	 * @param string $name
-	 * @param CalculationService $calculationService
 	 */
 	public function __construct(Calendar $calendar, string $name) {
 		$this->calendar = $calendar;
 		$this->name = $name;
-		$this->calendarObject = $this->getCalendarObject();
+
+		$data = $this->extractData($name);
+		if ($data === null) {
+			throw new \InvalidArgumentException('Invalid calendar object name');
+		}
+		$this->eventData = $this->calendar->getEventData($data[1], $data[0]);
 	}
 
 	public function getOwner() {
@@ -74,9 +88,10 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 	}
 
 	public function get() {
-		if ($this->calendarObject) {
-			return $this->calendarObject->serialize();
+		if ($this->serializedCalendar === null) {
+			$this->serializedCalendar = $this->getCalendarObject()->serialize();
 		}
+		return $this->serializedCalendar;
 	}
 
 	public function getContentType() {
@@ -84,12 +99,17 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 	}
 
 	public function getETag() {
-		return '"' . md5($this->get()) . '"';
-		////return '"' . md5($this->sourceItem->getLastModified()) . '"';
+		if ($this->etag === null) {
+			// The event data is already the canonical source used to generate the
+			// ICS resource. Hashing it avoids constructing and serializing a
+			// VCalendar when a DAV query requests only the ETag.
+			$this->etag = '"' . hash('sha256', serialize([$this->name, $this->eventData])) . '"';
+		}
+		return $this->etag;
 	}
 
 	public function getSize() {
-		return mb_strlen($this->calendarObject->serialize());
+		return mb_strlen($this->get());
 	}
 
 	public function delete() {
@@ -105,34 +125,33 @@ class CalendarObject implements \Sabre\CalDAV\ICalendarObject, \Sabre\DAVACL\IAC
 	}
 
 	public function getLastModified() {
-		return time();
-		///            return $this->sourceItem->getLastModified();
+		return null;
 	}
 
 	private function getCalendarObject(): VCalendar {
-		$calendar = new VCalendar();
-		$name = $this->getName();
-		$Data = $this->extractData($name);
-		if ($Data) {
-			$eData = $this->calendar->getEventData($Data[1], $Data[0]);
-			$event = $calendar->createComponent('VEVENT');
-			$event->UID = $name;
-			$event->DTSTAMP = $eData['DTStamp'];   //gmdate('Ymd\\THis\\Z');
-			$event->DTSTART = $eData['DTStart'];
-			$event->DTSTART['VALUE'] = $eData['DTStartValue'];
-			$event->SUMMARY = $eData['Summary'];
-			$event->DESCRIPTION = $eData['Description'];
-			$event->DURATION = $eData['Duration'];
-			$event->TRANSP = $eData['Transp'];
-			$event->LOCATION = $eData['Location'];
-			$event->GEO = $eData['Geo'];
-			$calendar->add($event);
+		if ($this->calendarObject !== null) {
+			return $this->calendarObject;
 		}
 
-		return $calendar;
+		$calendar = new VCalendar();
+		$event = $calendar->createComponent('VEVENT');
+		$event->UID = $this->name;
+		$event->DTSTAMP = $this->eventData['DTStamp'];
+		$event->DTSTART = $this->eventData['DTStart'];
+		$event->DTSTART['VALUE'] = $this->eventData['DTStartValue'];
+		$event->SUMMARY = $this->eventData['Summary'];
+		$event->DESCRIPTION = $this->eventData['Description'];
+		$event->DURATION = $this->eventData['Duration'];
+		$event->TRANSP = $this->eventData['Transp'];
+		$event->LOCATION = $this->eventData['Location'];
+		$event->GEO = $this->eventData['Geo'];
+		$calendar->add($event);
+
+		$this->calendarObject = $calendar;
+		return $this->calendarObject;
 	}
 
-	private function extractData($name) {
+	private function extractData(string $name): ?array {
 		$parts = explode('_', substr($name, 0, -4));
 		if (count($parts) === 2) {
 			return $parts;

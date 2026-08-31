@@ -1,14 +1,8 @@
-import Vue from 'vue'
-import './bootstrap'
-import Dashboard from './views/Dashboard'
+import { createApp } from 'vue'
+import Dashboard from './views/Dashboard.vue'
 
-document.addEventListener('DOMContentLoaded', function() {
-
-	OCA.Dashboard.register('salattime', (el, { widget }) => {
-		const View = Vue.extend(Dashboard)
-		new View({
-			propsData: { title: widget.title },
-		}).$mount(el)
+document.addEventListener('DOMContentLoaded', () => {
+	OCA.Dashboard.register('salattime', (element) => {
+		createApp(Dashboard).mount(element)
 	})
-
 })

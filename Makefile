@@ -61,7 +61,6 @@ build:
 #endif
 ifneq (,$(wildcard $(CURDIR)/package.json))
 	make npm
-	make js
 endif
 ifneq (,$(wildcard $(CURDIR)/js/package.json))
 	make npm
@@ -173,4 +172,5 @@ test: composer
 
 .PHONY: build-dep
 	npm install
+
 

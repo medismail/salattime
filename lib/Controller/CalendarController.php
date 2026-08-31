@@ -27,18 +27,17 @@
 
 namespace OCA\SalatTime\Controller;
 
-use OCP\AppFramework\Controller;
-use OCP\Appframework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCA\SalatTime\Service\ConfigService;
+use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\IRequest;
 
 class CalendarController extends Controller {
 	/** @var ConfigService */
 	private ConfigService $config;
 
-	/** @var UserId */
-	private $UserId;
+	/** @var userId */
+	private $userId;
 
 	public function __construct(string $appName, IRequest $request, ConfigService $configService, $UserId) {
 		parent::__construct($appName, $request);
@@ -50,7 +49,6 @@ class CalendarController extends Controller {
 	/**
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	public function addCalendar() {
 		$this->config->setUserCalendar($this->userId);
 	}
@@ -58,7 +56,6 @@ class CalendarController extends Controller {
 	/**
 	 */
 	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	public function removeCalendar() {
 		$this->config->unsetUserCalendar($this->userId);
 	}

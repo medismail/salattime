@@ -39,6 +39,6 @@ class Isha extends PrayerTimes {
 	}
 
 	public function getMinutesAfterSunset(): float {
-		return (int) round($this->getMinutes());
+		return (int)round($this->getMinutes());
 	}
 }
