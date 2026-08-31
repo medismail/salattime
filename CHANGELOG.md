@@ -4,9 +4,12 @@
 ### Added
 - New look for APP
 - Paryers times with calendar choice for dates
+- Add support for Nextcloud 34
 ### Changed
 - Use of nextcloud Vuejs instead of old templates
 - Use of json instead of Markdown in the widget
+
+## 0.9.2
 ### Fixed
 - Auto Adjustment of Hijri Date not working in the background
 
