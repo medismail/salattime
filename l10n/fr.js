@@ -107,6 +107,7 @@ OC.L10N.register(
     "Algeria" : "Algérie",
     "Spiritual Administration of Muslims of Russia" : "Administration spirituelle des musulmans de Russie",
     "Union of Islamic Organizations of France (UOIF)" : "Union des Organisations Islamiques de France (UOIF)",
+    "Comunidade Islamica de Lisboa" : "Communauté Islamique de Lisbonne",
     "Majlis Ugama Islam Singapura, Singapore" : "Majlis Ugama Islam Singapura, Singapour",
     "Adjustments" : "Ajustements",
     "Settings" : "Paramètres",
