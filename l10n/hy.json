@@ -1,10 +1,5 @@
 { "translations": {
     "Time" : "Ժամ",
-    "Error" : "Սխալ",
-    "Day" : "Օր",
-    "Location" : "Տեղակայություն",
-    "Next" : "Հաջորդ",
-    "after" : "հետո",
-    "Settings" : "կարգավորումներ"
+    "Error" : "Սխալ"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

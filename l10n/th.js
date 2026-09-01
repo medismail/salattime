@@ -2,13 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "เวลา",
-    "Error" : "ข้อผิดพลาด",
-    "Day" : "วัน",
-    "Location" : "ตำแหน่ง",
-    "Next" : "ถัดไป",
-    "after" : "หลัง",
-    "Sunrise" : "อาทิตย์ขึ้น",
-    "Sunset" : "อาทิตย์ตก",
-    "Settings" : "การตั้งค่า"
+    "Error" : "ข้อผิดพลาด"
 },
 "nplurals=1; plural=0;");

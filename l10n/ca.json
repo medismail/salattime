@@ -1,19 +1,6 @@
 { "translations": {
     "Time" : "Hora",
     "No result." : "No hi ha resultats.",
-    "Error" : "Error",
-    "Day" : "Dia",
-    "Location" : "Ubicació",
-    "Next" : "Següent",
-    "after" : "després de",
-    "Sunrise" : "Sortida del sol",
-    "Sunset" : "Posta de sol",
-    "Timezone:" : "Zona horària:",
-    "Qatar" : "Qatar",
-    "Kuwait" : "Kuwait",
-    "Tunisia" : "Tunísia",
-    "Morocco" : "Marroc",
-    "Algeria" : "Algèria",
-    "Settings" : "Paràmetres"
+    "Error" : "Error"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

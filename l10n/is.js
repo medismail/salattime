@@ -3,19 +3,6 @@ OC.L10N.register(
     {
     "Time" : "Tími",
     "No result." : "Engar niðurstöður.",
-    "Error" : "Villa",
-    "Day" : "Dagur",
-    "Location" : "Staðsetning",
-    "Next" : "Næsta",
-    "after" : "eftir",
-    "Sunrise" : "Sólris",
-    "Sunset" : "Sólsetur",
-    "Timezone:" : "Tímabelti:",
-    "Qatar" : "Katar",
-    "Kuwait" : "Kúveit",
-    "Tunisia" : "Túnis",
-    "Morocco" : "Marokkó",
-    "Algeria" : "Alsír",
-    "Settings" : "Stillingar"
+    "Error" : "Villa"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

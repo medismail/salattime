@@ -1,13 +1,5 @@
 { "translations": {
     "Time" : "Tid",
-    "Error" : "Feil",
-    "Day" : "Dag",
-    "Location" : "Stad",
-    "Next" : "Neste",
-    "after" : "etter",
-    "Sunrise" : "Soloppgang",
-    "Sunset" : "Solnedgang",
-    "Kuwait" : "Kuwait",
-    "Settings" : "Innstillingar"
+    "Error" : "Feil"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

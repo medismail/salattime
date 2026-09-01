@@ -5,21 +5,6 @@ OC.L10N.register(
     "Time" : "Tid",
     "No result." : "Intet resultat",
     "Error" : "Fejl",
-    "Show 5 times prayer." : "Vis 5 gange bøn.",
-    "Day" : "Dag",
-    "Location" : "Placering",
-    "Next" : "Næste",
-    "after" : "efter",
-    "Day Information" : "Dag information",
-    "Sunrise" : "Solskin",
-    "Sunset" : "Solnedgang",
-    "Moon and Sun Information" : "Måne og sol information",
-    "Timezone:" : "Tidszone:",
-    "Qatar" : "Qatar",
-    "Kuwait" : "Kuwait",
-    "Tunisia" : "Tunesien",
-    "Morocco" : "Marokko",
-    "Algeria" : "Algeriet",
-    "Settings" : "Indstillinger"
+    "Show 5 times prayer." : "Vis 5 gange bøn."
 },
 "nplurals=2; plural=(n != 1);");

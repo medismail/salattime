@@ -1,12 +1,5 @@
 { "translations": {
     "Time" : "Zäit",
-    "Error" : "Fehler",
-    "Day" : "Dag",
-    "Location" : "Uert",
-    "Next" : "Weider",
-    "after" : "No",
-    "Sunrise" : "Sonnenopgang",
-    "Sunset" : "Sonnenënnergang",
-    "Settings" : "Astellungen"
+    "Error" : "Fehler"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

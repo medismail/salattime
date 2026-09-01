@@ -8,23 +8,6 @@
     "Moonset" : "月落",
     "Time" : "时间",
     "No result." : "无结果",
-    "Error" : "错误",
-    "Day" : "日",
-    "Location" : "地点",
-    "City" : "城市",
-    "Next" : "下一个",
-    "after" : "之后 ",
-    "Sunrise" : "日出",
-    "Sunset" : "日落",
-    "degrees" : "度",
-    "Altitude" : "海拔",
-    "Use 24 hours format" : "使用24小时制",
-    "Timezone:" : "时区：",
-    "Qatar" : "卡塔尔",
-    "Kuwait" : "科威特",
-    "Tunisia" : "突尼斯",
-    "Morocco" : "摩洛哥",
-    "Algeria" : "阿尔及利亚",
-    "Settings" : "设置"
+    "Error" : "错误"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

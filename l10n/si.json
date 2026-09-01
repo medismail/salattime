@@ -1,11 +1,5 @@
 { "translations": {
     "Time" : "වේලාව",
-    "Error" : "දෝෂය",
-    "Day" : "දිනය",
-    "Location" : "ස්ථානය",
-    "Next" : "ඊළඟ",
-    "Sunrise" : "ඉර නැගීම",
-    "Sunset" : "ඉර බැසීම",
-    "Settings" : "සැකසුම්"
+    "Error" : "දෝෂය"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

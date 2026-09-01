@@ -2,12 +2,6 @@ OC.L10N.register(
     "salattime",
     {
     "Time" : "වේලාව",
-    "Error" : "දෝෂය",
-    "Day" : "දිනය",
-    "Location" : "ස්ථානය",
-    "Next" : "ඊළඟ",
-    "Sunrise" : "ඉර නැගීම",
-    "Sunset" : "ඉර බැසීම",
-    "Settings" : "සැකසුම්"
+    "Error" : "දෝෂය"
 },
 "nplurals=2; plural=(n != 1);");
