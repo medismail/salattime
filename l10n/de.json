@@ -1,4 +1,6 @@
 { "translations": {
+    "End date was adjusted because it was before the start date." : "Das Enddatum wurde angepasst, da es vor dem Startdatum lag.",
+    "The selected range is limited to 31 days." : "Der gewählte Bereich ist auf 31 Tage begrenzt.",
     "Salat Time" : "Gebetszeit",
     "Salat %s" : "Gebet %s",
     "The Adhan for salat %s is at %s, the prayer time ends at %s." : "Der Adhan zum Gebet %s ist um %s, die Gebetszeit endet um %s.",

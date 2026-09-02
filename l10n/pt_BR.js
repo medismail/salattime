@@ -1,6 +1,8 @@
 OC.L10N.register(
     "salattime",
     {
+    "End date was adjusted because it was before the start date." : "A data de término foi ajustada porque era anterior à data de início.",
+    "The selected range is limited to 31 days." : "O intervalo selecionado está limitado a 31 dias.",
     "Salat Time" : "Horário da Salá",
     "Salat %s" : "Salá %s",
     "The Adhan for salat %s is at %s, the prayer time ends at %s." : "O azan para a salá %s é às %s, e o tempo de oração termina às %s.",
