@@ -1,6 +1,8 @@
 OC.L10N.register(
     "salattime",
     {
+    "End date was adjusted because it was before the start date." : "Bitiş tarihi, başlangıç tarihinden önce olduğu için ayarlandı.",
+    "The selected range is limited to 31 days." : "Seçim aralığı 31 gün ile sınırlıdır.",
     "Salat Time" : "Namaz saati",
     "Salat %s" : "%s namazı",
     "The Adhan for salat %s is at %s, the prayer time ends at %s." : "%s namazının ezanı %s zamanında, namaz vakti %s zamanında bitiyor.",

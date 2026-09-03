@@ -1,6 +1,8 @@
 OC.L10N.register(
     "salattime",
     {
+    "End date was adjusted because it was before the start date." : "Slutdatumet justerades eftersom det låg före startdatumet.",
+    "The selected range is limited to 31 days." : "Det valda intervallet är begränsat till 31 dagar.",
     "Salat Time" : "Bönetider",
     "Salat %s" : "Bön %s",
     "The Adhan for salat %s is at %s, the prayer time ends at %s." : "Böneutropet för bönen %s är kl. %s och bönetiden slutar kl. %s.",
