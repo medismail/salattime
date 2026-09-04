@@ -1,6 +1,8 @@
 OC.L10N.register(
     "salattime",
     {
+    "End date was adjusted because it was before the start date." : "La date de fin a été ajustée car elle était antérieure à la date de début.",
+    "The selected range is limited to 31 days." : "La plage sélectionnée est limitée à 31 jours.",
     "Salat Time" : "heure de prière",
     "Salat %s" : "Salat %s",
     "AM" : "AM",
