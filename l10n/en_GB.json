@@ -1,4 +1,6 @@
 { "translations": {
+    "End date was adjusted because it was before the start date." : "End date was adjusted because it was before the start date.",
+    "The selected range is limited to 31 days." : "The selected range is limited to 31 days.",
     "Salat Time" : "Salat Time",
     "Salat %s" : "Salat %s",
     "The Adhan for salat %s is at %s, the prayer time ends at %s." : "The Adhan for salat %s is at %s, the prayer time ends at %s.",
