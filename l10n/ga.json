@@ -1,4 +1,6 @@
 { "translations": {
+    "End date was adjusted because it was before the start date." : "Coigeartaíodh an dáta deiridh mar bhí sé roimh an dáta tosaigh.",
+    "The selected range is limited to 31 days." : "Tá an raon roghnaithe teoranta do 31 lá.",
     "Salat Time" : "Am Sailéad",
     "Salat %s" : "Salat %s",
     "The Adhan for salat %s is at %s, the prayer time ends at %s." : "Tá an Adhan do salat%s ag %s, críochnaíonn an t-am urnaí ag %s.",
