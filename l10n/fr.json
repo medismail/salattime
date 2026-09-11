@@ -57,6 +57,7 @@
     "Time" : "Heure",
     "No result." : "Aucun résultat.",
     "Error" : "Erreur",
-    "Show 5 times prayer." : "Montrez 5 fois la demande."
+    "Show 5 times prayer." : "Montrez 5 fois la demande.",
+    "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date with optional auto adjustment according to local observation capability\n * Qibla direction degrees and according to the sun and/or moon position\n * DAV Calendar Integration for prayer times and hijri date\n * Adhan notification\n * Widget on Dashboard\n * and many others useful informations." : "# Horaires de la salat\n * 5 temps de prière musulmane quotidiens\n * Date hégirienne avec ajustement automatique optionnel selon les possibilités d'observation locale\n * Direction de la Qibla en degrés et en fonction de la position du soleil et/ou de la lune\n * Intégration à l'agenda DAV pour les horaires de prières et dates hégiriennes\n * Notifications de l'adhan\n * Widget sur le tableau de bord\n * et beaucoup d'autres informations utiles."
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
