@@ -1,7 +1,7 @@
 { "translations": {
     "End date was adjusted because it was before the start date." : "Dátum ukončenia bol upravený, pretože predchádzal dátumu začiatku.",
     "The selected range is limited to 31 days." : "Vybraný rozsah je obmedzený na 31 dní.",
-    "Salat Time" : "Časy salátu",
+    "Salat Time" : "Salat Time",
     "Salat %s" : "Salat %s",
     "The Adhan for salat %s is at %s, the prayer time ends at %s." : "Adhán pre salát %s je o %s, čas modlitby sa končí o %s.",
     "Performing prayers is a duty on the believers at the appointed times." : "Modlitba v určených časoch je povinnosťou veriacich.",
