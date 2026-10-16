@@ -223,68 +223,82 @@
 	border: 1px dashed var(--color-primary-element);
 }
 
-.salattime-facts {
-	display: grid;
-	grid-template-columns: minmax(130px, 1fr) auto;
-	gap: 10px 16px;
-	margin: 0;
-}
-
-.salattime-facts dt {
-	color: var(--color-text-maxcontrast);
-}
-
-.salattime-facts dd {
-	margin: 0;
-	font-weight: 700;
-	text-align: end;
-}
-
-
-/* Astronomy information uses independent tiles instead of narrow label/value columns. */
-.salattime-astronomy-facts {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
-	gap: 12px;
-	margin: 0;
-}
-
-.salattime-astronomy-item {
+/* Shared, translation-friendly information layout for the Today cards. */
+.salattime-info-card {
 	min-width: 0;
-	padding: 12px 14px;
-	border-radius: var(--border-radius);
-	background-color: var(--color-background-hover);
-	overflow-wrap: anywhere;
+	container-type: inline-size;
 }
 
-.salattime-astronomy-item > dt {
-	margin-bottom: 6px;
-	color: var(--color-text-maxcontrast);
-}
-
-.salattime-astronomy-item > dd {
-	margin: 0;
-	font-weight: 700;
-	text-align: start;
-}
-
-.salattime-astronomy-coordinates {
+.salattime-info-list {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 12px;
 }
 
-.salattime-astronomy-coordinate {
+.salattime-info-item {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	min-width: 0;
+	gap: 6px;
+	padding: 12px 14px;
+	border-radius: var(--border-radius);
+	background-color: var(--color-background-hover);
+	overflow-wrap: anywhere;
+	text-align: start;
+}
+
+.salattime-info-label,
+.salattime-info-axis {
+	display: block;
+	color: var(--color-text-maxcontrast);
+	font-weight: 400;
+	white-space: normal;
+}
+
+.salattime-info-value {
+	display: block;
+	min-width: 0;
+	font-weight: 700;
+	white-space: normal;
+}
+
+.salattime-info-coordinates {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.salattime-info-coordinate {
 	min-width: 0;
 }
 
-.salattime-astronomy-coordinate-label {
-	color: var(--color-text-maxcontrast);
+.salattime-info-axis {
+	margin-bottom: 4px;
 	font-size: .85em;
-	font-weight: 400;
+}
+
+/* Respond to the card width, including when the Nextcloud sidebar is open. */
+@container (max-width: 520px) {
+	.salattime-info-list {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0;
+	}
+
+	.salattime-info-item {
+		padding: 12px 0;
+		border-bottom: 1px solid var(--color-border);
+		border-radius: 0;
+		background: transparent;
+	}
+
+	.salattime-info-item:first-child {
+		padding-top: 0;
+	}
+
+	.salattime-info-item:last-child {
+		padding-bottom: 0;
+		border-bottom: 0;
+	}
 }
 
 .salattime-compass-card {
@@ -455,28 +469,6 @@
 	.salattime-date-filter-actions {
 		flex-direction: column;
 		align-items: stretch;
-	}
-
-	/* On phones, show each label above its value as one vertical list. */
-	.salattime-astronomy-facts {
-		grid-template-columns: minmax(0, 1fr);
-		gap: 0;
-	}
-
-	.salattime-astronomy-item {
-		padding: 12px 0;
-		border-bottom: 1px solid var(--color-border);
-		border-radius: 0;
-		background: transparent;
-	}
-
-	.salattime-astronomy-item:first-child {
-		padding-top: 0;
-	}
-
-	.salattime-astronomy-item:last-child {
-		padding-bottom: 0;
-		border-bottom: 0;
 	}
 
 }
