@@ -66,28 +66,34 @@
 								</div>
 							</div>
 						</section>
-						<section class="salattime-card">
+						<section class="salattime-card salattime-info-card">
 							<h2>{{ t('Day Information') }}</h2>
-							<dl class="salattime-facts">
-								<template v-if="state.Imsak">
-									<dt>{{ t('Imsak') }}</dt>
-									<dd>{{ state.Imsak }}</dd>
-								</template>
-								<dt>{{ t('Sunrise') }}</dt>
-								<dd>{{ state.Sunrise }}</dd>
-								<dt>{{ t('Sunset') }}</dt>
-								<dd>{{ state.Sunset }}</dd>
-								<dt>{{ t('Day length') }}</dt>
-								<dd>{{ state.DayLength }}</dd>
-								<template v-if="state.Moonrise">
-									<dt>{{ t('Moonrise') }}</dt>
-									<dd>{{ state.Moonrise }}</dd>
-								</template>
-								<template v-if="state.Moonset">
-									<dt>{{ t('Moonset') }}</dt>
-									<dd>{{ state.Moonset }}</dd>
-								</template>
-							</dl>
+							<div class="salattime-info-list" role="list">
+								<div v-if="state.Imsak" class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Imsak') }}</span>
+									<strong class="salattime-info-value">{{ state.Imsak }}</strong>
+								</div>
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Sunrise') }}</span>
+									<strong class="salattime-info-value">{{ state.Sunrise }}</strong>
+								</div>
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Sunset') }}</span>
+									<strong class="salattime-info-value">{{ state.Sunset }}</strong>
+								</div>
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Day length') }}</span>
+									<strong class="salattime-info-value">{{ state.DayLength }}</strong>
+								</div>
+								<div v-if="state.Moonrise" class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Moonrise') }}</span>
+									<strong class="salattime-info-value">{{ state.Moonrise }}</strong>
+								</div>
+								<div v-if="state.Moonset" class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Moonset') }}</span>
+									<strong class="salattime-info-value">{{ state.Moonset }}</strong>
+								</div>
+							</div>
 						</section>
 						<section class="salattime-card salattime-compass-card">
 							<h2>{{ t('Qibla direction') }}</h2>
@@ -108,52 +114,52 @@
 							</div>
 							<p>{{ t('Azimuth') }}: <strong>{{ state.QiblaDirection }}°</strong></p>
 						</section>
-						<section class="salattime-card salattime-astronomy-card">
+						<section class="salattime-card salattime-info-card">
 							<h2>{{ t('Moon and Sun Information') }}</h2>
-							<dl class="salattime-astronomy-facts">
-								<div class="salattime-astronomy-item">
-									<dt>{{ t('Moon Phase') }}</dt>
-									<dd>{{ state.MoonPhase }}</dd>
+							<div class="salattime-info-list" role="list">
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Moon Phase') }}</span>
+									<strong class="salattime-info-value">{{ state.MoonPhase }}</strong>
 								</div>
-								<div class="salattime-astronomy-item">
-									<dt>{{ t('Moon\'s illuminated fraction') }}</dt>
-									<dd>{{ state.IlluminatedFraction }}%</dd>
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Moon\'s illuminated fraction') }}</span>
+									<strong class="salattime-info-value">{{ state.IlluminatedFraction }}%</strong>
 								</div>
-								<div class="salattime-astronomy-item">
-									<dt>{{ t('New moon') }}</dt>
-									<dd>{{ state.NewMoon }}</dd>
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('New moon') }}</span>
+									<strong class="salattime-info-value">{{ state.NewMoon }}</strong>
 								</div>
-								<div class="salattime-astronomy-item">
-									<dt>{{ t('Next new moon') }}</dt>
-									<dd>{{ state.NextNewMoon }}</dd>
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Next new moon') }}</span>
+									<strong class="salattime-info-value">{{ state.NextNewMoon }}</strong>
 								</div>
-								<div class="salattime-astronomy-item">
-									<dt>{{ t('Sun Position') }}</dt>
-									<dd class="salattime-astronomy-coordinates">
-										<span class="salattime-astronomy-coordinate">
-											<span class="salattime-astronomy-coordinate-label">{{ t('Azimuth') }}</span>
-											<span>{{ state.SunAzimuth }}°</span>
-										</span>
-										<span class="salattime-astronomy-coordinate">
-											<span class="salattime-astronomy-coordinate-label">{{ t('Altitude') }}</span>
-											<span>{{ state.SunAltitude }}°</span>
-										</span>
-									</dd>
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Sun Position') }}</span>
+									<div class="salattime-info-coordinates">
+										<div class="salattime-info-coordinate">
+											<span class="salattime-info-axis">{{ t('Azimuth') }}</span>
+											<strong class="salattime-info-value">{{ state.SunAzimuth }}°</strong>
+										</div>
+										<div class="salattime-info-coordinate">
+											<span class="salattime-info-axis">{{ t('Altitude') }}</span>
+											<strong class="salattime-info-value">{{ state.SunAltitude }}°</strong>
+										</div>
+									</div>
 								</div>
-								<div class="salattime-astronomy-item">
-									<dt>{{ t('Moon Position') }}</dt>
-									<dd class="salattime-astronomy-coordinates">
-										<span class="salattime-astronomy-coordinate">
-											<span class="salattime-astronomy-coordinate-label">{{ t('Azimuth') }}</span>
-											<span>{{ state.MoonAzimuth }}°</span>
-										</span>
-										<span class="salattime-astronomy-coordinate">
-											<span class="salattime-astronomy-coordinate-label">{{ t('Altitude') }}</span>
-											<span>{{ state.MoonAltitude }}°</span>
-										</span>
-									</dd>
+								<div class="salattime-info-item" role="listitem">
+									<span class="salattime-info-label">{{ t('Moon Position') }}</span>
+									<div class="salattime-info-coordinates">
+										<div class="salattime-info-coordinate">
+											<span class="salattime-info-axis">{{ t('Azimuth') }}</span>
+											<strong class="salattime-info-value">{{ state.MoonAzimuth }}°</strong>
+										</div>
+										<div class="salattime-info-coordinate">
+											<span class="salattime-info-axis">{{ t('Altitude') }}</span>
+											<strong class="salattime-info-value">{{ state.MoonAltitude }}°</strong>
+										</div>
+									</div>
 								</div>
-							</dl>
+							</div>
 						</section>
 					</div>
 				</section>
