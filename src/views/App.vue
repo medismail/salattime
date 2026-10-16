@@ -108,21 +108,51 @@
 							</div>
 							<p>{{ t('Azimuth') }}: <strong>{{ state.QiblaDirection }}°</strong></p>
 						</section>
-						<section class="salattime-card">
+						<section class="salattime-card salattime-astronomy-card">
 							<h2>{{ t('Moon and Sun Information') }}</h2>
-							<dl class="salattime-facts">
-								<dt>{{ t('Moon Phase') }}</dt>
-								<dd>{{ state.MoonPhase }}</dd>
-								<dt>{{ t('Moon\'s illuminated fraction') }}</dt>
-								<dd>{{ state.IlluminatedFraction }}%</dd>
-								<dt>{{ t('New moon') }}</dt>
-								<dd>{{ state.NewMoon }}</dd>
-								<dt>{{ t('Next new moon') }}</dt>
-								<dd>{{ state.NextNewMoon }}</dd>
-								<dt>{{ t('Sun Position') }} ({{ t('Azimuth') }}/{{ t('Altitude') }})</dt>
-								<dd>{{ state.SunAzimuth }}° / {{ state.SunAltitude }}°</dd>
-								<dt>{{ t('Moon Position') }} ({{ t('Azimuth') }}/{{ t('Altitude') }})</dt>
-								<dd>{{ state.MoonAzimuth }}° / {{ state.MoonAltitude }}°</dd>
+							<dl class="salattime-astronomy-facts">
+								<div class="salattime-astronomy-item">
+									<dt>{{ t('Moon Phase') }}</dt>
+									<dd>{{ state.MoonPhase }}</dd>
+								</div>
+								<div class="salattime-astronomy-item">
+									<dt>{{ t('Moon\'s illuminated fraction') }}</dt>
+									<dd>{{ state.IlluminatedFraction }}%</dd>
+								</div>
+								<div class="salattime-astronomy-item">
+									<dt>{{ t('New moon') }}</dt>
+									<dd>{{ state.NewMoon }}</dd>
+								</div>
+								<div class="salattime-astronomy-item">
+									<dt>{{ t('Next new moon') }}</dt>
+									<dd>{{ state.NextNewMoon }}</dd>
+								</div>
+								<div class="salattime-astronomy-item">
+									<dt>{{ t('Sun Position') }}</dt>
+									<dd class="salattime-astronomy-coordinates">
+										<span class="salattime-astronomy-coordinate">
+											<span class="salattime-astronomy-coordinate-label">{{ t('Azimuth') }}</span>
+											<span>{{ state.SunAzimuth }}°</span>
+										</span>
+										<span class="salattime-astronomy-coordinate">
+											<span class="salattime-astronomy-coordinate-label">{{ t('Altitude') }}</span>
+											<span>{{ state.SunAltitude }}°</span>
+										</span>
+									</dd>
+								</div>
+								<div class="salattime-astronomy-item">
+									<dt>{{ t('Moon Position') }}</dt>
+									<dd class="salattime-astronomy-coordinates">
+										<span class="salattime-astronomy-coordinate">
+											<span class="salattime-astronomy-coordinate-label">{{ t('Azimuth') }}</span>
+											<span>{{ state.MoonAzimuth }}°</span>
+										</span>
+										<span class="salattime-astronomy-coordinate">
+											<span class="salattime-astronomy-coordinate-label">{{ t('Altitude') }}</span>
+											<span>{{ state.MoonAltitude }}°</span>
+										</span>
+									</dd>
+								</div>
 							</dl>
 						</section>
 					</div>
