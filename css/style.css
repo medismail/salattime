@@ -240,6 +240,53 @@
 	text-align: end;
 }
 
+
+/* Astronomy information uses independent tiles instead of narrow label/value columns. */
+.salattime-astronomy-facts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+	gap: 12px;
+	margin: 0;
+}
+
+.salattime-astronomy-item {
+	min-width: 0;
+	padding: 12px 14px;
+	border-radius: var(--border-radius);
+	background-color: var(--color-background-hover);
+	overflow-wrap: anywhere;
+}
+
+.salattime-astronomy-item > dt {
+	margin-bottom: 6px;
+	color: var(--color-text-maxcontrast);
+}
+
+.salattime-astronomy-item > dd {
+	margin: 0;
+	font-weight: 700;
+	text-align: start;
+}
+
+.salattime-astronomy-coordinates {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.salattime-astronomy-coordinate {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.salattime-astronomy-coordinate-label {
+	color: var(--color-text-maxcontrast);
+	font-size: .85em;
+	font-weight: 400;
+}
+
 .salattime-compass-card {
 	text-align: center;
 }
@@ -409,4 +456,27 @@
 		flex-direction: column;
 		align-items: stretch;
 	}
+
+	/* On phones, show each label above its value as one vertical list. */
+	.salattime-astronomy-facts {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0;
+	}
+
+	.salattime-astronomy-item {
+		padding: 12px 0;
+		border-bottom: 1px solid var(--color-border);
+		border-radius: 0;
+		background: transparent;
+	}
+
+	.salattime-astronomy-item:first-child {
+		padding-top: 0;
+	}
+
+	.salattime-astronomy-item:last-child {
+		padding-bottom: 0;
+		border-bottom: 0;
+	}
+
 }
