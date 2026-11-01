@@ -9,7 +9,7 @@
     "AM" : "AM",
     "PM" : "PM",
     "Prayer Times" : "Bønnetider",
-    "Hijri Date" : "Hijri dato",
+    "Hijri Date" : "Hijri-dato",
     "Ashura" : "Ashura",
     "Mawlid al-Nabi" : "Mawlid an-Nabi",
     "Lailat-ul-Miraj" : "Lailat al-Miraj",
@@ -55,9 +55,9 @@
     "DayLength" : "Dagslængde",
     "Salat" : "Salat",
     "Time" : "Tid",
-    "No result." : "Intet resultat",
+    "No result." : "Intet resultat.",
     "Error" : "Fejl",
-    "Show 5 times prayer." : "Vis 5 gange bøn.",
+    "Show 5 times prayer." : "Vis de 5 daglige bønnetider.",
     "# Salat Time\n * 5 muslim daily prayer times\n * Hijri date with optional auto adjustment according to local observation capability\n * Qibla direction degrees and according to the sun and/or moon position\n * DAV Calendar Integration for prayer times and hijri date\n * Adhan notification\n * Widget on Dashboard\n * and many others useful informations." : "# Bønnetider\n * De 5 daglige muslimske bønnetider\n * Hijri-dato med valgfri automatisk justering efter lokale observationsmuligheder\n * Qibla-retning i grader og efter solens og/eller månens position\n * DAV-kalenderintegration til bønnetider og hijri-dato\n * Notifikation ved adhan\n * Widget på dashboardet\n * og mange andre nyttige oplysninger."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
